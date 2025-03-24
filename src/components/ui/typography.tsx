@@ -1,90 +1,218 @@
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface TypographyProps {
   children: React.ReactNode;
   className?: string;
+  animate?: boolean;
 }
 
-export function TypographyH1({ children, className }: TypographyProps) {
+const fadeInVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 }
+};
+
+export function TypographyH1({ children, className, animate = false }: TypographyProps) {
+  const Component = animate ? motion.h1 : "h1";
+  const animationProps = animate ? {
+    variants: fadeInVariants,
+    initial: "hidden",
+    animate: "visible",
+    transition: { duration: 0.3 }
+  } : {};
+  
   return (
-    <h1 className={cn(
-      "scroll-m-20 text-4xl font-bold tracking-tight lg:text-5xl",
-      className
-    )}>
+    <Component 
+      className={cn(
+        "scroll-m-20 text-4xl font-bold tracking-tight lg:text-5xl",
+        className
+      )}
+      {...animationProps}
+    >
       {children}
-    </h1>
+    </Component>
   );
 }
 
-export function TypographyH2({ children, className }: TypographyProps) {
+export function TypographyH2({ children, className, animate = false }: TypographyProps) {
+  const Component = animate ? motion.h2 : "h2";
+  const animationProps = animate ? {
+    variants: fadeInVariants,
+    initial: "hidden",
+    animate: "visible",
+    transition: { duration: 0.3, delay: 0.1 }
+  } : {};
+  
   return (
-    <h2 className={cn(
-      "scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0",
-      className
-    )}>
+    <Component 
+      className={cn(
+        "scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0",
+        className
+      )}
+      {...animationProps}
+    >
       {children}
-    </h2>
+    </Component>
   );
 }
 
-export function TypographyH3({ children, className }: TypographyProps) {
+export function TypographyH3({ children, className, animate = false }: TypographyProps) {
+  const Component = animate ? motion.h3 : "h3";
+  const animationProps = animate ? {
+    variants: fadeInVariants,
+    initial: "hidden",
+    animate: "visible",
+    transition: { duration: 0.3, delay: 0.2 }
+  } : {};
+  
   return (
-    <h3 className={cn(
-      "scroll-m-20 text-2xl font-semibold tracking-tight",
-      className
-    )}>
+    <Component 
+      className={cn(
+        "scroll-m-20 text-2xl font-semibold tracking-tight",
+        className
+      )}
+      {...animationProps}
+    >
       {children}
-    </h3>
+    </Component>
   );
 }
 
-export function TypographyH4({ children, className }: TypographyProps) {
+export function TypographyH4({ children, className, animate = false }: TypographyProps) {
+  const Component = animate ? motion.h4 : "h4";
+  const animationProps = animate ? {
+    variants: fadeInVariants,
+    initial: "hidden",
+    animate: "visible",
+    transition: { duration: 0.3, delay: 0.2 }
+  } : {};
+  
   return (
-    <h4 className={cn(
-      "scroll-m-20 text-xl font-semibold tracking-tight",
-      className
-    )}>
+    <Component 
+      className={cn(
+        "scroll-m-20 text-xl font-semibold tracking-tight",
+        className
+      )}
+      {...animationProps}
+    >
       {children}
-    </h4>
+    </Component>
   );
 }
 
-export function TypographyP({ children, className }: TypographyProps) {
+export function TypographyP({ children, className, animate = false }: TypographyProps) {
+  const Component = animate ? motion.p : "p";
+  const animationProps = animate ? {
+    variants: fadeInVariants,
+    initial: "hidden",
+    animate: "visible",
+    transition: { duration: 0.3, delay: 0.3 }
+  } : {};
+  
   return (
-    <p className={cn("leading-7 [&:not(:first-child)]:mt-6", className)}>
+    <Component 
+      className={cn("leading-7 [&:not(:first-child)]:mt-6", className)}
+      {...animationProps}
+    >
       {children}
-    </p>
+    </Component>
   );
 }
 
-export function TypographyLead({ children, className }: TypographyProps) {
+export function TypographyLead({ children, className, animate = false }: TypographyProps) {
+  const Component = animate ? motion.p : "p";
+  const animationProps = animate ? {
+    variants: fadeInVariants,
+    initial: "hidden",
+    animate: "visible",
+    transition: { duration: 0.3, delay: 0.2 }
+  } : {};
+  
   return (
-    <p className={cn("text-xl text-muted-foreground", className)}>
+    <Component 
+      className={cn("text-xl text-muted-foreground", className)}
+      {...animationProps}
+    >
       {children}
-    </p>
+    </Component>
   );
 }
 
-export function TypographyLarge({ children, className }: TypographyProps) {
+export function TypographyLarge({ children, className, animate = false }: TypographyProps) {
+  const Component = animate ? motion.div : "div";
+  const animationProps = animate ? {
+    variants: fadeInVariants,
+    initial: "hidden",
+    animate: "visible",
+    transition: { duration: 0.3 }
+  } : {};
+  
   return (
-    <div className={cn("text-lg font-semibold", className)}>
+    <Component 
+      className={cn("text-lg font-semibold", className)}
+      {...animationProps}
+    >
       {children}
-    </div>
+    </Component>
   );
 }
 
-export function TypographySmall({ children, className }: TypographyProps) {
+export function TypographySmall({ children, className, animate = false }: TypographyProps) {
+  const Component = animate ? motion.small : "small";
+  const animationProps = animate ? {
+    variants: fadeInVariants,
+    initial: "hidden",
+    animate: "visible",
+    transition: { duration: 0.3 }
+  } : {};
+  
   return (
-    <small className={cn("text-sm font-medium leading-none", className)}>
+    <Component 
+      className={cn("text-sm font-medium leading-none", className)}
+      {...animationProps}
+    >
       {children}
-    </small>
+    </Component>
   );
 }
 
-export function TypographyMuted({ children, className }: TypographyProps) {
+export function TypographyMuted({ children, className, animate = false }: TypographyProps) {
+  const Component = animate ? motion.p : "p";
+  const animationProps = animate ? {
+    variants: fadeInVariants,
+    initial: "hidden",
+    animate: "visible",
+    transition: { duration: 0.3 }
+  } : {};
+  
   return (
-    <p className={cn("text-sm text-muted-foreground", className)}>
+    <Component 
+      className={cn("text-sm text-muted-foreground", className)}
+      {...animationProps}
+    >
       {children}
-    </p>
+    </Component>
+  );
+}
+
+export function TypographyGradient({ children, className, animate = false }: TypographyProps) {
+  const Component = animate ? motion.span : "span";
+  const animationProps = animate ? {
+    variants: fadeInVariants,
+    initial: "hidden",
+    animate: "visible",
+    transition: { duration: 0.3 }
+  } : {};
+  
+  return (
+    <Component 
+      className={cn(
+        "bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent",
+        className
+      )}
+      {...animationProps}
+    >
+      {children}
+    </Component>
   );
 }

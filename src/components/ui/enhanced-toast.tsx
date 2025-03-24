@@ -3,7 +3,7 @@ import { Cross2Icon } from "@radix-ui/react-icons";
 import * as ToastPrimitives from "@radix-ui/react-toast";
 import { cva, type VariantProps } from "class-variance-authority";
 import { AlertCircle, CheckCircle2, Info, XCircle } from "lucide-react";
-
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const ToastProvider = ToastPrimitives.Provider;
@@ -121,8 +121,13 @@ const EnhancedToast = React.forwardRef<
   React.ElementRef<typeof Toast>,
   ToastProps & {
     type?: "success" | "error" | "warning" | "info";
+    title?: string;
+    description?: string;
+    action?: ToastActionElement;
+    hasProgress?: boolean;
+    duration?: number;
   }
->(({ type, variant, children, ...props }, ref) => {
+>(({ type, variant, title, description, action, hasProgress = true, duration = 5000, children, ...props }, ref) => {
   // Map type to variant
   const mappedVariant = type ? 
     type === "success" ? "success" : 
@@ -138,22 +143,80 @@ const EnhancedToast = React.forwardRef<
               type === "info" ? Info :
               null;
   
+  const [progress, setProgress] = React.useState(100);
+  
+  React.useEffect(() => {
+    if (!hasProgress || !duration) return;
+    
+    const startTime = Date.now();
+    const endTime = startTime + duration;
+    
+    const updateProgress = () => {
+      const now = Date.now();
+      const remaining = Math.max(0, endTime - now);
+      const newProgress = (remaining / duration) * 100;
+      setProgress(newProgress);
+      
+      if (remaining > 0) {
+        requestAnimationFrame(updateProgress);
+      }
+    };
+    
+    const animationId = requestAnimationFrame(updateProgress);
+    return () => cancelAnimationFrame(animationId);
+  }, [duration, hasProgress]);
+  
   return (
     <Toast ref={ref} variant={mappedVariant} {...props}>
-      <div className="flex gap-2">
-        {Icon && <Icon className="h-5 w-5" />}
-        <div>{children}</div>
+      <div className="flex gap-2 w-full">
+        {Icon && <Icon className="h-5 w-5 shrink-0" />}
+        <div className="flex-1 flex flex-col gap-1">
+          {title && <ToastTitle>{title}</ToastTitle>}
+          {description && <ToastDescription>{description}</ToastDescription>}
+          {children}
+          {action && <div className="mt-2">{action}</div>}
+        </div>
       </div>
       <ToastClose />
+      
+      {hasProgress && (
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted">
+          <motion.div 
+            className={cn(
+              "h-full",
+              type === "success" ? "bg-success" :
+              type === "error" ? "bg-destructive" :
+              type === "warning" ? "bg-warning" :
+              "bg-primary"
+            )}
+            initial={{ width: "100%" }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.1, ease: "linear" }}
+          />
+        </div>
+      )}
     </Toast>
   );
 });
 EnhancedToast.displayName = "EnhancedToast";
 
+// Enhanced Toast Provider with AnimatePresence
+const EnhancedToastProvider = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <ToastProvider>
+      <AnimatePresence mode="popLayout">
+        {children}
+      </AnimatePresence>
+      <ToastViewport />
+    </ToastProvider>
+  );
+};
+
 export {
   type ToastProps,
   type ToastActionElement,
   ToastProvider,
+  EnhancedToastProvider,
   ToastViewport,
   Toast,
   EnhancedToast,
