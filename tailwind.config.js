@@ -1,7 +1,3 @@
-import { colors } from "./src/lib/colors";
-import { typography } from "./src/lib/typography";
-import { spacing } from "./src/lib/spacing";
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
@@ -21,7 +17,6 @@ module.exports = {
     },
     extend: {
       colors: {
-        ...colors,
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -134,12 +129,6 @@ module.exports = {
         "slide-in-from-bottom": "slide-in-from-bottom 0.2s ease-out",
         "pulse-subtle": "pulse-subtle 2s ease-in-out infinite",
       },
-      fontFamily: typography.fontFamily,
-      fontSize: typography.fontSize,
-      fontWeight: typography.fontWeight,
-      lineHeight: typography.lineHeight,
-      letterSpacing: typography.letterSpacing,
-      spacing: spacing,
     },
   },
   plugins: [require("tailwindcss-animate")],
