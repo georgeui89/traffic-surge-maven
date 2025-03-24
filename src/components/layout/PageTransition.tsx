@@ -1,23 +1,23 @@
-
-import { ReactNode, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import React from 'react';
+import { motion } from 'framer-motion';
 
 interface PageTransitionProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
-const PageTransition = ({ children }: PageTransitionProps) => {
-  const location = useLocation();
-
-  useEffect(() => {
-    // Scroll to top when route changes
-    window.scrollTo(0, 0);
-  }, [location.pathname]);
-
+const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
   return (
-    <div className="animate-fade-in w-full">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ 
+        duration: 0.3,
+        ease: "easeInOut"
+      }}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 };
 
