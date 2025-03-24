@@ -12,20 +12,25 @@ import {
   ChevronRight,
   LayoutDashboard,
   MonitorPlay,
+  TrendingUp,
+  DollarSign,
+  Cpu,
   PanelTop
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Separator } from '@/components/ui/separator';
 
 type NavItemProps = {
   to: string;
   icon: React.ElementType;
   label: string;
   collapsed: boolean;
+  highlight?: boolean;
 };
 
-const NavItem = ({ to, icon: Icon, label, collapsed }: NavItemProps) => {
+const NavItem = ({ to, icon: Icon, label, collapsed, highlight }: NavItemProps) => {
   const location = useLocation();
   const isActive = location.pathname === to;
 
@@ -42,6 +47,7 @@ const NavItem = ({ to, icon: Icon, label, collapsed }: NavItemProps) => {
                 isActive 
                   ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' 
                   : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50',
+                highlight ? 'border-l-2 border-primary' : '',
                 collapsed ? 'px-3' : 'px-4'
               )}
             >
@@ -86,12 +92,29 @@ export const Sidebar = () => {
       </div>
 
       <nav className="flex-1 overflow-y-auto py-4 px-3">
-        <NavItem to="/" icon={LayoutDashboard} label="Dashboard" collapsed={collapsed} />
-        <NavItem to="/platforms" icon={Globe} label="Platforms" collapsed={collapsed} />
-        <NavItem to="/rdp-management" icon={Server} label="RDP Management" collapsed={collapsed} />
-        <NavItem to="/campaigns" icon={MonitorPlay} label="Campaigns" collapsed={collapsed} />
-        <NavItem to="/automation" icon={Bot} label="Automation" collapsed={collapsed} />
-        <NavItem to="/reporting" icon={FileText} label="Reporting" collapsed={collapsed} />
+        <div className="mb-2">
+          {!collapsed && <div className="text-xs font-medium text-sidebar-foreground/50 mb-2 ml-3">OVERVIEW</div>}
+          <NavItem to="/" icon={LayoutDashboard} label="Dashboard" collapsed={collapsed} />
+        </div>
+        
+        {!collapsed && <Separator className="my-3 bg-sidebar-border/70" />}
+        
+        <div className="mb-2">
+          {!collapsed && <div className="text-xs font-medium text-sidebar-foreground/50 mb-2 ml-3">TRAFFIC MANAGEMENT</div>}
+          <NavItem to="/platforms" icon={Globe} label="Platforms" collapsed={collapsed} />
+          <NavItem to="/rdp-management" icon={Server} label="RDP Management" collapsed={collapsed} />
+          <NavItem to="/campaigns" icon={MonitorPlay} label="Campaigns" collapsed={collapsed} />
+          <NavItem to="/traffic-analytics" icon={TrendingUp} label="Traffic Analytics" collapsed={collapsed} highlight={true} />
+        </div>
+        
+        {!collapsed && <Separator className="my-3 bg-sidebar-border/70" />}
+        
+        <div className="mb-2">
+          {!collapsed && <div className="text-xs font-medium text-sidebar-foreground/50 mb-2 ml-3">INTELLIGENCE</div>}
+          <NavItem to="/automation" icon={Bot} label="Automation" collapsed={collapsed} />
+          <NavItem to="/budget-optimizer" icon={DollarSign} label="Budget Optimizer" collapsed={collapsed} />
+          <NavItem to="/reporting" icon={FileText} label="Reporting" collapsed={collapsed} />
+        </div>
       </nav>
 
       <div className="border-t border-sidebar-border py-4 px-3">

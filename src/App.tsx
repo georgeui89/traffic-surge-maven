@@ -19,6 +19,8 @@ import Automation from "./pages/Automation";
 import Reporting from "./pages/Reporting";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import TrafficAnalytics from "./pages/TrafficAnalytics";
+import BudgetOptimizer from "./pages/BudgetOptimizer";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +43,8 @@ const App = () => (
                 <Route path="/automation" element={<PageTransition><Automation /></PageTransition>} />
                 <Route path="/reporting" element={<PageTransition><Reporting /></PageTransition>} />
                 <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
+                <Route path="/traffic-analytics" element={<PageTransition><TrafficAnalytics /></PageTransition>} />
+                <Route path="/budget-optimizer" element={<PageTransition><BudgetOptimizer /></PageTransition>} />
                 <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
               </Routes>
             </main>
