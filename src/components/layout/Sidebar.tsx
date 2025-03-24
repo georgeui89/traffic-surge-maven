@@ -6,7 +6,7 @@ import {
   Settings, 
   Globe, 
   Server, 
-  Robot, 
+  Bot, 
   FileText, 
   ChevronLeft, 
   ChevronRight,
@@ -90,7 +90,7 @@ export const Sidebar = () => {
         <NavItem to="/platforms" icon={Globe} label="Platforms" collapsed={collapsed} />
         <NavItem to="/rdp-management" icon={Server} label="RDP Management" collapsed={collapsed} />
         <NavItem to="/campaigns" icon={MonitorPlay} label="Campaigns" collapsed={collapsed} />
-        <NavItem to="/automation" icon={Robot} label="Automation" collapsed={collapsed} />
+        <NavItem to="/automation" icon={Bot} label="Automation" collapsed={collapsed} />
         <NavItem to="/reporting" icon={FileText} label="Reporting" collapsed={collapsed} />
       </nav>
 

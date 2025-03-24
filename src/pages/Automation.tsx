@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Robot, Zap, Clock, BarChart2, AlertTriangle } from 'lucide-react';
+import { Bot, Zap, Clock, BarChart2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -182,7 +182,7 @@ const Automation = () => {
               
               {aiRecommendation && (
                 <Alert className="bg-primary/5 border-primary/20 transition-all duration-300 hover:bg-primary/10">
-                  <Robot className="h-5 w-5 text-primary" />
+                  <Bot className="h-5 w-5 text-primary" />
                   <div className="flex justify-between items-start w-full">
                     <div>
                       <AlertTitle>AI Recommendation</AlertTitle>
