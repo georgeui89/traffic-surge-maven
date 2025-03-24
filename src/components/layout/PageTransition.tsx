@@ -1,23 +1,60 @@
-
-import { ReactNode, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import React from 'react';
+import { motion } from 'framer-motion';
 
 interface PageTransitionProps {
-  children: ReactNode;
+  children: React.ReactNode;
+  transitionType?: 'fade' | 'slide' | 'scale' | 'none';
 }
 
-const PageTransition = ({ children }: PageTransitionProps) => {
-  const location = useLocation();
+const fadeVariants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 }
+};
 
-  useEffect(() => {
-    // Scroll to top when route changes
-    window.scrollTo(0, 0);
-  }, [location.pathname]);
+const slideVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 }
+};
 
+const scaleVariants = {
+  initial: { opacity: 0, scale: 0.95 },
+  animate: { opacity: 1, scale: 1 },
+  exit: { opacity: 0, scale: 1.05 }
+};
+
+const PageTransition: React.FC<PageTransitionProps> = ({ 
+  children, 
+  transitionType = 'fade' 
+}) => {
+  // Check if user prefers reduced motion
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
+  // If user prefers reduced motion or transition type is none, render without animation
+  if (prefersReducedMotion || transitionType === 'none') {
+    return <>{children}</>;
+  }
+  
+  // Select variants based on transition type
+  const variants = 
+    transitionType === 'slide' ? slideVariants :
+    transitionType === 'scale' ? scaleVariants :
+    fadeVariants;
+  
   return (
-    <div className="animate-fade-in w-full">
+    <motion.div
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      variants={variants}
+      transition={{ 
+        duration: 0.3,
+        ease: "easeInOut"
+      }}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 };
 
