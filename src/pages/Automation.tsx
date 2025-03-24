@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const AutomationRule = ({ 
   title, 
@@ -23,12 +24,12 @@ const AutomationRule = ({
   onToggle: (enabled: boolean) => void;
 }) => {
   return (
-    <Card className="transition-all duration-200 hover:shadow-md">
+    <Card className="transition-all duration-300 hover:shadow-md border-border/80 hover:border-primary/20">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-md bg-muted">
-              <Icon className="h-5 w-5 text-primary" />
+            <div className={`p-2 rounded-md ${enabled ? 'bg-primary/10' : 'bg-muted'} transition-colors duration-300`}>
+              <Icon className={`h-5 w-5 ${enabled ? 'text-primary' : 'text-muted-foreground'} transition-colors duration-300`} />
             </div>
             <CardTitle className="text-base">{title}</CardTitle>
           </div>
@@ -42,7 +43,12 @@ const AutomationRule = ({
         <CardDescription>{description}</CardDescription>
       </CardContent>
       <CardFooter>
-        <Button variant="outline" size="sm" disabled={!enabled}>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          disabled={!enabled}
+          className="transition-all duration-200 hover:bg-primary/10"
+        >
           Configure
         </Button>
       </CardFooter>
@@ -60,7 +66,8 @@ const Automation = () => {
     errorHandling: false,
   });
   
-  const [budgetSlider, setBudgetSlider] = useState([50]); // Percentage of automation
+  const [budgetSlider, setBudgetSlider] = useState([50]); 
+  const [aiRecommendation, setAiRecommendation] = useState(true);
   
   const handleRuleToggle = (rule: keyof typeof rules, enabled: boolean) => {
     setRules({ ...rules, [rule]: enabled });
@@ -79,21 +86,25 @@ const Automation = () => {
       duration: 3000,
     });
   };
+
+  const dismissRecommendation = () => {
+    setAiRecommendation(false);
+  };
   
   return (
-    <div className="page-container">
+    <div className="page-container animate-fade-in">
       <div className="page-header">
         <h1 className="page-title">Automation</h1>
         <p className="page-description">Configure intelligent automation rules and strategies</p>
       </div>
       
       <Tabs defaultValue="rules" className="mb-8">
-        <TabsList>
-          <TabsTrigger value="rules">Automation Rules</TabsTrigger>
-          <TabsTrigger value="autopilot">AI Autopilot</TabsTrigger>
+        <TabsList className="transition-all duration-200">
+          <TabsTrigger value="rules" className="transition-all duration-200">Automation Rules</TabsTrigger>
+          <TabsTrigger value="autopilot" className="transition-all duration-200">AI Autopilot</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="rules" className="mt-6">
+        <TabsContent value="rules" className="mt-6 animate-fade-in">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <AutomationRule
               title="Budget Optimization"
@@ -129,8 +140,8 @@ const Automation = () => {
           </div>
         </TabsContent>
         
-        <TabsContent value="autopilot" className="mt-6">
-          <Card>
+        <TabsContent value="autopilot" className="mt-6 animate-fade-in">
+          <Card className="transition-all duration-300 hover:shadow-md">
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
@@ -142,6 +153,7 @@ const Automation = () => {
                 <Switch 
                   checked={autopilotEnabled}
                   onCheckedChange={handleAutopilotToggle}
+                  className="transition-all duration-200"
                 />
               </div>
             </CardHeader>
@@ -159,6 +171,7 @@ const Automation = () => {
                   onValueChange={setBudgetSlider}
                   max={100}
                   step={5}
+                  className="transition-opacity duration-300"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Conservative</span>
@@ -167,22 +180,37 @@ const Automation = () => {
                 </div>
               </div>
               
-              <div className="bg-muted/40 p-4 rounded-md">
-                <div className="flex items-start gap-3">
-                  <Robot className="h-5 w-5 text-primary mt-0.5" />
-                  <div>
-                    <h4 className="text-sm font-medium">AI Recommendation</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Based on your current traffic patterns, I recommend redistributing budget from Hitleap to 9Hits to improve ROI by approximately 15%.
-                    </p>
+              {aiRecommendation && (
+                <Alert className="bg-primary/5 border-primary/20 transition-all duration-300 hover:bg-primary/10">
+                  <Robot className="h-5 w-5 text-primary" />
+                  <div className="flex justify-between items-start w-full">
+                    <div>
+                      <AlertTitle>AI Recommendation</AlertTitle>
+                      <AlertDescription>
+                        Based on your current traffic patterns, I recommend redistributing budget from Hitleap to 9Hits to improve ROI by approximately 15%.
+                      </AlertDescription>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={dismissRecommendation} className="mt-1">
+                      Dismiss
+                    </Button>
                   </div>
-                </div>
-              </div>
+                </Alert>
+              )}
             </CardContent>
             
             <CardFooter className="flex justify-between">
-              <Button variant="outline">View AI Insights</Button>
-              <Button disabled={!autopilotEnabled}>Apply Recommendations</Button>
+              <Button 
+                variant="outline"
+                className="transition-all duration-200 hover:bg-primary/10"
+              >
+                View AI Insights
+              </Button>
+              <Button 
+                disabled={!autopilotEnabled}
+                className="transition-all duration-200"
+              >
+                Apply Recommendations
+              </Button>
             </CardFooter>
           </Card>
         </TabsContent>

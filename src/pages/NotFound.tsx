@@ -16,9 +16,9 @@ const NotFound = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-background">
-      <div className="text-center max-w-md">
+      <div className="text-center max-w-md animate-fade-in">
         <div className="mb-6 flex justify-center">
-          <div className="rounded-full bg-destructive/10 p-4">
+          <div className="rounded-full bg-destructive/10 p-4 animate-pulse-subtle">
             <AlertCircle className="h-12 w-12 text-destructive" />
           </div>
         </div>
@@ -26,7 +26,7 @@ const NotFound = () => {
         <p className="text-muted-foreground mb-8">
           The page you are looking for doesn't exist or has been moved. Please return to the dashboard.
         </p>
-        <Button asChild className="gap-2">
+        <Button asChild className="gap-2 hover-scale">
           <Link to="/">
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard

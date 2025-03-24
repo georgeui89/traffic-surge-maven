@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 // Layout
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
+import PageTransition from "@/components/layout/PageTransition";
 
 // Pages
 import Dashboard from "./pages/Dashboard";
@@ -33,14 +34,14 @@ const App = () => (
             <Header />
             <main className="flex-1 overflow-y-auto">
               <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/platforms" element={<Platforms />} />
-                <Route path="/rdp-management" element={<RdpManagement />} />
-                <Route path="/campaigns" element={<Campaigns />} />
-                <Route path="/automation" element={<Automation />} />
-                <Route path="/reporting" element={<Reporting />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="*" element={<NotFound />} />
+                <Route path="/" element={<PageTransition><Dashboard /></PageTransition>} />
+                <Route path="/platforms" element={<PageTransition><Platforms /></PageTransition>} />
+                <Route path="/rdp-management" element={<PageTransition><RdpManagement /></PageTransition>} />
+                <Route path="/campaigns" element={<PageTransition><Campaigns /></PageTransition>} />
+                <Route path="/automation" element={<PageTransition><Automation /></PageTransition>} />
+                <Route path="/reporting" element={<PageTransition><Reporting /></PageTransition>} />
+                <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
+                <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
               </Routes>
             </main>
           </div>
