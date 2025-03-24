@@ -6,9 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // Layout
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
+import { MainLayout } from "@/components/layout/MainLayout";
 import PageTransition from "@/components/layout/PageTransition";
+import { ParticleBackground } from "@/components/ui/particle-background";
 
 // Pages
 import Dashboard from "./pages/Dashboard";
@@ -21,6 +21,8 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import TrafficAnalytics from "./pages/TrafficAnalytics";
 import BudgetOptimizer from "./pages/BudgetOptimizer";
+import CpmCalculator from "./pages/CpmCalculator";
+import RdpScaler from "./pages/RdpScaler";
 
 const queryClient = new QueryClient();
 
@@ -31,25 +33,24 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <div className="flex h-screen overflow-hidden bg-background">
-          <Sidebar />
-          <div className="flex flex-col flex-1 overflow-hidden">
-            <Header />
-            <main className="flex-1 overflow-y-auto">
-              <Routes>
-                <Route path="/" element={<PageTransition><Dashboard /></PageTransition>} />
-                <Route path="/platforms" element={<PageTransition><Platforms /></PageTransition>} />
-                <Route path="/rdp-management" element={<PageTransition><RdpManagement /></PageTransition>} />
-                <Route path="/campaigns" element={<PageTransition><Campaigns /></PageTransition>} />
-                <Route path="/automation" element={<PageTransition><Automation /></PageTransition>} />
-                <Route path="/reporting" element={<PageTransition><Reporting /></PageTransition>} />
-                <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
-                <Route path="/traffic-analytics" element={<PageTransition><TrafficAnalytics /></PageTransition>} />
-                <Route path="/budget-optimizer" element={<PageTransition><BudgetOptimizer /></PageTransition>} />
-                <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
-              </Routes>
-            </main>
-          </div>
+          <MainLayout>
+            <Routes>
+              <Route path="/" element={<PageTransition><Dashboard /></PageTransition>} />
+              <Route path="/platforms" element={<PageTransition><Platforms /></PageTransition>} />
+              <Route path="/rdp-management" element={<PageTransition><RdpManagement /></PageTransition>} />
+              <Route path="/campaigns" element={<PageTransition><Campaigns /></PageTransition>} />
+              <Route path="/automation" element={<PageTransition><Automation /></PageTransition>} />
+              <Route path="/reporting" element={<PageTransition><Reporting /></PageTransition>} />
+              <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
+              <Route path="/traffic-analytics" element={<PageTransition><TrafficAnalytics /></PageTransition>} />
+              <Route path="/budget-optimizer" element={<PageTransition><BudgetOptimizer /></PageTransition>} />
+              <Route path="/cpm-calculator" element={<PageTransition><CpmCalculator /></PageTransition>} />
+              <Route path="/rdp-scaler" element={<PageTransition><RdpScaler /></PageTransition>} />
+              <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+            </Routes>
+          </MainLayout>
         </div>
+        <ParticleBackground />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
