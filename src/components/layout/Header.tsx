@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Bell, Moon, Sun, Search, HelpCircle, Gift, Shield, User } from 'lucide-react';
+import { Bell, Moon, Sun, Search, HelpCircle, Gift, Shield, User, Command, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -50,21 +50,28 @@ export const Header = () => {
   const earningsToday = '$3.45';
 
   return (
-    <header className="h-16 border-b border-border px-4 flex items-center justify-between bg-background/80 backdrop-blur-sm z-10 animate-fade-in">
+    <header className="h-16 border-b border-border/30 backdrop-blur-lg px-4 flex items-center justify-between bg-background/40 z-10 animate-fade-in">
       <div className="flex items-center gap-4 w-full max-w-md">
+        <div className="flex items-center gap-2 text-gradient-cyan font-futuristic">
+          <Zap className="h-5 w-5 text-neon-cyan animate-pulse" />
+          <span className="text-lg font-medium hidden md:inline-block">TrafficManager</span>
+        </div>
         <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1 text-muted-foreground">
+            <Command className="h-3.5 w-3.5" />
+            <span className="text-xs hidden sm:inline-block">K</span>
+          </div>
           <Input 
             placeholder="Search across platforms, RDPs, campaigns..." 
-            className="pl-9 h-9 w-full bg-muted/40 border-0 focus-visible:ring-1 transition-all duration-200" 
+            className="pl-10 h-9 w-full bg-background/30 border-border/30 focus-visible:ring-neon-cyan/30 focus-visible:border-neon-cyan/50 transition-all duration-200" 
           />
         </div>
       </div>
       
       <div className="flex items-center gap-4">
-        <div className="hidden md:flex items-center gap-1 bg-success/10 text-success px-3.5 py-1.5 rounded-md border border-success/20">
+        <div className="hidden md:flex items-center gap-1 bg-neon-cyan/10 text-neon-cyan px-3.5 py-1.5 rounded-md border border-neon-cyan/20 shadow-neon-cyan animate-float">
           <span className="text-sm font-medium">{earningsToday}</span>
-          <span className="text-xs text-success/80">today</span>
+          <span className="text-xs text-neon-cyan/80">today</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -73,26 +80,28 @@ export const Header = () => {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-muted-foreground hover:text-foreground transition-colors duration-200 relative"
+                className="text-muted-foreground hover:text-neon-cyan transition-colors duration-200 relative hover:bg-neon-cyan/10"
               >
                 <Bell className="h-5 w-5" />
-                <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center">3</Badge>
+                <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center bg-neon-magenta text-white">3</Badge>
               </Button>
             </HoverCardTrigger>
-            <HoverCardContent className="w-80">
-              <div className="space-y-2">
-                <h4 className="text-sm font-semibold">Recent Notifications</h4>
+            <HoverCardContent className="w-80 glass-card border-neon-cyan/20">
+              <div className="space-y-3">
+                <h4 className="text-sm font-futuristic text-gradient-cyan">Recent Notifications</h4>
                 <div className="space-y-2">
-                  <div className="p-2 rounded-md bg-warning/10 border border-warning/20 text-sm">
+                  <div className="p-2 rounded-md bg-warning/10 border border-warning/20 text-sm backdrop-blur-sm">
                     <div className="font-medium">Warning: Low Acceptance Rate</div>
                     <div className="text-xs text-muted-foreground">Hit Leap platform showing 28% acceptance</div>
                   </div>
-                  <div className="p-2 rounded-md bg-success/10 border border-success/20 text-sm">
-                    <div className="font-medium">Budget Target Reached</div>
+                  <div className="p-2 rounded-md bg-neon-cyan/10 border border-neon-cyan/20 text-sm backdrop-blur-sm">
+                    <div className="font-medium text-neon-cyan">Budget Target Reached</div>
                     <div className="text-xs text-muted-foreground">Daily goal of $5 achieved</div>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" className="w-full mt-2" onClick={showNotifications}>View All</Button>
+                <Button variant="outline" size="sm" className="w-full mt-2 border-neon-cyan/30 text-neon-cyan hover:bg-neon-cyan/10" onClick={showNotifications}>
+                  View All
+                </Button>
               </div>
             </HoverCardContent>
           </HoverCard>
@@ -103,7 +112,7 @@ export const Header = () => {
                 variant="ghost" 
                 size="icon"
                 onClick={toggleDarkMode}
-                className="text-muted-foreground hover:text-foreground transition-colors duration-200"
+                className="text-muted-foreground hover:text-neon-cyan transition-colors duration-200 hover:bg-neon-cyan/10"
               >
                 {isDarkMode ? 
                   <Sun className="h-5 w-5 transition-transform duration-300 hover:rotate-12" /> : 
@@ -111,9 +120,9 @@ export const Header = () => {
                 }
               </Button>
             </HoverCardTrigger>
-            <HoverCardContent className="w-64">
+            <HoverCardContent className="w-64 glass-card border-neon-cyan/20">
               <div className="space-y-2">
-                <h4 className="text-sm font-semibold">Theme Preference</h4>
+                <h4 className="text-sm font-futuristic text-gradient-cyan">Theme Preference</h4>
                 <p className="text-sm text-muted-foreground">
                   Toggle between light and dark mode.
                 </p>
@@ -126,18 +135,20 @@ export const Header = () => {
               <Button 
                 variant="ghost" 
                 size="icon"
-                className="text-muted-foreground hover:text-foreground transition-colors duration-200"
+                className="text-muted-foreground hover:text-neon-cyan transition-colors duration-200 hover:bg-neon-cyan/10"
               >
                 <HelpCircle className="h-5 w-5" />
               </Button>
             </HoverCardTrigger>
-            <HoverCardContent className="w-64">
+            <HoverCardContent className="w-64 glass-card border-neon-cyan/20">
               <div className="space-y-2">
-                <h4 className="text-sm font-semibold">Help & Support</h4>
+                <h4 className="text-sm font-futuristic text-gradient-cyan">Help & Support</h4>
                 <p className="text-sm text-muted-foreground">
                   Get assistance with using Traffic Manager
                 </p>
-                <Button variant="outline" size="sm" className="w-full">View Documentation</Button>
+                <Button variant="outline" size="sm" className="w-full border-neon-cyan/30 text-neon-cyan hover:bg-neon-cyan/10">
+                  View Documentation
+                </Button>
               </div>
             </HoverCardContent>
           </HoverCard>
@@ -147,26 +158,26 @@ export const Header = () => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="gap-2 text-sm font-normal ml-2 transition-all duration-200 hover:bg-accent/50"
+                className="gap-2 text-sm font-normal ml-2 transition-all duration-200 hover:bg-neon-cyan/10"
               >
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium transition-transform duration-200 hover:scale-105">
+                <div className="h-8 w-8 rounded-full bg-neon-cyan/10 flex items-center justify-center text-neon-cyan font-medium transition-transform duration-200 hover:scale-105 border border-neon-cyan/30 shadow-neon-cyan">
                   <User className="h-4 w-4" />
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 animate-fade-in">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuItem className="cursor-pointer transition-colors duration-200 flex items-center gap-2">
+            <DropdownMenuContent align="end" className="w-56 animate-fade-in glass-card border-neon-cyan/20">
+              <DropdownMenuLabel className="text-gradient-cyan font-futuristic">My Account</DropdownMenuLabel>
+              <DropdownMenuItem className="cursor-pointer transition-colors duration-200 flex items-center gap-2 hover:bg-neon-cyan/10 hover:text-neon-cyan focus:bg-neon-cyan/10 focus:text-neon-cyan">
                 <User className="h-4 w-4" /> Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer transition-colors duration-200 flex items-center gap-2">
+              <DropdownMenuItem className="cursor-pointer transition-colors duration-200 flex items-center gap-2 hover:bg-neon-cyan/10 hover:text-neon-cyan focus:bg-neon-cyan/10 focus:text-neon-cyan">
                 <Shield className="h-4 w-4" /> Subscription
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer transition-colors duration-200 flex items-center gap-2">
+              <DropdownMenuItem className="cursor-pointer transition-colors duration-200 flex items-center gap-2 hover:bg-neon-cyan/10 hover:text-neon-cyan focus:bg-neon-cyan/10 focus:text-neon-cyan">
                 <Gift className="h-4 w-4" /> Refer a Friend
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer transition-colors duration-200">Logout</DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-border/30" />
+              <DropdownMenuItem className="cursor-pointer transition-colors duration-200 hover:bg-neon-magenta/10 hover:text-neon-magenta focus:bg-neon-magenta/10 focus:text-neon-magenta">Logout</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

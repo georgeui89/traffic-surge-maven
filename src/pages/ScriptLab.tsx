@@ -7,7 +7,7 @@ import { ScriptPerformance } from '@/components/script-lab/ScriptPerformance';
 import { ScriptTemplates } from '@/components/script-lab/ScriptTemplates';
 import { ScriptRecommendations } from '@/components/script-lab/ScriptRecommendations';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Save, Play, Eye } from 'lucide-react';
+import { PlusCircle, Save, Play, Eye, Code } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 // Mock script templates
@@ -80,45 +80,81 @@ const ScriptLab = () => {
 
   return (
     <div className="page-container">
-      <div className="page-header">
-        <h1 className="page-title">Script Lab</h1>
-        <p className="page-description">Create, test, and optimize redirect scripts for traffic arbitrage</p>
+      <div className="page-header mb-8">
+        <div className="flex items-center gap-3 mb-1">
+          <Code className="h-7 w-7 text-neon-cyan" />
+          <h1 className="page-title font-futuristic text-3xl text-gradient-cyan">Script Lab</h1>
+        </div>
+        <p className="page-description text-lg">Create, test, and optimize redirect scripts for traffic arbitrage</p>
       </div>
 
-      <div className="flex justify-end space-x-2 mb-4">
+      <div className="flex justify-end space-x-3 mb-6">
         <Button 
           variant="outline" 
           onClick={handlePreviewScript}
-          className="gap-2"
+          className="gap-2 border-neon-cyan/30 hover:bg-neon-cyan/10 hover:border-neon-cyan/50 transition-all duration-300"
         >
-          <Eye className="h-4 w-4" />
+          <Eye className="h-4 w-4 text-neon-cyan" />
           Preview
         </Button>
         <Button 
           variant="outline" 
           onClick={handleTestScript} 
           disabled={isTestMode}
-          className="gap-2"
+          className="gap-2 border-neon-cyan/30 hover:bg-neon-cyan/10 hover:border-neon-cyan/50 transition-all duration-300"
         >
-          <Play className="h-4 w-4" />
+          <Play className="h-4 w-4 text-neon-cyan" />
           {isTestMode ? "Testing..." : "Test Script"}
         </Button>
-        <Button onClick={handleSaveScript} className="gap-2">
+        <Button 
+          onClick={handleSaveScript} 
+          className="gap-2 bg-neon-cyan hover:bg-neon-cyan/90 shadow-neon-cyan text-black font-medium transition-all duration-300"
+        >
           <Save className="h-4 w-4" />
           Save Script
         </Button>
       </div>
 
-      <Tabs defaultValue="editor" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-5 mb-4">
-          <TabsTrigger value="editor">Script Editor</TabsTrigger>
-          <TabsTrigger value="templates">Templates</TabsTrigger>
-          <TabsTrigger value="variants">Script Variants</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="recommendations">AI Recommendations</TabsTrigger>
+      <Tabs 
+        defaultValue="editor" 
+        value={activeTab} 
+        onValueChange={setActiveTab} 
+        className="w-full animate-warp-in"
+      >
+        <TabsList className="grid grid-cols-5 mb-6 bg-background/50 backdrop-blur-sm rounded-xl p-1 border border-border/50">
+          <TabsTrigger 
+            value="editor"
+            className="data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan data-[state=active]:shadow-neon-cyan data-[state=active]:border-neon-cyan/50 transition-all duration-300 data-[state=active]:font-medium"
+          >
+            Script Editor
+          </TabsTrigger>
+          <TabsTrigger 
+            value="templates"
+            className="data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan data-[state=active]:shadow-neon-cyan data-[state=active]:border-neon-cyan/50 transition-all duration-300 data-[state=active]:font-medium"
+          >
+            Templates
+          </TabsTrigger>
+          <TabsTrigger 
+            value="variants"
+            className="data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan data-[state=active]:shadow-neon-cyan data-[state=active]:border-neon-cyan/50 transition-all duration-300 data-[state=active]:font-medium"
+          >
+            Script Variants
+          </TabsTrigger>
+          <TabsTrigger 
+            value="performance"
+            className="data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan data-[state=active]:shadow-neon-cyan data-[state=active]:border-neon-cyan/50 transition-all duration-300 data-[state=active]:font-medium"
+          >
+            Performance
+          </TabsTrigger>
+          <TabsTrigger 
+            value="recommendations"
+            className="data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan data-[state=active]:shadow-neon-cyan data-[state=active]:border-neon-cyan/50 transition-all duration-300 data-[state=active]:font-medium"
+          >
+            AI Recommendations
+          </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="editor" className="mt-0">
+        <TabsContent value="editor" className="mt-0 glass-card p-4">
           <ScriptEditor 
             scriptCode={scriptCode} 
             setScriptCode={setScriptCode} 
@@ -126,7 +162,7 @@ const ScriptLab = () => {
           />
         </TabsContent>
         
-        <TabsContent value="templates" className="mt-0">
+        <TabsContent value="templates" className="mt-0 glass-card p-4">
           <ScriptTemplates 
             setScriptType={setScriptType} 
             setScriptCode={setScriptCode} 
@@ -134,10 +170,10 @@ const ScriptLab = () => {
           />
         </TabsContent>
         
-        <TabsContent value="variants" className="mt-0">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Script Variants</h2>
-            <Button className="gap-2">
+        <TabsContent value="variants" className="mt-0 glass-card p-4">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-futuristic text-gradient-cyan">Script Variants</h2>
+            <Button className="gap-2 bg-neon-magenta hover:bg-neon-magenta/90 shadow-neon-magenta text-white font-medium transition-all duration-300">
               <PlusCircle className="h-4 w-4" />
               Add Variant
             </Button>
@@ -145,11 +181,11 @@ const ScriptLab = () => {
           <ScriptVariantTable />
         </TabsContent>
         
-        <TabsContent value="performance" className="mt-0">
+        <TabsContent value="performance" className="mt-0 glass-card p-4">
           <ScriptPerformance />
         </TabsContent>
         
-        <TabsContent value="recommendations" className="mt-0">
+        <TabsContent value="recommendations" className="mt-0 glass-card p-4">
           <ScriptRecommendations />
         </TabsContent>
       </Tabs>

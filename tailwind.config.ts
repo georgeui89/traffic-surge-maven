@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -27,6 +26,12 @@ export default {
 					'system-ui',
 					'sans-serif',
 				],
+				futuristic: [
+					'"Exo 2"',
+					'"Orbitron"',
+					'system-ui',
+					'sans-serif'
+				]
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -95,12 +100,28 @@ export default {
 				rdp: {
 					DEFAULT: 'hsl(var(--rdp))',
 					foreground: 'hsl(var(--rdp-foreground))'
+				},
+				neon: {
+					cyan: '#00D4FF',
+					magenta: '#FF007A',
+					gold: '#FFD700'
+				},
+				cyber: {
+					dark: '#0D1B2A',
+					medium: '#1A3C66',
+					light: '#2A5C86'
 				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			boxShadow: {
+				'neon-cyan': '0 0 10px rgba(0, 212, 255, 0.7)',
+				'neon-magenta': '0 0 10px rgba(255, 0, 122, 0.7)',
+				'neon-gold': '0 0 10px rgba(255, 215, 0, 0.7)',
+				'glass': '0 4px 12px -2px rgba(0, 0, 0, 0.3)'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -174,6 +195,32 @@ export default {
 					'50%': {
 						opacity: '0.8'
 					}
+				},
+				'glow-pulse': {
+					'0%, 100%': {
+						boxShadow: '0 0 5px rgba(0, 212, 255, 0.7)'
+					},
+					'50%': {
+						boxShadow: '0 0 15px rgba(0, 212, 255, 0.9)'
+					}
+				},
+				'warp-in': {
+					from: {
+						opacity: '0',
+						transform: 'scale(0.95) translateY(10px)'
+					},
+					to: {
+						opacity: '1',
+						transform: 'scale(1) translateY(0)'
+					}
+				},
+				'float': {
+					'0%, 100%': {
+						transform: 'translateY(0)'
+					},
+					'50%': {
+						transform: 'translateY(-5px)'
+					}
 				}
 			},
 			animation: {
@@ -185,7 +232,10 @@ export default {
 				'slide-in-right': 'slide-in-right 0.3s ease-out',
 				'slide-in-top': 'slide-in-top 0.3s ease-out',
 				'slide-in-bottom': 'slide-in-bottom 0.3s ease-out',
-				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite'
+				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
+				'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
+				'warp-in': 'warp-in 0.2s ease-out',
+				'float': 'float 3s ease-in-out infinite'
 			}
 		}
 	},

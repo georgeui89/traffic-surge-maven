@@ -49,17 +49,17 @@ export const ScriptPerformance: React.FC = () => {
   const [timeRange, setTimeRange] = useState('7d');
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-warp-in">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Performance Analytics</h2>
+        <h2 className="text-xl font-futuristic text-gradient-cyan">Performance Analytics</h2>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Time Range:</span>
             <Select value={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-32 border-neon-cyan/30 focus:ring-neon-cyan/20">
                 <SelectValue placeholder="Select Range" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="glass-card border-neon-cyan/20">
                 <SelectItem value="24h">Last 24 Hours</SelectItem>
                 <SelectItem value="7d">Last 7 Days</SelectItem>
                 <SelectItem value="30d">Last 30 Days</SelectItem>
@@ -67,77 +67,87 @@ export const ScriptPerformance: React.FC = () => {
               </SelectContent>
             </Select>
           </div>
-          <Badge variant="outline" className="bg-background">
+          <Badge variant="outline" className="bg-background/20 backdrop-blur-sm text-neon-cyan border-neon-cyan/30 font-normal">
             Last Updated: Just now
           </Badge>
         </div>
       </div>
 
-      <Tabs defaultValue="comparison">
-        <TabsList>
-          <TabsTrigger value="comparison">Variant Comparison</TabsTrigger>
-          <TabsTrigger value="trends">Performance Trends</TabsTrigger>
+      <Tabs defaultValue="comparison" className="animate-fade-in">
+        <TabsList className="bg-background/50 backdrop-blur-sm p-1 border border-border/50 w-auto inline-flex">
+          <TabsTrigger 
+            value="comparison"
+            className="data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan"
+          >
+            Variant Comparison
+          </TabsTrigger>
+          <TabsTrigger 
+            value="trends"
+            className="data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan"
+          >
+            Performance Trends
+          </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="comparison" className="mt-4">
-          <div className="grid grid-cols-3 gap-4">
-            <Card>
+        <TabsContent value="comparison" className="mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="glass-card border-neon-cyan/20 overflow-hidden hover-scale">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Click-Through Rate (CTR)</CardTitle>
+                <CardTitle className="text-base font-futuristic text-gradient-cyan">Click-Through Rate (CTR)</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={ctrData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="name" />
-                      <YAxis tickFormatter={(value) => `${value}%`} />
-                      <Tooltip formatter={(value) => [`${value}%`, 'CTR']} />
-                      <Bar dataKey="value" fill="#3498db" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-neon-cyan/10" />
+                      <XAxis dataKey="name" stroke="#888" />
+                      <YAxis tickFormatter={(value) => `${value}%`} stroke="#888" />
+                      <Tooltip formatter={(value) => [`${value}%`, 'CTR']} contentStyle={{ backgroundColor: '#0D1B2A', backdropFilter: 'blur(10px)', border: '1px solid rgba(0, 212, 255, 0.2)' }} />
+                      <Bar dataKey="value" fill="#00D4FF" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="glass-card border-neon-cyan/20 overflow-hidden hover-scale">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">CPM ($ per 1000 impressions)</CardTitle>
+                <CardTitle className="text-base font-futuristic text-gradient-cyan">CPM ($ per 1000 impressions)</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={cpmData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="name" />
-                      <YAxis tickFormatter={(value) => `$${value}`} />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-neon-cyan/10" />
+                      <XAxis dataKey="name" stroke="#888" />
+                      <YAxis tickFormatter={(value) => `$${value}`} stroke="#888" />
                       <Tooltip formatter={(value) => {
                         // Fix: Check if value is a number before calling toFixed
                         const formattedValue = typeof value === 'number' 
                           ? `$${value.toFixed(2)}` 
                           : `$${value}`;
                         return [formattedValue, 'CPM'];
-                      }} />
-                      <Bar dataKey="value" fill="#2ecc71" />
+                      }} contentStyle={{ backgroundColor: '#0D1B2A', backdropFilter: 'blur(10px)', border: '1px solid rgba(0, 212, 255, 0.2)' }} />
+                      <Bar dataKey="value" fill="#FF007A" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="glass-card border-neon-cyan/20 overflow-hidden hover-scale">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Acceptance Rate</CardTitle>
+                <CardTitle className="text-base font-futuristic text-gradient-cyan">Acceptance Rate</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={acceptanceRateData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="name" />
-                      <YAxis tickFormatter={(value) => `${value}%`} />
-                      <Tooltip formatter={(value) => [`${value}%`, 'Acceptance']} />
-                      <Bar dataKey="value" fill="#9b59b6" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-neon-cyan/10" />
+                      <XAxis dataKey="name" stroke="#888" />
+                      <YAxis tickFormatter={(value) => `${value}%`} stroke="#888" />
+                      <Tooltip formatter={(value) => [`${value}%`, 'Acceptance']} contentStyle={{ backgroundColor: '#0D1B2A', backdropFilter: 'blur(10px)', border: '1px solid rgba(0, 212, 255, 0.2)' }} />
+                      <Bar dataKey="value" fill="#FFD700" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -146,26 +156,30 @@ export const ScriptPerformance: React.FC = () => {
           </div>
         </TabsContent>
         
-        <TabsContent value="trends" className="mt-4">
-          <Card>
+        <TabsContent value="trends" className="mt-6">
+          <Card className="glass-card border-neon-cyan/20 overflow-hidden hover-scale">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">CTR Trend Over Time</CardTitle>
+              <CardTitle className="text-base font-futuristic text-gradient-cyan">CTR Trend Over Time</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-80">
                 <ChartContainer
-                  config={chartConfigs}
+                  config={{
+                    basic: { color: '#00D4FF', label: 'Basic Redirect' },
+                    mobile: { color: '#FF007A', label: 'Mobile Optimized' },
+                    extended: { color: '#FFD700', label: 'Extended Delay' },
+                  }}
                 >
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={timeSeriesData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="date" />
-                      <YAxis tickFormatter={(value) => `${value}%`} />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-neon-cyan/10" />
+                      <XAxis dataKey="date" stroke="#888" />
+                      <YAxis tickFormatter={(value) => `${value}%`} stroke="#888" />
                       <ChartTooltip content={<ChartTooltipContent />} />
                       <Legend />
-                      <Line type="monotone" dataKey="basic" name="Basic Redirect" stroke="#3498db" strokeWidth={2} dot={{ r: 4 }} />
-                      <Line type="monotone" dataKey="mobile" name="Mobile Optimized" stroke="#2ecc71" strokeWidth={2} dot={{ r: 4 }} />
-                      <Line type="monotone" dataKey="extended" name="Extended Delay" stroke="#e74c3c" strokeWidth={2} dot={{ r: 4 }} />
+                      <Line type="monotone" dataKey="basic" name="Basic Redirect" stroke="#00D4FF" strokeWidth={2} dot={{ r: 4 }} />
+                      <Line type="monotone" dataKey="mobile" name="Mobile Optimized" stroke="#FF007A" strokeWidth={2} dot={{ r: 4 }} />
+                      <Line type="monotone" dataKey="extended" name="Extended Delay" stroke="#FFD700" strokeWidth={2} dot={{ r: 4 }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </ChartContainer>
