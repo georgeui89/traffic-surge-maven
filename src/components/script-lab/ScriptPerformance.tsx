@@ -1,193 +1,203 @@
 
-import React, { useState } from 'react';
+import { FC } from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { formatPercent } from '@/utils/formatters';
 
-// Mock data for performance metrics
-const ctrData = [
-  { name: 'Basic', value: 18.5, fill: '#3498db' },
-  { name: 'Mobile Opt', value: 22.7, fill: '#2ecc71' },
-  { name: 'Extended', value: 15.2, fill: '#e74c3c' },
-  { name: 'Geo-Target', value: 0, fill: '#95a5a6' }
-];
+type ValueType = string | number | Array<string | number>;
 
-const cpmData = [
-  { name: 'Basic', value: 4.2, fill: '#3498db' },
-  { name: 'Mobile Opt', value: 5.15, fill: '#2ecc71' },
-  { name: 'Extended', value: 3.85, fill: '#e74c3c' },
-  { name: 'Geo-Target', value: 0, fill: '#95a5a6' }
-];
-
-const acceptanceRateData = [
-  { name: 'Basic', value: 92, fill: '#3498db' },
-  { name: 'Mobile Opt', value: 87, fill: '#2ecc71' },
-  { name: 'Extended', value: 94, fill: '#e74c3c' },
-  { name: 'Geo-Target', value: 0, fill: '#95a5a6' }
-];
-
-const timeSeriesData = [
-  { date: '06/01', basic: 16.2, mobile: 18.3, extended: 14.1 },
-  { date: '06/02', basic: 16.8, mobile: 19.5, extended: 14.3 },
-  { date: '06/03', basic: 17.1, mobile: 20.2, extended: 14.5 },
-  { date: '06/04', basic: 17.5, mobile: 20.8, extended: 14.7 },
-  { date: '06/05', basic: 17.8, mobile: 21.2, extended: 14.9 },
-  { date: '06/06', basic: 18.0, mobile: 21.8, extended: 15.0 },
-  { date: '06/07', basic: 18.5, mobile: 22.7, extended: 15.2 }
-];
-
-const chartConfigs = {
-  basic: { color: '#3498db', label: 'Basic Redirect' },
-  mobile: { color: '#2ecc71', label: 'Mobile Optimized' },
-  extended: { color: '#e74c3c', label: 'Extended Delay' },
+type ScriptPerformanceProps = {
+  scriptId: string;
 };
 
-export const ScriptPerformance: React.FC = () => {
-  const [timeRange, setTimeRange] = useState('7d');
-  
-  return (
-    <div className="space-y-8 animate-warp-in">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-futuristic text-gradient-cyan">Performance Analytics</h2>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Time Range:</span>
-            <Select value={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="w-32 border-neon-cyan/30 focus:ring-neon-cyan/20">
-                <SelectValue placeholder="Select Range" />
-              </SelectTrigger>
-              <SelectContent className="glass-card border-neon-cyan/20">
-                <SelectItem value="24h">Last 24 Hours</SelectItem>
-                <SelectItem value="7d">Last 7 Days</SelectItem>
-                <SelectItem value="30d">Last 30 Days</SelectItem>
-                <SelectItem value="custom">Custom Range</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <Badge variant="outline" className="bg-background/20 backdrop-blur-sm text-neon-cyan border-neon-cyan/30 font-normal">
-            Last Updated: Just now
-          </Badge>
-        </div>
-      </div>
+const ScriptPerformance: FC<ScriptPerformanceProps> = ({ scriptId }) => {
+  // Mock data for script performance
+  const performanceData = [
+    { date: 'Mon', ctr: 4.2, acceptanceRate: 42, trafficQuality: 72 },
+    { date: 'Tue', ctr: 3.8, acceptanceRate: 38, trafficQuality: 68 },
+    { date: 'Wed', ctr: 5.1, acceptanceRate: 51, trafficQuality: 75 },
+    { date: 'Thu', ctr: 5.7, acceptanceRate: 57, trafficQuality: 78 },
+    { date: 'Fri', ctr: 4.9, acceptanceRate: 49, trafficQuality: 74 },
+    { date: 'Sat', ctr: 3.5, acceptanceRate: 35, trafficQuality: 65 },
+    { date: 'Sun', ctr: 3.2, acceptanceRate: 32, trafficQuality: 62 },
+  ];
 
-      <Tabs defaultValue="comparison" className="animate-fade-in">
-        <TabsList className="bg-background/50 backdrop-blur-sm p-1 border border-border/50 w-auto inline-flex">
-          <TabsTrigger 
-            value="comparison"
-            className="data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan"
-          >
-            Variant Comparison
-          </TabsTrigger>
-          <TabsTrigger 
-            value="trends"
-            className="data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan"
-          >
-            Performance Trends
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="comparison" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="glass-card border-neon-cyan/20 overflow-hidden hover-scale">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-futuristic text-gradient-cyan">Click-Through Rate (CTR)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={ctrData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-neon-cyan/10" />
-                      <XAxis dataKey="name" stroke="#888" />
-                      <YAxis tickFormatter={(value) => `${value}%`} stroke="#888" />
-                      <Tooltip formatter={(value) => [`${value}%`, 'CTR']} contentStyle={{ backgroundColor: '#0D1B2A', backdropFilter: 'blur(10px)', border: '1px solid rgba(0, 212, 255, 0.2)' }} />
-                      <Bar dataKey="value" fill="#00D4FF" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="glass-card border-neon-cyan/20 overflow-hidden hover-scale">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-futuristic text-gradient-cyan">CPM ($ per 1000 impressions)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={cpmData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-neon-cyan/10" />
-                      <XAxis dataKey="name" stroke="#888" />
-                      <YAxis tickFormatter={(value) => `$${value}`} stroke="#888" />
-                      <Tooltip formatter={(value) => {
-                        // Fix: Check if value is a number before calling toFixed
-                        const formattedValue = typeof value === 'number' 
-                          ? `$${value.toFixed(2)}` 
-                          : `$${value}`;
-                        return [formattedValue, 'CPM'];
-                      }} contentStyle={{ backgroundColor: '#0D1B2A', backdropFilter: 'blur(10px)', border: '1px solid rgba(0, 212, 255, 0.2)' }} />
-                      <Bar dataKey="value" fill="#FF007A" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="glass-card border-neon-cyan/20 overflow-hidden hover-scale">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-futuristic text-gradient-cyan">Acceptance Rate</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={acceptanceRateData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-neon-cyan/10" />
-                      <XAxis dataKey="name" stroke="#888" />
-                      <YAxis tickFormatter={(value) => `${value}%`} stroke="#888" />
-                      <Tooltip formatter={(value) => [`${value}%`, 'Acceptance']} contentStyle={{ backgroundColor: '#0D1B2A', backdropFilter: 'blur(10px)', border: '1px solid rgba(0, 212, 255, 0.2)' }} />
-                      <Bar dataKey="value" fill="#FFD700" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
+  const platformData = [
+    { name: '9Hits', value: 35, color: 'hsl(var(--traffic))' },
+    { name: 'HitLeap', value: 25, color: 'hsl(var(--platforms))' },
+    { name: 'Otohits', value: 20, color: 'hsl(var(--earnings))' },
+    { name: 'EasyHits4U', value: 10, color: 'hsl(var(--primary))' },
+    { name: 'Others', value: 10, color: 'hsl(var(--muted-foreground))' },
+  ];
+
+  // Custom tooltip for the line chart
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-background/95 backdrop-blur-sm border border-border p-3 rounded-lg shadow-md">
+          <p className="font-medium">{label}</p>
+          <div className="mt-2 space-y-1.5">
+            <p className="text-sm flex items-center">
+              <span className="h-2 w-2 rounded-full bg-primary mr-2"></span>
+              <span>CTR: </span>
+              <span className="ml-1 font-medium">
+                {typeof payload[0].value === 'number' ? `${payload[0].value.toFixed(2)}%` : payload[0].value}
+              </span>
+            </p>
+            <p className="text-sm flex items-center">
+              <span className="h-2 w-2 rounded-full bg-traffic mr-2"></span>
+              <span>Acceptance Rate: </span>
+              <span className="ml-1 font-medium">
+                {typeof payload[1].value === 'number' ? `${payload[1].value}%` : payload[1].value}
+              </span>
+            </p>
+            <p className="text-sm flex items-center">
+              <span className="h-2 w-2 rounded-full bg-earnings mr-2"></span>
+              <span>Traffic Quality: </span>
+              <span className="ml-1 font-medium">
+                {typeof payload[2].value === 'number' ? `${payload[2].value}/100` : payload[2].value}
+              </span>
+            </p>
           </div>
-        </TabsContent>
-        
-        <TabsContent value="trends" className="mt-6">
-          <Card className="glass-card border-neon-cyan/20 overflow-hidden hover-scale">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base font-futuristic text-gradient-cyan">CTR Trend Over Time</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-80">
-                <ChartContainer
-                  config={{
-                    basic: { color: '#00D4FF', label: 'Basic Redirect' },
-                    mobile: { color: '#FF007A', label: 'Mobile Optimized' },
-                    extended: { color: '#FFD700', label: 'Extended Delay' },
-                  }}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Custom tooltip for the bar chart
+  const PlatformTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-background/95 backdrop-blur-sm border border-border p-3 rounded-lg shadow-md">
+          <p className="font-medium">{payload[0].name}</p>
+          <div className="mt-2">
+            <p className="text-sm">
+              <span>Share: </span>
+              <span className="font-medium">
+                {typeof payload[0].value === 'number' ? `${payload[0].value}%` : payload[0].value}
+              </span>
+            </p>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <Card className="shadow-modern border border-border/50 overflow-hidden">
+      <CardHeader className="bg-muted/20 border-b border-border/50">
+        <CardTitle className="text-xl">Script Performance</CardTitle>
+      </CardHeader>
+      <CardContent className="p-4">
+        <Tabs defaultValue="metrics" className="w-full">
+          <TabsList className="w-full mb-4 bg-muted/30">
+            <TabsTrigger value="metrics" className="flex-1">Metrics</TabsTrigger>
+            <TabsTrigger value="platforms" className="flex-1">Platform Distribution</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="metrics" className="mt-0">
+            <div className="h-80 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={performanceData}
+                  margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
                 >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={timeSeriesData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-neon-cyan/10" />
-                      <XAxis dataKey="date" stroke="#888" />
-                      <YAxis tickFormatter={(value) => `${value}%`} stroke="#888" />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Legend />
-                      <Line type="monotone" dataKey="basic" name="Basic Redirect" stroke="#00D4FF" strokeWidth={2} dot={{ r: 4 }} />
-                      <Line type="monotone" dataKey="mobile" name="Mobile Optimized" stroke="#FF007A" strokeWidth={2} dot={{ r: 4 }} />
-                      <Line type="monotone" dataKey="extended" name="Extended Delay" stroke="#FFD700" strokeWidth={2} dot={{ r: 4 }} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+                  <defs>
+                    <linearGradient id="colorCtr" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
+                    </linearGradient>
+                    <linearGradient id="colorAcceptance" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--traffic))" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="hsl(var(--traffic))" stopOpacity={0.1} />
+                    </linearGradient>
+                    <linearGradient id="colorQuality" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--earnings))" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="hsl(var(--earnings))" stopOpacity={0.1} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                  <XAxis dataKey="date" className="text-xs" />
+                  <YAxis className="text-xs" />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area 
+                    type="monotone" 
+                    dataKey="ctr" 
+                    stroke="hsl(var(--primary))" 
+                    fillOpacity={1} 
+                    fill="url(#colorCtr)" 
+                    strokeWidth={2}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="acceptanceRate" 
+                    stroke="hsl(var(--traffic))" 
+                    fillOpacity={1} 
+                    fill="url(#colorAcceptance)" 
+                    strokeWidth={2}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="trafficQuality" 
+                    stroke="hsl(var(--earnings))" 
+                    fillOpacity={1} 
+                    fill="url(#colorQuality)" 
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="grid grid-cols-3 gap-4 mt-4">
+              <div className="bg-primary/10 rounded-lg p-3 border border-primary/30">
+                <div className="text-sm text-muted-foreground">Average CTR</div>
+                <div className="text-xl font-bold mt-1 text-primary">4.3%</div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+              <div className="bg-traffic/10 rounded-lg p-3 border border-traffic/30">
+                <div className="text-sm text-muted-foreground">Acceptance Rate</div>
+                <div className="text-xl font-bold mt-1 text-traffic">43%</div>
+              </div>
+              <div className="bg-earnings/10 rounded-lg p-3 border border-earnings/30">
+                <div className="text-sm text-muted-foreground">Traffic Quality</div>
+                <div className="text-xl font-bold mt-1 text-earnings">72/100</div>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="platforms" className="mt-0">
+            <div className="h-80 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={platformData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  layout="vertical"
+                >
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" horizontal={true} vertical={false} />
+                  <XAxis type="number" className="text-xs" />
+                  <YAxis dataKey="name" type="category" className="text-xs" width={80} />
+                  <Tooltip content={<PlatformTooltip />} />
+                  <Legend />
+                  <Bar dataKey="value" name="Platform Share" radius={[0, 4, 4, 0]} barSize={24}>
+                    {platformData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="bg-muted/30 p-4 rounded-lg mt-4 border border-border/50">
+              <h4 className="font-medium mb-2">Platform Insights</h4>
+              <p className="text-sm text-muted-foreground">
+                Your script performs best on 9Hits with 35% traffic share. Consider optimizing for HitLeap to improve overall performance.
+              </p>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 };
+
+export default ScriptPerformance;

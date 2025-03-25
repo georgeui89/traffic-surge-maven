@@ -1,194 +1,148 @@
 
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScriptEditor } from '@/components/script-lab/ScriptEditor';
-import { ScriptVariantTable } from '@/components/script-lab/ScriptVariantTable';
-import { ScriptPerformance } from '@/components/script-lab/ScriptPerformance';
-import { ScriptTemplates } from '@/components/script-lab/ScriptTemplates';
-import { ScriptRecommendations } from '@/components/script-lab/ScriptRecommendations';
+import { useState } from 'react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Save, Play, Eye, Code } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-
-// Mock script templates
-const SCRIPT_TYPES = {
-  BASIC: 'basic',
-  ADVANCED: 'advanced',
-  CUSTOM: 'custom'
-};
-
-const DEFAULT_SCRIPT = `// Basic Redirect Script
-// This script will redirect the user after a set delay
-// You can customize the delay and target URL
-
-// Configuration
-const config = {
-  delay: 30, // Delay in milliseconds
-  targetUrl: "https://example.com", // Target URL to redirect to
-  trackImpression: true // Whether to track impressions
-};
-
-// Redirect logic
-setTimeout(function() {
-  if (config.trackImpression) {
-    // Track impression before redirecting
-    console.log("Tracking impression...");
-  }
-  
-  // Redirect to target URL
-  window.location.href = config.targetUrl;
-}, config.delay);
-`;
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import ScriptEditor from '@/components/script-lab/ScriptEditor';
+import ScriptPerformance from '@/components/script-lab/ScriptPerformance';
+import ScriptRecommendations from '@/components/script-lab/ScriptRecommendations';
+import ScriptVariantTable from '@/components/script-lab/ScriptVariantTable';
+import ScriptTemplates from '@/components/script-lab/ScriptTemplates';
+import { PlusCircle, Play, Save, Download, Upload, FileCode } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const ScriptLab = () => {
   const [activeTab, setActiveTab] = useState('editor');
-  const [scriptType, setScriptType] = useState(SCRIPT_TYPES.BASIC);
-  const [scriptCode, setScriptCode] = useState(DEFAULT_SCRIPT);
-  const [isTestMode, setIsTestMode] = useState(false);
+  const [scriptName, setScriptName] = useState('My Redirect Script');
+  const [scriptCode, setScriptCode] = useState('// Basic redirect script\nsetTimeout(() => {\n  window.location.href = "https://example.com";\n}, 1000);');
+  const [scriptType, setScriptType] = useState('redirect');
+  const { toast } = useToast();
 
   const handleSaveScript = () => {
+    // Here you would actually save the script to your backend
     toast({
       title: "Script Saved",
-      description: "Your script has been saved successfully.",
+      description: `${scriptName} has been saved successfully.`,
+      variant: "default",
     });
   };
 
-  const handleTestScript = () => {
-    setIsTestMode(true);
+  const handleRunScript = () => {
     toast({
-      title: "Testing Script",
-      description: "Your script is now running in the sandbox environment.",
+      title: "Script Running",
+      description: "Script is being executed in a sandboxed environment.",
+      variant: "default",
     });
-
-    // Simulate testing completion after 2 seconds
-    setTimeout(() => {
-      setIsTestMode(false);
-      toast({
-        title: "Test Complete",
-        description: "Script executed successfully with no errors.",
-        variant: "default", // Changed from "success" to "default"
-      });
-    }, 2000);
   };
 
-  const handlePreviewScript = () => {
-    toast({
-      title: "Script Preview",
-      description: "Preview mode activated. Script behavior is simulated.",
-    });
+  const handleExportScript = () => {
+    const blob = new Blob([scriptCode], { type: 'text/javascript' });
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = href;
+    link.download = `${scriptName.replace(/\s+/g, '-').toLowerCase()}.js`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(href);
   };
 
   return (
     <div className="page-container">
-      <div className="page-header mb-8">
-        <div className="flex items-center gap-3 mb-1">
-          <Code className="h-7 w-7 text-neon-cyan" />
-          <h1 className="page-title font-futuristic text-3xl text-gradient-cyan">Script Lab</h1>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Script Lab</h1>
+          <p className="page-description">Create, test, and optimize redirect scripts</p>
         </div>
-        <p className="page-description text-lg">Create, test, and optimize redirect scripts for traffic arbitrage</p>
+        <div className="flex gap-2">
+          <Button size="sm" onClick={handleSaveScript}>
+            <Save className="h-4 w-4 mr-2" />
+            Save
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleRunScript}>
+            <Play className="h-4 w-4 mr-2" />
+            Run
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleExportScript}>
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+        </div>
       </div>
-
-      <div className="flex justify-end space-x-3 mb-6">
-        <Button 
-          variant="outline" 
-          onClick={handlePreviewScript}
-          className="gap-2 border-neon-cyan/30 hover:bg-neon-cyan/10 hover:border-neon-cyan/50 transition-all duration-300"
-        >
-          <Eye className="h-4 w-4 text-neon-cyan" />
-          Preview
-        </Button>
-        <Button 
-          variant="outline" 
-          onClick={handleTestScript} 
-          disabled={isTestMode}
-          className="gap-2 border-neon-cyan/30 hover:bg-neon-cyan/10 hover:border-neon-cyan/50 transition-all duration-300"
-        >
-          <Play className="h-4 w-4 text-neon-cyan" />
-          {isTestMode ? "Testing..." : "Test Script"}
-        </Button>
-        <Button 
-          onClick={handleSaveScript} 
-          className="gap-2 bg-neon-cyan hover:bg-neon-cyan/90 shadow-neon-cyan text-black font-medium transition-all duration-300"
-        >
-          <Save className="h-4 w-4" />
-          Save Script
-        </Button>
-      </div>
-
-      <Tabs 
-        defaultValue="editor" 
-        value={activeTab} 
-        onValueChange={setActiveTab} 
-        className="w-full animate-warp-in"
-      >
-        <TabsList className="grid grid-cols-5 mb-6 bg-background/50 backdrop-blur-sm rounded-xl p-1 border border-border/50">
-          <TabsTrigger 
-            value="editor"
-            className="data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan data-[state=active]:shadow-neon-cyan data-[state=active]:border-neon-cyan/50 transition-all duration-300 data-[state=active]:font-medium"
-          >
-            Script Editor
-          </TabsTrigger>
-          <TabsTrigger 
-            value="templates"
-            className="data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan data-[state=active]:shadow-neon-cyan data-[state=active]:border-neon-cyan/50 transition-all duration-300 data-[state=active]:font-medium"
-          >
-            Templates
-          </TabsTrigger>
-          <TabsTrigger 
-            value="variants"
-            className="data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan data-[state=active]:shadow-neon-cyan data-[state=active]:border-neon-cyan/50 transition-all duration-300 data-[state=active]:font-medium"
-          >
-            Script Variants
-          </TabsTrigger>
-          <TabsTrigger 
-            value="performance"
-            className="data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan data-[state=active]:shadow-neon-cyan data-[state=active]:border-neon-cyan/50 transition-all duration-300 data-[state=active]:font-medium"
-          >
-            Performance
-          </TabsTrigger>
-          <TabsTrigger 
-            value="recommendations"
-            className="data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan data-[state=active]:shadow-neon-cyan data-[state=active]:border-neon-cyan/50 transition-all duration-300 data-[state=active]:font-medium"
-          >
-            AI Recommendations
-          </TabsTrigger>
-        </TabsList>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-8 space-y-6">
+          <Card className="shadow-modern border border-border/50">
+            <CardHeader className="pb-3 bg-muted/20 border-b border-border/50">
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle className="text-xl">Script Editor</CardTitle>
+                  <CardDescription>Write and customize your redirection script</CardDescription>
+                </div>
+                <div className="flex gap-2">
+                  <Select value={scriptType} onValueChange={setScriptType}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Script Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="redirect">Basic Redirect</SelectItem>
+                      <SelectItem value="advanced">Advanced Redirect</SelectItem>
+                      <SelectItem value="custom">Custom Script</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="p-4">
+                <Input 
+                  value={scriptName} 
+                  onChange={e => setScriptName(e.target.value)} 
+                  placeholder="Script Name" 
+                  className="mb-4"
+                />
+                <ScriptEditor code={scriptCode} setCode={setScriptCode} />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <ScriptPerformance scriptId="1" />
+        </div>
         
-        <TabsContent value="editor" className="mt-0 glass-card p-4">
-          <ScriptEditor 
-            scriptCode={scriptCode} 
-            setScriptCode={setScriptCode} 
-            scriptType={scriptType}
-          />
-        </TabsContent>
-        
-        <TabsContent value="templates" className="mt-0 glass-card p-4">
-          <ScriptTemplates 
-            setScriptType={setScriptType} 
-            setScriptCode={setScriptCode} 
-            setActiveTab={setActiveTab}
-          />
-        </TabsContent>
-        
-        <TabsContent value="variants" className="mt-0 glass-card p-4">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-futuristic text-gradient-cyan">Script Variants</h2>
-            <Button className="gap-2 bg-neon-magenta hover:bg-neon-magenta/90 shadow-neon-magenta text-white font-medium transition-all duration-300">
-              <PlusCircle className="h-4 w-4" />
-              Add Variant
-            </Button>
-          </div>
-          <ScriptVariantTable />
-        </TabsContent>
-        
-        <TabsContent value="performance" className="mt-0 glass-card p-4">
-          <ScriptPerformance />
-        </TabsContent>
-        
-        <TabsContent value="recommendations" className="mt-0 glass-card p-4">
+        <div className="lg:col-span-4 space-y-6">
+          <Card className="shadow-modern border border-border/50">
+            <CardHeader className="pb-3 bg-muted/20 border-b border-border/50">
+              <CardTitle className="text-xl">Script Variants</CardTitle>
+              <CardDescription>Compare different versions of your script</CardDescription>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-medium">Current Variants</h3>
+                <Button size="sm" variant="outline">
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add Variant
+                </Button>
+              </div>
+              <ScriptVariantTable />
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-modern border border-border/50">
+            <CardHeader className="pb-3 bg-muted/20 border-b border-border/50">
+              <CardTitle className="text-xl">Templates</CardTitle>
+              <CardDescription>Use pre-built script templates</CardDescription>
+            </CardHeader>
+            <CardContent className="p-4">
+              <ScriptTemplates onSelectTemplate={(template) => setScriptCode(template.code)} />
+            </CardContent>
+          </Card>
+          
           <ScriptRecommendations />
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   );
 };

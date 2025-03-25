@@ -1,205 +1,109 @@
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Code, MousePointer, Globe, Smartphone, Clock, Shield, RefreshCw } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { FileCode, Clock, Smartphone, Code } from "lucide-react";
 
-// Templates
-const TEMPLATES = {
-  BASIC: `// Basic Redirect Script
-// This script will redirect the user after a set delay
-// You can customize the delay and target URL
-
-// Configuration
-const config = {
-  delay: 30, // Delay in milliseconds
-  targetUrl: "https://example.com", // Target URL to redirect to
-  trackImpression: true // Whether to track impressions
-};
-
-// Redirect logic
-setTimeout(function() {
-  if (config.trackImpression) {
-    // Track impression before redirecting
-    console.log("Tracking impression...");
-  }
-  
-  // Redirect to target URL
-  window.location.href = config.targetUrl;
-}, config.delay);`,
-  
-  ADVANCED: `// Advanced Redirect Script with Device Detection
-// This script detects device type and redirects accordingly
-// You can customize delays and URLs for different devices
-
-// Configuration
-const config = {
-  delay: {
-    desktop: 30, // Desktop delay in milliseconds
-    mobile: 20 // Mobile delay in milliseconds
+const templates = [
+  {
+    id: "basic-redirect",
+    name: "Basic Redirect",
+    description: "Simple timed redirect to a destination URL",
+    code: `// Basic Redirect Script
+setTimeout(() => {
+  window.location.href = "https://example.com";
+}, 1000); // 1 second delay`,
+    icon: <Clock className="h-4 w-4" />,
+    difficulty: "beginner",
   },
-  targetUrl: {
-    desktop: "https://example.com", // Desktop target URL
-    mobile: "https://m.example.com" // Mobile target URL
+  {
+    id: "device-detection",
+    name: "Device Detection",
+    description: "Redirect based on user's device type",
+    code: `// Device Detection Redirect Script
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+if (isMobile) {
+  window.location.href = "https://mobile.example.com";
+} else {
+  window.location.href = "https://desktop.example.com";
+}`,
+    icon: <Smartphone className="h-4 w-4" />,
+    difficulty: "intermediate",
   },
-  trackImpression: true // Whether to track impressions
-};
+  {
+    id: "advanced",
+    name: "Advanced Redirect",
+    description: "Includes parameters and tracking",
+    code: `// Advanced Redirect Script with Tracking
+const urlParams = new URLSearchParams(window.location.search);
+const source = urlParams.get('source') || 'direct';
+const campaign = urlParams.get('campaign') || 'none';
 
-// Device detection
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-// Determine settings based on device
-const delay = isMobile ? config.delay.mobile : config.delay.desktop;
-const targetUrl = isMobile ? config.targetUrl.mobile : config.targetUrl.desktop;
-
-// Redirect logic
-setTimeout(function() {
-  if (config.trackImpression) {
-    // Track impression before redirecting
-    console.log("Tracking impression for " + (isMobile ? "mobile" : "desktop") + "...");
-  }
-  
-  // Redirect to target URL
-  window.location.href = targetUrl;
-}, delay);`,
-  
-  CUSTOM: `// Custom Redirect Script Template
-// This is a starting point for your custom script
-// You have full control over the redirect logic
-
-// Your configuration variables
-const config = {
-  // Add your configuration here
-};
-
-// Your custom code goes here
-console.log("Custom script running...");
-
-// Example: Add your redirect logic
-// window.location.href = "https://example.com";`
-};
+// Track the visit
+fetch('https://api.example.com/track', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ source, campaign })
+})
+.then(() => {
+  // Redirect after tracking
+  window.location.href = \`https://example.com?ref=\${source}&camp=\${campaign}\`;
+})
+.catch(err => {
+  console.error('Tracking failed:', err);
+  // Redirect anyway
+  window.location.href = "https://example.com";
+});`,
+    icon: <Code className="h-4 w-4" />,
+    difficulty: "advanced",
+  },
+];
 
 interface ScriptTemplatesProps {
-  setScriptType: (type: string) => void;
-  setScriptCode: (code: string) => void;
-  setActiveTab: (tab: string) => void;
+  onSelectTemplate: (template: typeof templates[0]) => void;
 }
 
-export const ScriptTemplates: React.FC<ScriptTemplatesProps> = ({
-  setScriptType,
-  setScriptCode,
-  setActiveTab
-}) => {
-  const handleSelectTemplate = (type: string, code: string) => {
-    setScriptType(type);
-    setScriptCode(code);
-    setActiveTab('editor');
-  };
-
+const ScriptTemplates = ({ onSelectTemplate }: ScriptTemplatesProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex justify-between items-center">
-            <span>Basic Redirect</span>
-            <Badge>Beginner</Badge>
-          </CardTitle>
-          <CardDescription>Simple time-delayed redirect script</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Configurable delay</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <MousePointer className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Single target URL</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Basic impression tracking</span>
-            </div>
+    <div className="space-y-4">
+      {templates.map((template) => (
+        <div
+          key={template.id}
+          className="relative flex flex-col p-4 border border-border/50 rounded-lg bg-card hover:bg-muted/20 transition-colors cursor-pointer"
+        >
+          <div className="absolute top-3 right-3">
+            <StatusBadge 
+              variant={
+                template.difficulty === "beginner" 
+                  ? "success" 
+                  : template.difficulty === "intermediate" 
+                  ? "warning" 
+                  : "info"
+              } 
+              label={template.difficulty}
+              size="sm"
+            />
           </div>
-        </CardContent>
-        <CardFooter>
+          <div className="flex items-center mb-2">
+            <div className="mr-2 p-1.5 bg-primary/10 rounded-md text-primary">
+              {template.icon}
+            </div>
+            <h3 className="font-medium">{template.name}</h3>
+          </div>
+          <p className="text-sm text-muted-foreground mb-3">{template.description}</p>
           <Button 
-            className="w-full" 
-            onClick={() => handleSelectTemplate('basic', TEMPLATES.BASIC)}
+            variant="outline" 
+            size="sm" 
+            className="w-full"
+            onClick={() => onSelectTemplate(template)}
           >
+            <FileCode className="h-4 w-4 mr-2" />
             Use Template
           </Button>
-        </CardFooter>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex justify-between items-center">
-            <span>Advanced Redirect</span>
-            <Badge variant="secondary">Intermediate</Badge>
-          </CardTitle>
-          <CardDescription>Device-aware redirect with mobile detection</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <Smartphone className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Mobile device detection</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Device-specific delays</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Globe className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Multiple target URLs</span>
-            </div>
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button 
-            className="w-full" 
-            onClick={() => handleSelectTemplate('advanced', TEMPLATES.ADVANCED)}
-          >
-            Use Template
-          </Button>
-        </CardFooter>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex justify-between items-center">
-            <span>Custom Script</span>
-            <Badge variant="destructive">Advanced</Badge>
-          </CardTitle>
-          <CardDescription>Start from scratch or with minimal boilerplate</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <Code className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Full code flexibility</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Advanced security options</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <RefreshCw className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Custom logic flows</span>
-            </div>
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button 
-            className="w-full" 
-            onClick={() => handleSelectTemplate('custom', TEMPLATES.CUSTOM)}
-          >
-            Use Template
-          </Button>
-        </CardFooter>
-      </Card>
+        </div>
+      ))}
     </div>
   );
 };
+
+export default ScriptTemplates;

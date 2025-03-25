@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -20,9 +21,10 @@ export default {
 		extend: {
 			fontFamily: {
 				sans: [
+					'Inter',
+					'Roboto',
 					'"SF Pro Display"',
 					'"SF Pro"',
-					'"Inter"',
 					'system-ui',
 					'sans-serif',
 				],
@@ -110,6 +112,12 @@ export default {
 					dark: '#0D1B2A',
 					medium: '#1A3C66',
 					light: '#2A5C86'
+				},
+				modern: {
+					primary: '#2A5C86',
+					secondary: '#F5A623',
+					neutral: '#F8F9FA',
+					dark: '#333333'
 				}
 			},
 			borderRadius: {
@@ -121,7 +129,12 @@ export default {
 				'neon-cyan': '0 0 10px rgba(0, 212, 255, 0.7)',
 				'neon-magenta': '0 0 10px rgba(255, 0, 122, 0.7)',
 				'neon-gold': '0 0 10px rgba(255, 215, 0, 0.7)',
-				'glass': '0 4px 12px -2px rgba(0, 0, 0, 0.3)'
+				'glass': '0 4px 12px -2px rgba(0, 0, 0, 0.3)',
+				'modern': '0 2px 15px rgba(0, 0, 0, 0.05)',
+				'elevated': '0 8px 30px rgba(0, 0, 0, 0.12)',
+				'interactive': '0 5px 15px rgba(0, 0, 0, 0.1)',
+				'card': '0 2px 10px rgba(0, 0, 0, 0.08)',
+				'hover': '0 8px 20px rgba(0, 0, 0, 0.15)'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -221,6 +234,24 @@ export default {
 					'50%': {
 						transform: 'translateY(-5px)'
 					}
+				},
+				'scale': {
+					'0%': {
+						transform: 'scale(0.95)',
+						opacity: '0.7'
+					},
+					'100%': {
+						transform: 'scale(1)',
+						opacity: '1'
+					}
+				},
+				'shimmer': {
+					'0%': {
+						backgroundPosition: '-200% 0'
+					},
+					'100%': {
+						backgroundPosition: '200% 0'
+					}
 				}
 			},
 			animation: {
@@ -235,7 +266,9 @@ export default {
 				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
 				'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
 				'warp-in': 'warp-in 0.2s ease-out',
-				'float': 'float 3s ease-in-out infinite'
+				'float': 'float 3s ease-in-out infinite',
+				'scale': 'scale 0.3s ease-out',
+				'shimmer': 'shimmer 3s linear infinite'
 			}
 		}
 	},

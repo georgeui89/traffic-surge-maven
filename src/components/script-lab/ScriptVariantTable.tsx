@@ -1,159 +1,84 @@
 
-import React from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Edit, Copy, Trash, ArrowUp, ArrowDown, Play, CheckCircle, AlertCircle } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { Edit, Trash2, Copy, Star } from "lucide-react";
 
-// Mock data for script variants
-const variants = [
+const variantData = [
   {
-    id: 1,
-    name: 'Basic Redirect (Default)',
-    type: 'basic',
-    delay: 30,
-    active: true,
-    status: 'active',
-    ctr: 18.5,
-    cpm: 4.20,
-    acceptanceRate: 92,
-    impressions: 54320,
-    lastTested: '2 hours ago'
+    id: "1",
+    name: "Default Variant",
+    ctr: 4.3,
+    acceptanceRate: 43,
+    isActive: true,
   },
   {
-    id: 2,
-    name: 'Mobile Optimized',
-    type: 'advanced',
-    delay: 20,
-    active: true,
-    status: 'testing',
-    ctr: 22.7,
-    cpm: 5.15,
-    acceptanceRate: 87,
-    impressions: 32180,
-    lastTested: '6 hours ago'
+    id: "2",
+    name: "50ms Delay Variant",
+    ctr: 3.9,
+    acceptanceRate: 38,
+    isActive: false,
   },
   {
-    id: 3,
-    name: 'Extended Delay',
-    type: 'basic',
-    delay: 40,
-    active: false,
-    status: 'paused',
-    ctr: 15.2,
-    cpm: 3.85,
-    acceptanceRate: 94,
-    impressions: 18760,
-    lastTested: '1 day ago'
+    id: "3",
+    name: "Device Detection",
+    ctr: 5.1,
+    acceptanceRate: 53,
+    isActive: false,
   },
-  {
-    id: 4,
-    name: 'Geo-Targeted',
-    type: 'custom',
-    delay: 25,
-    active: false,
-    status: 'error',
-    ctr: 0,
-    cpm: 0,
-    acceptanceRate: 0,
-    impressions: 0,
-    lastTested: 'Never'
-  }
 ];
 
-export const ScriptVariantTable: React.FC = () => {
+const ScriptVariantTable = () => {
   return (
-    <Card>
-      <CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[25%]">Script Variant</TableHead>
-              <TableHead className="w-[10%]">Delay</TableHead>
-              <TableHead className="w-[10%]">CTR</TableHead>
-              <TableHead className="w-[10%]">CPM</TableHead>
-              <TableHead className="w-[15%]">Acceptance</TableHead>
-              <TableHead className="w-[10%]">Status</TableHead>
-              <TableHead className="w-[20%] text-right">Actions</TableHead>
+    <div className="overflow-hidden rounded-md border border-border/50">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[180px]">Name</TableHead>
+            <TableHead className="text-center">CTR</TableHead>
+            <TableHead className="text-center">Accept</TableHead>
+            <TableHead className="text-center">Status</TableHead>
+            <TableHead className="text-right pr-4">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {variantData.map((variant) => (
+            <TableRow key={variant.id} className="hover:bg-muted/30">
+              <TableCell className="font-medium">{variant.name}</TableCell>
+              <TableCell className="text-center">{variant.ctr}%</TableCell>
+              <TableCell className="text-center">{variant.acceptanceRate}%</TableCell>
+              <TableCell className="text-center">
+                <StatusBadge 
+                  variant={variant.isActive ? "success" : "muted"}
+                  withDot={true}
+                  label={variant.isActive ? "Active" : "Inactive"}
+                />
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  {variant.isActive ? (
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-success">
+                      <Star className="h-4 w-4 fill-current" />
+                    </Button>
+                  ) : (
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {variants.map((variant) => (
-              <TableRow key={variant.id}>
-                <TableCell className="font-medium">
-                  <div className="flex flex-col">
-                    {variant.name}
-                    <span className="text-xs text-muted-foreground">
-                      {variant.impressions.toLocaleString()} impressions
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell>{variant.delay}ms</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1">
-                    {variant.ctr}%
-                    {variant.id === 2 && (
-                      <ArrowUp className="h-4 w-4 text-success" />
-                    )}
-                    {variant.id === 3 && (
-                      <ArrowDown className="h-4 w-4 text-destructive" />
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>${variant.cpm.toFixed(2)}</TableCell>
-                <TableCell>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span>{variant.acceptanceRate}%</span>
-                    </div>
-                    <Progress value={variant.acceptanceRate} className="h-2" />
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {variant.status === 'active' && (
-                    <Badge className="bg-success">
-                      <CheckCircle className="h-3 w-3 mr-1" /> Active
-                    </Badge>
-                  )}
-                  {variant.status === 'testing' && (
-                    <Badge variant="secondary">
-                      <Play className="h-3 w-3 mr-1" /> Testing
-                    </Badge>
-                  )}
-                  {variant.status === 'paused' && (
-                    <Badge variant="outline">Paused</Badge>
-                  )}
-                  {variant.status === 'error' && (
-                    <Badge variant="destructive">
-                      <AlertCircle className="h-3 w-3 mr-1" /> Error
-                    </Badge>
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-1">
-                    <Button variant="ghost" size="icon" title="Edit">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" title="Duplicate">
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" title="Delete">
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                    {variant.status !== 'testing' && (
-                      <Button variant="ghost" size="icon" title="Test">
-                        <Play className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
+
+export default ScriptVariantTable;
