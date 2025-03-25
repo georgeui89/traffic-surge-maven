@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import ScriptEditor from '@/components/script-lab/ScriptEditor';
+import { ScriptEditor } from '@/components/script-lab/ScriptEditor';
 import ScriptPerformance from '@/components/script-lab/ScriptPerformance';
 import ScriptRecommendations from '@/components/script-lab/ScriptRecommendations';
 import ScriptVariantTable from '@/components/script-lab/ScriptVariantTable';
