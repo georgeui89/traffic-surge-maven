@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
@@ -11,8 +11,9 @@ import ScriptPerformance from '@/components/script-lab/ScriptPerformance';
 import ScriptRecommendations from '@/components/script-lab/ScriptRecommendations';
 import ScriptVariantTable from '@/components/script-lab/ScriptVariantTable';
 import ScriptTemplates from '@/components/script-lab/ScriptTemplates';
-import { PlusCircle, Play, Save, Download, Upload, FileCode } from 'lucide-react';
+import { PlusCircle, Play, Save, Download, Upload, FileCode, RefreshCw, Share } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { StatusBadge } from '@/components/ui/status-badge';
 
 const ScriptLab = () => {
   const [activeTab, setActiveTab] = useState('editor');
@@ -52,21 +53,21 @@ const ScriptLab = () => {
 
   return (
     <div className="page-container">
-      <div className="page-header">
+      <div className="page-header backdrop-blur-sm bg-background/60 sticky top-0 z-10 p-4 mb-4 rounded-lg shadow-modern border border-border/30">
         <div>
-          <h1 className="page-title">Script Lab</h1>
+          <h1 className="page-title text-gradient-primary">Script Lab</h1>
           <p className="page-description">Create, test, and optimize redirect scripts</p>
         </div>
         <div className="flex gap-2">
-          <Button size="sm" onClick={handleSaveScript}>
+          <Button size="sm" className="shadow-modern transition-all hover:shadow-hover" onClick={handleSaveScript}>
             <Save className="h-4 w-4 mr-2" />
             Save
           </Button>
-          <Button size="sm" variant="outline" onClick={handleRunScript}>
+          <Button size="sm" variant="outline" className="shadow-modern transition-all hover:shadow-hover" onClick={handleRunScript}>
             <Play className="h-4 w-4 mr-2" />
             Run
           </Button>
-          <Button size="sm" variant="outline" onClick={handleExportScript}>
+          <Button size="sm" variant="outline" className="shadow-modern transition-all hover:shadow-hover" onClick={handleExportScript}>
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -75,11 +76,11 @@ const ScriptLab = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-8 space-y-6">
-          <Card className="shadow-modern border border-border/50">
-            <CardHeader className="pb-3 bg-muted/20 border-b border-border/50">
+          <Card className="shadow-modern border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-hover">
+            <CardHeader className="pb-3 bg-muted/30 border-b border-border/50">
               <div className="flex justify-between items-center">
                 <div>
-                  <CardTitle className="text-xl">Script Editor</CardTitle>
+                  <CardTitle className="text-xl font-medium">Script Editor</CardTitle>
                   <CardDescription>Write and customize your redirection script</CardDescription>
                 </div>
                 <div className="flex gap-2">
@@ -113,8 +114,8 @@ const ScriptLab = () => {
         </div>
         
         <div className="lg:col-span-4 space-y-6">
-          <Card className="shadow-modern border border-border/50">
-            <CardHeader className="pb-3 bg-muted/20 border-b border-border/50">
+          <Card className="shadow-modern border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-hover">
+            <CardHeader className="pb-3 bg-muted/30 border-b border-border/50">
               <CardTitle className="text-xl">Script Variants</CardTitle>
               <CardDescription>Compare different versions of your script</CardDescription>
             </CardHeader>
@@ -130,8 +131,8 @@ const ScriptLab = () => {
             </CardContent>
           </Card>
           
-          <Card className="shadow-modern border border-border/50">
-            <CardHeader className="pb-3 bg-muted/20 border-b border-border/50">
+          <Card className="shadow-modern border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-hover">
+            <CardHeader className="pb-3 bg-muted/30 border-b border-border/50">
               <CardTitle className="text-xl">Templates</CardTitle>
               <CardDescription>Use pre-built script templates</CardDescription>
             </CardHeader>
@@ -143,6 +144,58 @@ const ScriptLab = () => {
           <ScriptRecommendations />
         </div>
       </div>
+      
+      <Card className="shadow-modern border border-border/50 mt-6 overflow-hidden transition-all duration-300 hover:shadow-hover">
+        <CardHeader className="pb-3 bg-muted/30 border-b border-border/50">
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="text-xl">Performance Analytics</CardTitle>
+              <CardDescription>Review how your scripts are performing</CardDescription>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+              <Button size="sm" variant="outline">
+                <Share className="h-4 w-4 mr-2" />
+                Share
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-muted/10 p-4 rounded-lg border border-border/30">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Executions</p>
+                  <h3 className="text-2xl font-bold">24,583</h3>
+                </div>
+                <StatusBadge variant="success" label="+12.5%" />
+              </div>
+            </div>
+            <div className="bg-muted/10 p-4 rounded-lg border border-border/30">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm text-muted-foreground">Success Rate</p>
+                  <h3 className="text-2xl font-bold">96.3%</h3>
+                </div>
+                <StatusBadge variant="success" label="+2.1%" />
+              </div>
+            </div>
+            <div className="bg-muted/10 p-4 rounded-lg border border-border/30">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm text-muted-foreground">Avg. Load Time</p>
+                  <h3 className="text-2xl font-bold">0.83s</h3>
+                </div>
+                <StatusBadge variant="warning" label="+0.05s" />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

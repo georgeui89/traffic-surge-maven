@@ -8,35 +8,34 @@ import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 
 interface ScriptEditorProps {
-  scriptCode: string;
-  setScriptCode: (code: string) => void;
-  scriptType: string;
+  code: string;
+  setCode: (code: string) => void;
 }
 
 export const ScriptEditor: React.FC<ScriptEditorProps> = ({
-  scriptCode,
-  setScriptCode,
-  scriptType
+  code,
+  setCode
 }) => {
   return (
     <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-8">
-        <Card className="border-2 border-primary/10">
+      <div className="col-span-12 lg:col-span-8">
+        <Card className="shadow-modern border-2 border-primary/10 transition-all duration-300 hover:shadow-hover">
           <CardContent className="p-0">
-            <div className="flex items-center justify-between bg-muted p-2 border-b">
+            <div className="flex items-center justify-between bg-muted/50 p-2 border-b">
               <div className="flex items-center gap-2">
-                <Badge variant="outline">script.js</Badge>
-                <Badge variant={scriptType === 'basic' ? 'default' : 'outline'}>Basic</Badge>
-                <Badge variant={scriptType === 'advanced' ? 'secondary' : 'outline'}>Advanced</Badge>
-                <Badge variant={scriptType === 'custom' ? 'destructive' : 'outline'}>Custom</Badge>
+                <Badge variant="outline" className="font-mono">script.js</Badge>
+                <Badge variant="default">Basic</Badge>
+                <Badge variant="outline">Advanced</Badge>
+                <Badge variant="outline">Custom</Badge>
               </div>
-              <Badge variant="success" className="bg-success text-success-foreground">Valid</Badge>
+              <StatusBadge variant="success" label="Valid" withDot />
             </div>
             <Textarea
-              value={scriptCode}
-              onChange={(e) => setScriptCode(e.target.value)}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
               className="font-mono text-sm border-0 rounded-none min-h-[500px] focus-visible:ring-0 resize-none"
               style={{ 
                 fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
@@ -49,8 +48,8 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         </Card>
       </div>
       
-      <div className="col-span-4">
-        <Card className="h-full">
+      <div className="col-span-12 lg:col-span-4">
+        <Card className="h-full shadow-modern transition-all duration-300 hover:shadow-hover">
           <CardContent className="p-4">
             <h3 className="text-lg font-semibold mb-4">Script Configuration</h3>
             

@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const statusBadgeVariants = cva(
-  "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold",
+  "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-all duration-200",
   {
     variants: {
       variant: {
@@ -17,7 +17,7 @@ const statusBadgeVariants = cva(
       },
       size: {
         default: "h-6",
-        sm: "h-5",
+        sm: "h-5 text-[10px]",
         lg: "h-7 px-3",
       },
       withDot: {
@@ -43,7 +43,8 @@ const StatusBadge = React.forwardRef<HTMLDivElement, StatusBadgeProps>(
     return (
       <div
         ref={ref}
-        className={cn(statusBadgeVariants({ variant, size, withDot }), className)}
+        className={cn(statusBadgeVariants({ variant, size, withDot }), 
+        "shadow-sm hover:shadow-md transition-all duration-200", className)}
         {...props}
       >
         {withDot && (
