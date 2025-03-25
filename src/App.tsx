@@ -23,6 +23,7 @@ import TrafficAnalytics from "./pages/TrafficAnalytics";
 import BudgetOptimizer from "./pages/BudgetOptimizer";
 import CpmCalculator from "./pages/CpmCalculator";
 import RdpScaler from "./pages/RdpScaler";
+import ScriptLab from "./pages/ScriptLab";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/budget-optimizer" element={<PageTransition><BudgetOptimizer /></PageTransition>} />
               <Route path="/cpm-calculator" element={<PageTransition><CpmCalculator /></PageTransition>} />
               <Route path="/rdp-scaler" element={<PageTransition><RdpScaler /></PageTransition>} />
+              <Route path="/script-lab" element={<PageTransition><ScriptLab /></PageTransition>} />
               <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
             </Routes>
           </MainLayout>

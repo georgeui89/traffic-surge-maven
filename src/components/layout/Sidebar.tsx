@@ -16,7 +16,8 @@ import {
   DollarSign,
   Calculator,
   Activity,
-  Zap
+  Zap,
+  Code
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -152,14 +153,15 @@ export const Sidebar = () => {
           <NavItem to="/automation" icon={Bot} label="Automation" collapsed={collapsed} />
           <NavItem to="/budget-optimizer" icon={DollarSign} label="Budget Optimizer" collapsed={collapsed} />
           <NavItem to="/reporting" icon={FileText} label="Reporting" collapsed={collapsed} />
+          <NavItem to="/script-lab" icon={Code} label="Script Lab" collapsed={collapsed} isNew={true} />
         </div>
 
         {!collapsed && <Separator className="my-3 bg-sidebar-border/70" />}
         
         <div className="mb-2">
           {!collapsed && <div className="text-xs font-medium text-sidebar-foreground/50 mb-2 ml-3">TOOLS</div>}
-          <NavItem to="/cpm-calculator" icon={Calculator} label="CPM Calculator" collapsed={collapsed} isNew={true} />
-          <NavItem to="/rdp-scaler" icon={Activity} label="RDP Scaler" collapsed={collapsed} isNew={true} />
+          <NavItem to="/cpm-calculator" icon={Calculator} label="CPM Calculator" collapsed={collapsed} />
+          <NavItem to="/rdp-scaler" icon={Activity} label="RDP Scaler" collapsed={collapsed} />
         </div>
       </nav>
 
