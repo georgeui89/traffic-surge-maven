@@ -66,7 +66,7 @@ const ScriptLab = () => {
       toast({
         title: "Test Complete",
         description: "Script executed successfully with no errors.",
-        variant: "success",
+        variant: "default", // Changed from "success" to "default"
       });
     }, 2000);
   };

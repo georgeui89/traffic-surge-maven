@@ -111,7 +111,13 @@ export const ScriptPerformance: React.FC = () => {
                       <CartesianGrid strokeDasharray="3 3" vertical={false} />
                       <XAxis dataKey="name" />
                       <YAxis tickFormatter={(value) => `$${value}`} />
-                      <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, 'CPM']} />
+                      <Tooltip formatter={(value) => {
+                        // Fix: Check if value is a number before calling toFixed
+                        const formattedValue = typeof value === 'number' 
+                          ? `$${value.toFixed(2)}` 
+                          : `$${value}`;
+                        return [formattedValue, 'CPM'];
+                      }} />
                       <Bar dataKey="value" fill="#2ecc71" />
                     </BarChart>
                   </ResponsiveContainer>
