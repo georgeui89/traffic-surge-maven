@@ -1,12 +1,16 @@
 
 import * as React from "react"
-import { Calendar, Download, FileText } from "lucide-react"
+import { useState, useCallback } from "react"
+import { Calendar, Download, FileText, Loader2, AlertCircle, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { StatusBadge } from "@/components/ui/status-badge"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"
+import { format } from "date-fns"
 import { useToast } from "@/hooks/use-toast"
-import { useState } from "react"
 
 type ReportType = 'traffic' | 'earnings' | 'platforms' | 'rdps'
 
@@ -23,16 +27,34 @@ interface ReportGeneratorProps {
 
 export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
   const { toast } = useToast()
   const [format, setFormat] = useState<"pdf" | "csv" | "excel">("pdf")
+  const [dateRange, setDateRange] = useState<{
+    from: Date | undefined
+    to: Date | undefined
+  }>({
+    from: new Date(new Date().setDate(new Date().getDate() - 7)),
+    to: new Date()
+  })
   
   const generateReport = async () => {
     setLoading(true)
+    setError(null)
+    setSuccess(false)
+    
     try {
       // Simulate API call
-      console.log(`Generating ${reportInfo.type} report in ${format} format`)
+      console.log(`Generating ${reportInfo.type} report in ${format} format for date range:`, dateRange)
       await new Promise(resolve => setTimeout(resolve, 1500))
       
+      // Simulate random error (20% chance)
+      if (Math.random() < 0.2) {
+        throw new Error("Server connection timeout. Please try again.");
+      }
+      
+      setSuccess(true)
       toast({
         title: "Report Generated",
         description: `${reportInfo.title} has been generated successfully.`,
@@ -41,24 +63,36 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
       
       // Simulate download
       const dummyLink = document.createElement('a')
-      dummyLink.href = `data:application/octet-stream,${encodeURIComponent(`Sample ${reportInfo.type} report data`)}`
-      dummyLink.download = `${reportInfo.type}-report.${format}`
+      dummyLink.href = `data:application/octet-stream,${encodeURIComponent(`Sample ${reportInfo.type} report data from ${format(dateRange.from || new Date(), 'yyyy-MM-dd')} to ${format(dateRange.to || new Date(), 'yyyy-MM-dd')}`)}`
+      dummyLink.download = `${reportInfo.type}-report-${format(new Date(), 'yyyy-MM-dd')}.${format}`
       document.body.appendChild(dummyLink)
       dummyLink.click()
       document.body.removeChild(dummyLink)
       
     } catch (error) {
       console.error("Error generating report:", error)
+      setError(error instanceof Error ? error.message : "Unknown error occurred")
       toast({
         title: "Error",
-        description: "Failed to generate report. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate report. Please try again.",
         variant: "destructive",
         duration: 3000,
       })
     } finally {
+      // Reset success state after 3 seconds
+      if (success) {
+        setTimeout(() => setSuccess(false), 3000)
+      }
       setLoading(false)
     }
   }
+  
+  const formatDateRange = useCallback(() => {
+    if (dateRange.from && dateRange.to) {
+      return `${format(dateRange.from, 'MMM d, yyyy')} - ${format(dateRange.to, 'MMM d, yyyy')}`
+    }
+    return "Select date range"
+  }, [dateRange])
   
   return (
     <Card className="transition-all duration-200 hover:shadow-md">
@@ -77,7 +111,7 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
           <div>
             <label className="text-sm font-medium block mb-1">Format</label>
             <Select value={format} onValueChange={(value: "pdf" | "csv" | "excel") => setFormat(value)}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" id={`format-select-${reportInfo.type}`}>
                 <SelectValue placeholder="Select format" />
               </SelectTrigger>
               <SelectContent>
@@ -89,10 +123,23 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
           </div>
           
           <div className="flex items-center justify-between">
-            <Button variant="outline" size="sm" className="gap-2">
-              <Calendar className="h-4 w-4" />
-              Select Date Range
-            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2" id={`date-range-${reportInfo.type}`}>
+                  <Calendar className="h-4 w-4" />
+                  {formatDateRange()}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  initialFocus
+                  mode="range"
+                  selected={dateRange}
+                  onSelect={(range) => setDateRange(range || {from: undefined, to: undefined})}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
             
             {loading && (
               <StatusBadge 
@@ -102,7 +149,33 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
                 loading 
               />
             )}
+            
+            {!loading && success && (
+              <StatusBadge 
+                variant="success" 
+                label="Generated" 
+                withDot 
+              />
+            )}
           </div>
+          
+          {error && (
+            <Alert variant="destructive" className="mt-2">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {success && (
+            <Alert variant="success" className="mt-2 bg-success/10 text-success border-success/20">
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>
+                Report generated successfully. Download started.
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
       </CardContent>
       <CardFooter className="pt-0">
@@ -110,10 +183,11 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
           onClick={generateReport} 
           disabled={loading} 
           className="gap-2 w-full"
+          id={`generate-report-btn-${reportInfo.type}`}
         >
           {loading ? (
             <>
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              <Loader2 className="h-4 w-4 animate-spin" />
               Generating...
             </>
           ) : (
@@ -172,9 +246,10 @@ export function ReportDownloadButton({ report, format }: { report: { name: strin
       className="gap-1"
       onClick={handleDownload}
       disabled={loading}
+      id={`download-${report.name.toLowerCase().replace(/\s+/g, '-')}-${format}`}
     >
       {loading ? (
-        <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        <Loader2 className="h-3 w-3 animate-spin" />
       ) : (
         <Download className="h-4 w-4" />
       )}
