@@ -22,12 +22,16 @@ const statusBadgeVariants = cva(
       },
       withDot: {
         true: "pl-2",
+      },
+      interactive: {
+        true: "cursor-pointer hover:bg-opacity-80 active:transform active:scale-95",
       }
     },
     defaultVariants: {
       variant: "default",
       size: "default",
       withDot: false,
+      interactive: false,
     },
   }
 )
@@ -36,15 +40,24 @@ export interface StatusBadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof statusBadgeVariants> {
   label: string;
+  onClick?: () => void;
+  loading?: boolean;
 }
 
 const StatusBadge = React.forwardRef<HTMLDivElement, StatusBadgeProps>(
-  ({ className, variant, size, withDot, label, ...props }, ref) => {
+  ({ className, variant, size, withDot, label, interactive, loading, onClick, ...props }, ref) => {
     return (
       <div
         ref={ref}
-        className={cn(statusBadgeVariants({ variant, size, withDot }), 
-        "shadow-sm hover:shadow-md transition-all duration-200", className)}
+        className={cn(
+          statusBadgeVariants({ variant, size, withDot, interactive }), 
+          "shadow-sm hover:shadow-md transition-all duration-200",
+          loading && "opacity-70 cursor-wait",
+          className
+        )}
+        onClick={!loading && onClick ? onClick : undefined}
+        role={onClick ? "button" : undefined}
+        tabIndex={onClick ? 0 : undefined}
         {...props}
       >
         {withDot && (
@@ -56,9 +69,15 @@ const StatusBadge = React.forwardRef<HTMLDivElement, StatusBadgeProps>(
             variant === "error" && "bg-destructive",
             variant === "info" && "bg-traffic",
             variant === "muted" && "bg-muted-foreground",
+            loading && "animate-pulse",
           )} />
         )}
-        {label}
+        {loading ? (
+          <div className="flex items-center">
+            <div className="mr-1 h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            <span>{label}</span>
+          </div>
+        ) : label}
       </div>
     )
   }
