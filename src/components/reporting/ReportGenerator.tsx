@@ -30,10 +30,10 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const { toast } = useToast()
-  const [format, setFormat] = useState<"pdf" | "csv" | "excel">("pdf")
+  const [fileFormat, setFileFormat] = useState<"pdf" | "csv" | "excel">("pdf")
   const [dateRange, setDateRange] = useState<{
-    from: Date | undefined
-    to: Date | undefined
+    from: Date
+    to: Date
   }>({
     from: new Date(new Date().setDate(new Date().getDate() - 7)),
     to: new Date()
@@ -46,7 +46,7 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
     
     try {
       // Simulate API call
-      console.log(`Generating ${reportInfo.type} report in ${format} format for date range:`, dateRange)
+      console.log(`Generating ${reportInfo.type} report in ${fileFormat} format for date range:`, dateRange)
       await new Promise(resolve => setTimeout(resolve, 1500))
       
       // Simulate random error (20% chance)
@@ -64,7 +64,7 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
       // Simulate download
       const dummyLink = document.createElement('a')
       dummyLink.href = `data:application/octet-stream,${encodeURIComponent(`Sample ${reportInfo.type} report data from ${format(dateRange.from || new Date(), 'yyyy-MM-dd')} to ${format(dateRange.to || new Date(), 'yyyy-MM-dd')}`)}`
-      dummyLink.download = `${reportInfo.type}-report-${format(new Date(), 'yyyy-MM-dd')}.${format}`
+      dummyLink.download = `${reportInfo.type}-report-${format(new Date(), 'yyyy-MM-dd')}.${fileFormat}`
       document.body.appendChild(dummyLink)
       dummyLink.click()
       document.body.removeChild(dummyLink)
@@ -110,7 +110,7 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
         <div className="mt-4 space-y-3">
           <div>
             <label className="text-sm font-medium block mb-1">Format</label>
-            <Select value={format} onValueChange={(value: "pdf" | "csv" | "excel") => setFormat(value)}>
+            <Select value={fileFormat} onValueChange={(value: "pdf" | "csv" | "excel") => setFileFormat(value)}>
               <SelectTrigger className="w-full" id={`format-select-${reportInfo.type}`}>
                 <SelectValue placeholder="Select format" />
               </SelectTrigger>
@@ -135,7 +135,11 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
                   initialFocus
                   mode="range"
                   selected={dateRange}
-                  onSelect={(range) => setDateRange(range || {from: undefined, to: undefined})}
+                  onSelect={(range) => {
+                    if (range?.from && range?.to) {
+                      setDateRange({from: range.from, to: range.to});
+                    }
+                  }}
                   numberOfMonths={2}
                 />
               </PopoverContent>
@@ -169,7 +173,7 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
           )}
           
           {success && (
-            <Alert variant="success" className="mt-2 bg-success/10 text-success border-success/20">
+            <Alert className="mt-2 bg-success/10 text-success border-success/20">
               <CheckCircle className="h-4 w-4" />
               <AlertDescription>
                 Report generated successfully. Download started.

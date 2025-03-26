@@ -485,7 +485,7 @@ export function ApiIntegration({
             </div>
             
             {dataFreshness === 'stale' && (
-              <Alert variant="warning" className="bg-warning/10 border-warning/30 text-warning-foreground">
+              <Alert className="bg-warning/10 border-warning/30 text-warning-foreground">
                 <Info className="h-4 w-4" />
                 <AlertDescription>
                   Data is out of sync. Click "Sync Now" to update.

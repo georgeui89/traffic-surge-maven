@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Save, Moon, Sun, BellRing, BellOff, DollarSign, Percent, Server, PlugZap } from 'lucide-react';
+import { Save, Moon, Sun, BellRing, BellOff, DollarSign, Percent, Server, PlugZap, BarChart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { defaultSettings } from '@/utils/mockData';
 import { useToast } from '@/hooks/use-toast';
+import { ApiIntegration } from '@/components/integrations/ApiIntegration';
 
 const Settings = () => {
   const { toast } = useToast();
@@ -45,6 +46,58 @@ const Settings = () => {
       duration: 2000,
     });
   };
+
+  // Adsterra API code examples
+  const adsterraCodeExamples = [
+    {
+      language: "PHP",
+      code: `<?php
+$client = new \\GuzzleHttp\\Client();
+$response = $client->request('GET', 'https://api3.adsterratools.com/publisher/stats.json?domain=domain_id&placement=placement_id&start_date=2022-03-06&finish_date=2022-03-06&group_by=placement', [
+'headers' => [
+  'Accept' => 'application/json',
+  'X-API-Key' => 'YOUR_API_KEY_HERE',
+],
+]);
+echo $response->getBody();`
+    },
+    {
+      language: "JavaScript",
+      code: `const settings = {
+  async: true,
+  crossDomain: true,
+  url: 'https://api3.adsterratools.com/publisher/stats.json?domain=domain_id&placement=placement_id&start_date=2022-03-06&finish_date=2022-03-06&group_by=placement',
+  method: 'GET',
+  headers: {
+    Accept: 'application/json',
+    'X-API-Key': 'YOUR_API_KEY_HERE'
+  }
+};
+$.ajax(settings).done(function (response) {
+  console.log(response);
+});`
+    },
+    {
+      language: "Python",
+      code: `import requests
+
+url = "https://api3.adsterratools.com/publisher/stats.json"
+params = {
+    "domain": "domain_id",
+    "placement": "placement_id",
+    "start_date": "2022-03-06",
+    "finish_date": "2022-03-06",
+    "group_by": "placement"
+}
+headers = {
+    "Accept": "application/json",
+    "X-API-Key": "YOUR_API_KEY_HERE"
+}
+
+response = requests.get(url, headers=headers, params=params)
+print(response.json())`
+    }
+  ];
   
   return (
     <div className="page-container">
@@ -257,75 +310,142 @@ const Settings = () => {
         </TabsContent>
         
         <TabsContent value="integrations">
-          <Card>
-            <CardHeader>
-              <CardTitle>Integrations</CardTitle>
-              <CardDescription>Manage platform connections and API settings</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <PlugZap className="h-5 w-5 text-primary" />
-                  <div>
-                    <Label htmlFor="enable-autoscaling">Auto-Scaling</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Enable automatic RDP provisioning
-                    </p>
+          <div className="space-y-6">
+            {/* Adsterra API Integration */}
+            <ApiIntegration 
+              title="Adsterra Publisher API" 
+              description="Connect to Adsterra API to fetch monetization data including impressions, clicks, CPM rates, and revenue across your websites and ad placements."
+              apiId="adsterra"
+              codeExamples={adsterraCodeExamples}
+              metrics={['impressions', 'clicks', 'ctr', 'cpm', 'revenue']}
+              dateRanges={['7d', '30d', '90d', 'custom']}
+            />
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Integrations</CardTitle>
+                <CardDescription>Manage platform connections and API settings</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <PlugZap className="h-5 w-5 text-primary" />
+                    <div>
+                      <Label htmlFor="enable-autoscaling">Auto-Scaling</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Enable automatic RDP provisioning
+                      </p>
+                    </div>
                   </div>
+                  <Switch 
+                    id="enable-autoscaling" 
+                    checked={settings.autoscalingEnabled}
+                    onCheckedChange={(value) => setSettings({ ...settings, autoscalingEnabled: value })}
+                  />
                 </div>
-                <Switch 
-                  id="enable-autoscaling" 
-                  checked={settings.autoscalingEnabled}
-                  onCheckedChange={(value) => setSettings({ ...settings, autoscalingEnabled: value })}
-                />
-              </div>
-              
-              <div className="space-y-3">
-                <Label htmlFor="api-keys">Platform API Keys</Label>
                 
-                <div className="rounded-md border overflow-hidden">
-                  <div className="p-3 border-b flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
-                        9H
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">9Hits</p>
-                        <p className="text-xs text-muted-foreground">API Key Connected</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">Manage</Button>
-                  </div>
+                <div className="space-y-3">
+                  <Label htmlFor="api-keys">Platform API Keys</Label>
                   
-                  <div className="p-3 border-b flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
-                        HL
+                  <div className="rounded-md border overflow-hidden">
+                    <div className="p-3 border-b flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                          9H
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">9Hits</p>
+                          <p className="text-xs text-muted-foreground">API Key Connected</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium">Hitleap</p>
-                        <p className="text-xs text-muted-foreground">API Key Connected</p>
-                      </div>
+                      <Button variant="outline" size="sm">Manage</Button>
                     </div>
-                    <Button variant="outline" size="sm">Manage</Button>
-                  </div>
-                  
-                  <div className="p-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
-                        OH
+                    
+                    <div className="p-3 border-b flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                          HL
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Hitleap</p>
+                          <p className="text-xs text-muted-foreground">API Key Connected</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium">Otohits</p>
-                        <p className="text-xs text-destructive">Not Connected</p>
-                      </div>
+                      <Button variant="outline" size="sm">Manage</Button>
                     </div>
-                    <Button variant="outline" size="sm">Connect</Button>
+                    
+                    <div className="p-3 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                          OH
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Otohits</p>
+                          <p className="text-xs text-destructive">Not Connected</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">Connect</Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Documentation Card */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <BarChart className="h-5 w-5 text-primary" />
+                  <CardTitle>Adsterra API Documentation</CardTitle>
+                </div>
+                <CardDescription>Key information about using the Adsterra Publisher API</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Available Data</h3>
+                  <ul className="list-disc pl-5 text-sm space-y-1">
+                    <li>Website information (names and IDs)</li>
+                    <li>Ad placements on each website</li>
+                    <li>Performance metrics (impressions, clicks, CTR, CPM, revenue)</li>
+                    <li>Data filterable by domain, placement, date, and GEO</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Common Use Cases</h3>
+                  <ul className="list-disc pl-5 text-sm space-y-1">
+                    <li>Track performance of multiple ad placements across websites</li>
+                    <li>Group statistics by country to identify top-performing regions</li>
+                    <li>Use placement_sub_id parameter to track Direct Links on different pages</li>
+                    <li>Automate data collection for revenue reporting</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">API Endpoints</h3>
+                  <div className="rounded-md bg-muted p-3 text-sm font-mono overflow-x-auto">
+                    https://api3.adsterratools.com/publisher
+                  </div>
+                  <p className="text-sm text-muted-foreground">Base URL for all Adsterra Publisher API requests</p>
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Getting Started</h3>
+                  <ol className="list-decimal pl-5 text-sm space-y-1">
+                    <li>Register as an Adsterra publisher</li>
+                    <li>Add a website with ad units to your account</li>
+                    <li>Generate an API token from your Adsterra dashboard</li>
+                    <li>Include your token in the X-API-Key header with each request</li>
+                  </ol>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="outline" className="w-full" onClick={() => window.open("https://publishers.adsterra.com/api", "_blank")}>
+                  Visit Official Documentation
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
       
