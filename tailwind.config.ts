@@ -33,6 +33,11 @@ export default {
 					'"Orbitron"',
 					'system-ui',
 					'sans-serif'
+				],
+				exo: [
+					'"Exo 2"',
+					'system-ui',
+					'sans-serif'
 				]
 			},
 			colors: {
