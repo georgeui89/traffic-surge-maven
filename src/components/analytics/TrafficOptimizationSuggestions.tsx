@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
-import { Loader2 } from "lucide-react"
+import { Loader2, CheckCircle2 } from "lucide-react"
+import { StatusBadge } from "@/components/ui/status-badge"
 
 interface OptimizationSuggestion {
   id: string
@@ -23,9 +24,12 @@ interface TrafficOptimizationSuggestionsProps {
 export function TrafficOptimizationSuggestions({ initialSuggestions }: TrafficOptimizationSuggestionsProps) {
   const [suggestions, setSuggestions] = useState<OptimizationSuggestion[]>(initialSuggestions)
   const [loadingIds, setLoadingIds] = useState<string[]>([])
+  const [successIds, setSuccessIds] = useState<string[]>([])
   const { toast } = useToast()
   
   const handleApplyFix = async (suggestion: OptimizationSuggestion) => {
+    if (loadingIds.includes(suggestion.id)) return
+    
     setLoadingIds(prev => [...prev, suggestion.id])
     
     try {
@@ -33,8 +37,13 @@ export function TrafficOptimizationSuggestions({ initialSuggestions }: TrafficOp
       console.log(`Applying fix: ${suggestion.title}`)
       await new Promise(resolve => setTimeout(resolve, 1500))
       
-      // Remove the suggestion from the list
-      setSuggestions(prev => prev.filter(s => s.id !== suggestion.id))
+      // Show success state temporarily
+      setSuccessIds(prev => [...prev, suggestion.id])
+      setTimeout(() => {
+        // Remove the suggestion from the list after showing success
+        setSuggestions(prev => prev.filter(s => s.id !== suggestion.id))
+        setSuccessIds(prev => prev.filter(id => id !== suggestion.id))
+      }, 1000)
       
       toast({
         title: "Fix Applied",
@@ -55,6 +64,8 @@ export function TrafficOptimizationSuggestions({ initialSuggestions }: TrafficOp
   }
   
   const handleDismiss = (suggestionId: string) => {
+    if (loadingIds.includes(suggestionId)) return
+    
     setSuggestions(prev => prev.filter(s => s.id !== suggestionId))
     
     toast({
@@ -125,10 +136,10 @@ export function TrafficOptimizationSuggestions({ initialSuggestions }: TrafficOp
                   <h3 className="text-sm font-medium mb-1">{suggestion.title}</h3>
                   <p className="text-sm text-muted-foreground mb-2">{suggestion.description}</p>
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant={getImpactBadgeVariant(suggestion.impactType)}>
+                    <Badge variant={getImpactBadgeVariant(suggestion.impactType) as "success" | "destructive" | "secondary"}>
                       Impact: {suggestion.impact}
                     </Badge>
-                    <Badge variant={getComplexityBadgeVariant(suggestion.complexity)}>
+                    <Badge variant={getComplexityBadgeVariant(suggestion.complexity) as "success" | "warning" | "destructive"}>
                       Complexity: {suggestion.complexity}
                     </Badge>
                   </div>
@@ -146,12 +157,17 @@ export function TrafficOptimizationSuggestions({ initialSuggestions }: TrafficOp
                     size="sm"
                     className="optimize-btn fix-suggestion-btn"
                     onClick={() => handleApplyFix(suggestion)}
-                    disabled={loadingIds.includes(suggestion.id)}
+                    disabled={loadingIds.includes(suggestion.id) || successIds.includes(suggestion.id)}
                   >
                     {loadingIds.includes(suggestion.id) ? (
                       <>
                         <Loader2 className="mr-2 h-3 w-3 animate-spin" />
                         Applying...
+                      </>
+                    ) : successIds.includes(suggestion.id) ? (
+                      <>
+                        <CheckCircle2 className="mr-2 h-3 w-3" />
+                        Applied
                       </>
                     ) : (
                       "Apply Fix"

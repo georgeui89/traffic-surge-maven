@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency, formatNumber, formatPercent } from "@/utils/formatters"
-import { Zap } from "lucide-react"
+import { Zap, Loader2 } from "lucide-react"
 
 interface Platform {
   id: string
@@ -51,18 +51,23 @@ export function BudgetAllocator({
 
   // Calculate expected results whenever platforms or total budget changes
   useEffect(() => {
-    // Simple calculation formula, in a real app this would be more complex
-    const dailyVisits = totalBudget * 200 // 200 visits per $1
-    const dailyImpressions = dailyVisits * 0.4 // 40% acceptance rate
-    const dailyRevenue = dailyImpressions * 0.005 // $0.005 per impression
-    const roi = ((dailyRevenue - totalBudget) / totalBudget) * 100
-
-    setResults({
-      dailyVisits,
-      dailyImpressions,
-      dailyRevenue,
-      roi
-    })
+    // Ensure a small delay to make it feel like real calculations
+    const timer = setTimeout(() => {
+      // Simple calculation formula, in a real app this would be more complex
+      const dailyVisits = totalBudget * 200 // 200 visits per $1
+      const dailyImpressions = dailyVisits * 0.4 // 40% acceptance rate
+      const dailyRevenue = dailyImpressions * 0.005 // $0.005 per impression
+      const roi = ((dailyRevenue - totalBudget) / totalBudget) * 100
+  
+      setResults({
+        dailyVisits,
+        dailyImpressions,
+        dailyRevenue,
+        roi
+      })
+    }, 300)
+    
+    return () => clearTimeout(timer)
   }, [totalBudget, platforms])
 
   const handleSliderChange = (platformId: string, value: number[]) => {
@@ -104,7 +109,32 @@ export function BudgetAllocator({
       }
     })
     
+    // Ensure we have 100% allocation
+    const totalPercentage = updatedPlatforms.reduce((sum, p) => sum + p.percentage, 0)
+    if (Math.abs(totalPercentage - 100) > 0.01) {
+      // If we're off by more than 0.01%, adjust the last platform to make it exactly 100%
+      const lastPlatform = updatedPlatforms.find(p => p.id !== platformId)
+      if (lastPlatform) {
+        const adjustment = 100 - (totalPercentage - lastPlatform.percentage)
+        const index = updatedPlatforms.findIndex(p => p.id === lastPlatform.id)
+        updatedPlatforms[index] = {
+          ...lastPlatform,
+          percentage: adjustment,
+          budget: (totalBudget * adjustment) / 100
+        }
+      }
+    }
+    
     setPlatforms(updatedPlatforms)
+    
+    // Show a toast notification for significant changes
+    if (Math.abs(difference) >= 10) {
+      toast({
+        title: "Budget Allocation Updated",
+        description: `${platform.name} allocation ${difference > 0 ? 'increased' : 'decreased'} by ${Math.abs(difference).toFixed(0)}%`,
+        duration: 3000,
+      })
+    }
   }
 
   const optimizeBudget = async () => {
@@ -187,6 +217,8 @@ export function BudgetAllocator({
               max={100}
               step={5}
               onValueChange={(value) => handleSliderChange(platform.id, value)}
+              className="budget-allocation-slider"
+              aria-label={`${platform.name} budget allocation`}
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>0%</span>
@@ -199,7 +231,7 @@ export function BudgetAllocator({
       
       <div className="pt-4">
         <h3 className="text-sm font-medium mb-3">Current Budget Distribution</h3>
-        <div className="space-y-4">
+        <div className="space-y-4" id="budget-distribution-chart">
           {platforms.map((platform) => (
             <div key={platform.id} className="space-y-2">
               <div className="flex justify-between items-center">
@@ -221,7 +253,7 @@ export function BudgetAllocator({
       <div className="pt-4">
         <h3 className="text-sm font-medium mb-3">Expected Results</h3>
         
-        <div className="space-y-4">
+        <div className="space-y-4" id="expected-results-container">
           <div className="bg-background rounded-md p-3 border">
             <div className="flex items-center justify-between">
               <span className="text-sm">Daily Visits</span>
@@ -261,7 +293,7 @@ export function BudgetAllocator({
       <Button onClick={optimizeBudget} disabled={loading} className="w-full">
         {loading ? (
           <>
-            <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             Optimizing...
           </>
         ) : (

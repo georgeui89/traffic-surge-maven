@@ -49,6 +49,8 @@ export function QuickActionButton({ icon, label, route, action }: QuickActionPro
       variant={route ? "default" : "outline"}
       onClick={handleClick}
       disabled={loading}
+      id={`quick-action-${label.toLowerCase().replace(/\s+/g, '-')}`}
+      data-testid={`quick-action-${label.toLowerCase().replace(/\s+/g, '-')}`}
     >
       {loading ? (
         <Loader2 className="h-6 w-6 animate-spin" />
@@ -62,19 +64,35 @@ export function QuickActionButton({ icon, label, route, action }: QuickActionPro
 
 export function QuickActions() {
   const { toast } = useToast()
+  const navigate = useNavigate()
   
   const handleViewEarnings = async () => {
     // Simulate API call to prepare earnings data
     await new Promise(resolve => setTimeout(resolve, 1000))
     
     // Navigate to earnings page
-    window.location.href = "/reporting"
+    navigate("/reporting")
     
     toast({
       title: "Earnings Report",
       description: "Preparing your earnings report...",
       duration: 3000,
     })
+  }
+
+  const handleViewTraffic = async () => {
+    await new Promise(resolve => setTimeout(resolve, 800))
+    navigate("/traffic-analytics")
+  }
+
+  const handleManageRDPs = async () => {
+    await new Promise(resolve => setTimeout(resolve, 800))
+    navigate("/rdp-management")
+  }
+
+  const handleCreateCampaign = async () => {
+    await new Promise(resolve => setTimeout(resolve, 800))
+    navigate("/campaigns")
   }
   
   return (
@@ -88,17 +106,17 @@ export function QuickActions() {
           <QuickActionButton
             icon={<Activity />}
             label="View Traffic"
-            route="/traffic-analytics"
+            action={handleViewTraffic}
           />
           <QuickActionButton
             icon={<Server />}
             label="Manage RDPs"
-            route="/rdp-management"
+            action={handleManageRDPs}
           />
           <QuickActionButton
             icon={<MonitorPlay />}
             label="Create Campaign"
-            route="/campaigns"
+            action={handleCreateCampaign}
           />
           <QuickActionButton
             icon={<DollarSign />}

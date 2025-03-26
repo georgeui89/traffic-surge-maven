@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2 } from "lucide-react"
+import { Loader2, CheckCircle2 } from "lucide-react"
 
 interface AutomationRuleProps {
   title: string
@@ -30,12 +30,19 @@ export function AutomationRule({
   const [enabled, setEnabled] = useState(initialEnabled)
   const [configOpen, setConfigOpen] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
   const { toast } = useToast()
   
   // Configuration state
   const [triggerType, setTriggerType] = useState("threshold")
   const [actionType, setActionType] = useState("notification")
   const [threshold, setThreshold] = useState([50])
+  const [metric, setMetric] = useState("traffic")
+  const [frequency, setFrequency] = useState("daily")
+  const [time, setTime] = useState("10:00")
+  const [eventType, setEventType] = useState("campaign-created")
+  const [budgetAction, setBudgetAction] = useState("increase")
+  const [budgetAmount, setBudgetAmount] = useState("10")
   
   const handleToggle = (checked: boolean) => {
     setEnabled(checked)
@@ -54,8 +61,22 @@ export function AutomationRule({
     setSaving(true)
     try {
       // Simulate API call
-      console.log("Saving configuration:", { title, triggerType, actionType, threshold: threshold[0] })
+      console.log("Saving configuration:", { 
+        title, 
+        triggerType, 
+        actionType, 
+        threshold: threshold[0],
+        metric,
+        frequency,
+        time,
+        eventType,
+        budgetAction,
+        budgetAmount
+      })
       await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
       
       toast({
         title: "Configuration Saved",
@@ -63,7 +84,9 @@ export function AutomationRule({
         duration: 3000,
       })
       
-      setConfigOpen(false)
+      setTimeout(() => {
+        setConfigOpen(false)
+      }, 1200)
     } catch (error) {
       console.error("Error saving configuration:", error)
       toast({
@@ -75,6 +98,18 @@ export function AutomationRule({
     } finally {
       setSaving(false)
     }
+  }
+  
+  const handleOpenConfig = () => {
+    if (!enabled) {
+      toast({
+        title: "Rule Disabled",
+        description: "Enable the rule first to configure it.",
+        duration: 3000,
+      })
+      return
+    }
+    setConfigOpen(true)
   }
   
   return (
@@ -95,6 +130,7 @@ export function AutomationRule({
             <Switch 
               checked={enabled}
               onCheckedChange={handleToggle}
+              id={`automation-rule-toggle-${title.toLowerCase().replace(/\s+/g, '-')}`}
             />
           </div>
         </CardHeader>
@@ -107,7 +143,8 @@ export function AutomationRule({
             size="sm" 
             disabled={!enabled}
             className="transition-all duration-200 hover:bg-primary/10"
-            onClick={() => setConfigOpen(true)}
+            onClick={handleOpenConfig}
+            id={`configure-${title.toLowerCase().replace(/\s+/g, '-')}`}
           >
             Configure
           </Button>
@@ -150,7 +187,7 @@ export function AutomationRule({
                 />
                 
                 <Label htmlFor="metric">Metric</Label>
-                <Select defaultValue="traffic">
+                <Select value={metric} onValueChange={setMetric}>
                   <SelectTrigger id="metric">
                     <SelectValue placeholder="Select a metric" />
                   </SelectTrigger>
@@ -166,7 +203,7 @@ export function AutomationRule({
             {triggerType === "schedule" && (
               <div className="grid gap-2">
                 <Label htmlFor="frequency">Frequency</Label>
-                <Select defaultValue="daily">
+                <Select value={frequency} onValueChange={setFrequency}>
                   <SelectTrigger id="frequency">
                     <SelectValue placeholder="Select frequency" />
                   </SelectTrigger>
@@ -181,7 +218,8 @@ export function AutomationRule({
                 <Input 
                   id="time"
                   type="time"
-                  defaultValue="10:00"
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
                 />
               </div>
             )}
@@ -189,7 +227,7 @@ export function AutomationRule({
             {triggerType === "event" && (
               <div className="grid gap-2">
                 <Label htmlFor="event-type">Event</Label>
-                <Select defaultValue="campaign-created">
+                <Select value={eventType} onValueChange={setEventType}>
                   <SelectTrigger id="event-type">
                     <SelectValue placeholder="Select event" />
                   </SelectTrigger>
@@ -220,7 +258,7 @@ export function AutomationRule({
               <div className="grid gap-2">
                 <Label>Budget Adjustment</Label>
                 <div className="flex gap-4 items-center">
-                  <Select defaultValue="increase">
+                  <Select value={budgetAction} onValueChange={setBudgetAction}>
                     <SelectTrigger className="w-[120px]">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -233,7 +271,8 @@ export function AutomationRule({
                   <div className="flex items-center gap-2">
                     <Input 
                       type="number" 
-                      defaultValue="10" 
+                      value={budgetAmount}
+                      onChange={(e) => setBudgetAmount(e.target.value)}
                       className="w-[100px]"
                     />
                     <span>%</span>
@@ -247,11 +286,20 @@ export function AutomationRule({
             <Button variant="outline" onClick={() => setConfigOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSaveConfig} disabled={saving}>
+            <Button 
+              onClick={handleSaveConfig} 
+              disabled={saving || saved}
+              id="save-automation-config"
+            >
               {saving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Saving...
+                </>
+              ) : saved ? (
+                <>
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  Saved!
                 </>
               ) : (
                 "Save Configuration"

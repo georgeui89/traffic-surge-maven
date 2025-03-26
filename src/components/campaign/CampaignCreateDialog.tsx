@@ -26,7 +26,8 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
-import { Plus } from "lucide-react"
+import { Plus, Loader2, CheckCircle2 } from "lucide-react"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 // Validation schema for campaign
 const campaignSchema = z.object({
@@ -36,6 +37,9 @@ const campaignSchema = z.object({
   status: z.enum(["active", "paused"], { 
     required_error: "Please select a status" 
   }),
+  campaignType: z.enum(["popup", "direct", "banner"], {
+    required_error: "Please select a campaign type"
+  })
 })
 
 type CampaignFormValues = z.infer<typeof campaignSchema>
@@ -46,11 +50,13 @@ const defaultValues: Partial<CampaignFormValues> = {
   url: "",
   platform: "",
   status: "active",
+  campaignType: "direct"
 }
 
 export function CampaignCreateDialog() {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
   const { toast } = useToast()
   
   const form = useForm<CampaignFormValues>({
@@ -59,21 +65,29 @@ export function CampaignCreateDialog() {
   })
 
   async function onSubmit(data: CampaignFormValues) {
+    if (loading) return
+    
     setLoading(true)
     try {
       // Simulate API request
       console.log("Creating campaign:", data)
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise(resolve => setTimeout(resolve, 1200))
 
+      // Show success state
+      setSuccess(true)
+      
       // Show success message
       toast({
         title: "Campaign created",
         description: "Your campaign has been created successfully",
       })
 
-      // Reset form and close dialog
-      form.reset()
-      setOpen(false)
+      // Reset and close after a brief delay to show success state
+      setTimeout(() => {
+        form.reset()
+        setSuccess(false)
+        setOpen(false)
+      }, 1500)
     } catch (error) {
       console.error("Failed to create campaign:", error)
       toast({
@@ -82,14 +96,27 @@ export function CampaignCreateDialog() {
         variant: "destructive",
       })
     } finally {
-      setLoading(false)
+      if (!success) {
+        setLoading(false)
+      }
     }
   }
 
+  // Reset success/loading state when dialog closes
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      setTimeout(() => {
+        setSuccess(false)
+        setLoading(false)
+      }, 300)
+    }
+    setOpen(newOpen)
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button className="gap-2 w-full md:w-auto">
+        <Button className="gap-2 w-full md:w-auto" id="create-campaign-btn">
           <Plus className="h-4 w-4" />
           New Campaign
         </Button>
@@ -131,6 +158,48 @@ export function CampaignCreateDialog() {
                   <FormDescription>
                     The destination URL for your campaign
                   </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="campaignType"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>Campaign Type</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex space-x-1"
+                    >
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="direct" />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Direct
+                        </FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="popup" />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Popup
+                        </FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="banner" />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Banner
+                        </FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -196,15 +265,24 @@ export function CampaignCreateDialog() {
                 variant="outline" 
                 onClick={() => setOpen(false)} 
                 type="button"
-                disabled={loading}
+                disabled={loading || success}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button 
+                type="submit" 
+                disabled={loading || success}
+                className="min-w-[120px]"
+              >
                 {loading ? (
                   <>
-                    <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Creating...
+                  </>
+                ) : success ? (
+                  <>
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    Created!
                   </>
                 ) : (
                   "Create Campaign"
