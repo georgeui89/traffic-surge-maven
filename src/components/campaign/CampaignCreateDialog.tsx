@@ -79,7 +79,7 @@ export function CampaignCreateDialog() {
       // Show success message
       toast({
         title: "Campaign created",
-        description: "Your campaign has been created successfully",
+        description: `Your campaign "${data.name}" has been created successfully`,
       })
 
       // Reset and close after a brief delay to show success state
@@ -105,6 +105,7 @@ export function CampaignCreateDialog() {
   // Reset success/loading state when dialog closes
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
+      form.reset(defaultValues)
       setTimeout(() => {
         setSuccess(false)
         setLoading(false)

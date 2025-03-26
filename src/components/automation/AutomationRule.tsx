@@ -1,6 +1,6 @@
 
 import * as React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
@@ -44,6 +44,9 @@ export function AutomationRule({
   const [budgetAction, setBudgetAction] = useState("increase")
   const [budgetAmount, setBudgetAmount] = useState("10")
   
+  // State to track if configuration has been saved at least once
+  const [hasBeenConfigured, setHasBeenConfigured] = useState(false)
+  
   const handleToggle = (checked: boolean) => {
     setEnabled(checked)
     if (onToggle) {
@@ -55,6 +58,11 @@ export function AutomationRule({
       description: `${title} has been ${checked ? 'enabled' : 'disabled'}.`,
       duration: 3000,
     })
+    
+    if (checked && !hasBeenConfigured) {
+      // Automatically open configuration dialog when enabling for the first time
+      setTimeout(() => setConfigOpen(true), 500)
+    }
   }
   
   const handleSaveConfig = async () => {
@@ -76,6 +84,7 @@ export function AutomationRule({
       await new Promise(resolve => setTimeout(resolve, 1000))
       
       setSaved(true)
+      setHasBeenConfigured(true)
       setTimeout(() => setSaved(false), 2000)
       
       toast({

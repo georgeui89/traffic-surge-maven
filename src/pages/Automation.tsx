@@ -1,17 +1,28 @@
-
 import { useState, useEffect } from 'react';
-import { Bot, Zap, Clock, BarChart2, AlertTriangle, Brain, Sparkles, ChevronRight, Star } from 'lucide-react';
+import { 
+  Settings, BookCopy, Zap, Code, Check, ChevronRight, Plus, 
+  Trash2, Copy, Edit, Info, Loader2 
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Slider } from '@/components/ui/slider';
-import { useToast } from '@/hooks/use-toast';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Switch } from '@/components/ui/switch';
 import { AutomationRule } from '@/components/automation/AutomationRule';
-import { Progress } from '@/components/ui/progress';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  Dialog, DialogContent, DialogDescription, DialogFooter, 
+  DialogHeader, DialogTitle, DialogTrigger 
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { 
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Slider } from '@/components/ui/slider';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Automation = () => {
   const { toast } = useToast();
@@ -36,7 +47,6 @@ const Automation = () => {
     errorTolerance: 40,
   });
   
-  // Simulate AI learning progress when autopilot is enabled
   useEffect(() => {
     let interval: number;
     
@@ -52,7 +62,6 @@ const Automation = () => {
     return () => clearInterval(interval);
   }, [autopilotEnabled, aiLearningProgress]);
   
-  // Reset learning progress when disabled
   useEffect(() => {
     if (!autopilotEnabled) {
       setAiLearningProgress(0);
@@ -74,7 +83,6 @@ const Automation = () => {
     if (enabled) {
       setAiProcessing(true);
       
-      // Simulate AI initialization
       setTimeout(() => {
         setAiProcessing(false);
         
@@ -100,7 +108,6 @@ const Automation = () => {
   const applyRecommendation = () => {
     setAiProcessing(true);
     
-    // Simulate applying AI recommendation
     setTimeout(() => {
       setAiProcessing(false);
       setAiRecommendation(false);
@@ -116,7 +123,6 @@ const Automation = () => {
   const handleModeChange = (mode: 'conservative' | 'balanced' | 'aggressive') => {
     setSelectedMode(mode);
     
-    // Adjust slider based on mode
     if (mode === 'conservative') {
       setBudgetSlider([25]);
       setAdvancedSettings({
@@ -649,3 +655,4 @@ const Automation = () => {
 };
 
 export default Automation;
+

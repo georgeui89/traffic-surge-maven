@@ -1,135 +1,83 @@
-
 import * as React from "react"
-import { useState, useEffect, useRef } from "react"
-import { Check, Copy, RefreshCw, Loader2, X, AlertCircle, Info, Clock } from "lucide-react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { useToast } from "@/hooks/use-toast"
+import { CheckCircle, Loader2, AlertTriangle, Copy, RefreshCw, Plus, MoreHorizontal } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { StatusBadge } from "@/components/ui/status-badge"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Progress } from "@/components/ui/progress"
-import { useToast } from "@/hooks/use-toast"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
+import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
 
-type ApiStatus = 'disconnected' | 'connected' | 'error' | 'connecting' | 'syncing'
-
-interface ApiIntegrationProps {
-  title: string
+interface ApiConnectionProps {
+  platformName: string
+  icon: React.ReactNode
   description: string
-  apiId: string
-  apiLogo?: string
-  codeExamples: {
-    language: string
-    code: string
-  }[]
-  metrics?: string[]
-  dateRanges?: string[]
-  isConnected?: boolean
+  connectionStatus: 'not-connected' | 'connected' | 'syncing' | 'error'
+  lastSync: string | null
+  onConnect: () => Promise<void>
+  onDisconnect: () => Promise<void>
+  onSync: () => Promise<void>
+  errorMessage: string | null
 }
 
-export function ApiIntegration({
-  title,
+export function ApiConnection({
+  platformName,
+  icon,
   description,
-  apiId,
-  apiLogo,
-  codeExamples,
-  metrics = ['impressions', 'clicks', 'ctr', 'cpm', 'revenue'],
-  dateRanges = ['7d', '30d', '90d', 'custom'],
-  isConnected = false
-}: ApiIntegrationProps) {
-  const [apiKey, setApiKey] = useState("")
-  const [status, setStatus] = useState<ApiStatus>(isConnected ? 'connected' : 'disconnected')
+  connectionStatus,
+  lastSync,
+  onConnect,
+  onDisconnect,
+  onSync,
+  errorMessage
+}: ApiConnectionProps) {
   const [connecting, setConnecting] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [selectedLanguage, setSelectedLanguage] = useState(codeExamples[0]?.language || "")
-  const [selectedMetric, setSelectedMetric] = useState(metrics[0])
-  const [selectedDateRange, setSelectedDateRange] = useState(dateRanges[0])
-  const [copied, setCopied] = useState(false)
-  const [syncProgress, setSyncProgress] = useState(0)
-  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [dataFreshness, setDataFreshness] = useState<'fresh' | 'stale' | 'unknown'>('unknown')
-  const [retryCount, setRetryCount] = useState(0)
-  const syncIntervalRef = useRef<number | null>(null)
+  const [disconnecting, setDisconnecting] = useState(false)
+  const [syncing, setSyncing] = useState(false)
   const { toast } = useToast()
   
-  // Simulate periodic data freshness check
-  useEffect(() => {
-    if (status === 'connected') {
-      const interval = setInterval(() => {
-        // Random chance to become stale (for demo purposes)
-        const freshness = Math.random() > 0.7 ? 'stale' : 'fresh'
-        setDataFreshness(freshness)
-        
-        if (freshness === 'stale') {
-          toast({
-            title: "Data Sync Required",
-            description: `${title} data is stale and needs to be synchronized.`,
-            duration: 5000,
-          })
-        }
-      }, 30000) // Check every 30 seconds
-      
-      return () => clearInterval(interval)
-    }
-  }, [status, title, toast])
-  
-  // Clear error message after 5 seconds
-  useEffect(() => {
-    if (errorMessage) {
-      const timer = setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
-      
-      return () => clearTimeout(timer)
-    }
-  }, [errorMessage])
-  
   const handleConnect = async () => {
-    if (!apiKey.trim()) {
-      toast({
-        title: "API Key Required",
-        description: "Please enter a valid API key to connect.",
-        variant: "destructive",
-        duration: 3000,
-      })
-      return
-    }
-    
     setConnecting(true)
-    setStatus('connecting')
-    setErrorMessage(null)
-    
     try {
-      // Simulate API call
-      console.log(`Connecting to ${apiId} with key ${apiKey}`)
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      // Simulate random connection error (20% chance)
-      if (Math.random() < 0.2) {
-        throw new Error("Authentication failed. Please check your API key and try again.")
-      }
-      
-      setStatus('connected')
-      setDataFreshness('fresh')
-      setLastSyncTime(new Date())
-      
+      await onConnect()
       toast({
-        title: "Connected Successfully",
-        description: `Your ${title} account has been connected.`,
-        duration: 3000,
+        title: "Connected",
+        description: `Successfully connected to ${platformName}.`,
       })
     } catch (error) {
-      console.error("Error connecting API:", error)
-      setStatus('error')
-      setErrorMessage(error instanceof Error ? error.message : "Failed to connect to the API")
+      console.error("Connection error:", error)
       toast({
-        title: "Connection Error",
-        description: error instanceof Error ? error.message : "Failed to connect to the API. Please check your key and try again.",
+        title: "Connection Failed",
+        description: `Failed to connect to ${platformName}. Please check your credentials.`,
         variant: "destructive",
-        duration: 3000,
       })
     } finally {
       setConnecting(false)
@@ -137,464 +85,717 @@ export function ApiIntegration({
   }
   
   const handleDisconnect = async () => {
-    setConnecting(true)
+    setDisconnecting(true)
     try {
-      // Simulate API call
-      console.log(`Disconnecting from ${apiId}`)
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      setStatus('disconnected')
-      setApiKey("")
-      setDataFreshness('unknown')
-      setLastSyncTime(null)
-      
-      // Clear any sync intervals
-      if (syncIntervalRef.current) {
-        clearInterval(syncIntervalRef.current)
-        syncIntervalRef.current = null
-      }
-      
+      await onDisconnect()
       toast({
         title: "Disconnected",
-        description: `Your ${title} account has been disconnected.`,
-        duration: 3000,
+        description: `Successfully disconnected from ${platformName}.`,
       })
     } catch (error) {
-      console.error("Error disconnecting API:", error)
+      console.error("Disconnection error:", error)
       toast({
-        title: "Disconnection Error",
-        description: "Failed to disconnect from the API. Please try again.",
+        title: "Disconnection Failed",
+        description: `Failed to disconnect from ${platformName}. Please try again.`,
         variant: "destructive",
-        duration: 3000,
       })
     } finally {
-      setConnecting(false)
+      setDisconnecting(false)
     }
   }
   
-  const syncData = async () => {
-    if (status !== 'connected') return
-    
-    setStatus('syncing')
-    setLoading(true)
-    setSyncProgress(0)
-    setErrorMessage(null)
-    
-    const progressInterval = setInterval(() => {
-      setSyncProgress(prev => {
-        const newProgress = prev + Math.random() * 20
-        return newProgress >= 100 ? 100 : newProgress
-      })
-    }, 300)
-    
+  const handleSync = async () => {
+    setSyncing(true)
     try {
-      // Simulate API sync
-      console.log(`Syncing data from ${apiId}`)
-      await new Promise(resolve => setTimeout(resolve, 3000))
-      
-      // Simulate random error (20% chance)
-      if (Math.random() < 0.2) {
-        throw new Error("Data synchronization failed. Server returned an error.")
-      }
-      
-      setLastSyncTime(new Date())
-      setDataFreshness('fresh')
-      
+      await onSync()
       toast({
-        title: "Data Synchronized",
-        description: `${title} data has been successfully updated.`,
-        duration: 3000,
+        title: "Sync Complete",
+        description: `Successfully synced data from ${platformName}.`,
       })
     } catch (error) {
-      console.error("Error syncing data:", error)
-      setErrorMessage(error instanceof Error ? error.message : "Failed to sync data")
-      
-      // Auto-retry logic
-      if (retryCount < 2) {
-        setRetryCount(prev => prev + 1)
-        toast({
-          title: `Sync Failed (Retry ${retryCount + 1}/3)`,
-          description: "Attempting to reconnect in 5 seconds...",
-          variant: "destructive",
-          duration: 4000,
-        })
-        
-        setTimeout(() => syncData(), 5000)
-      } else {
-        toast({
-          title: "Sync Failed",
-          description: error instanceof Error ? error.message : "Failed to sync data. Please try manually.",
-          variant: "destructive",
-          duration: 3000,
-        })
-        setRetryCount(0)
-      }
-    } finally {
-      clearInterval(progressInterval)
-      setSyncProgress(100)
-      
-      // Reset UI after a delay
-      setTimeout(() => {
-        setStatus('connected')
-        setLoading(false)
-      }, 500)
-    }
-  }
-  
-  const handleFetchData = async () => {
-    setLoading(true)
-    setErrorMessage(null)
-    
-    try {
-      // Simulate API call
-      console.log(`Fetching ${selectedMetric} data for ${selectedDateRange} from ${apiId}`)
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Simulate random error (20% chance)
-      if (Math.random() < 0.2) {
-        throw new Error("Failed to fetch data. API returned an error.")
-      }
-      
+      console.error("Sync error:", error)
       toast({
-        title: "Data Fetched",
-        description: `${selectedMetric} data for the last ${selectedDateRange} has been retrieved.`,
-        duration: 3000,
-      })
-    } catch (error) {
-      console.error("Error fetching data:", error)
-      setErrorMessage(error instanceof Error ? error.message : "Failed to fetch data")
-      toast({
-        title: "Data Fetch Error",
-        description: error instanceof Error ? error.message : "Failed to fetch data from the API. Please try again.",
+        title: "Sync Failed",
+        description: `Failed to sync data from ${platformName}. Please try again.`,
         variant: "destructive",
-        duration: 3000,
       })
     } finally {
-      setLoading(false)
+      setSyncing(false)
     }
   }
   
-  const startAutoSync = () => {
-    // Clear any existing interval
-    if (syncIntervalRef.current) {
-      clearInterval(syncIntervalRef.current)
-    }
-    
-    // Set up new sync interval (every 5 minutes)
-    syncIntervalRef.current = window.setInterval(() => {
-      if (status === 'connected') {
-        syncData()
-      }
-    }, 300000) // 5 minutes
-    
-    toast({
-      title: "Auto-Sync Enabled",
-      description: `${title} data will be automatically synchronized every 5 minutes.`,
-      duration: 3000,
-    })
-  }
+  let statusBadge
   
-  const stopAutoSync = () => {
-    if (syncIntervalRef.current) {
-      clearInterval(syncIntervalRef.current)
-      syncIntervalRef.current = null
-      
-      toast({
-        title: "Auto-Sync Disabled",
-        description: `${title} data will no longer be automatically synchronized.`,
-        duration: 3000,
-      })
-    }
-  }
-  
-  const copyToClipboard = (code: string) => {
-    navigator.clipboard.writeText(code).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-      
-      toast({
-        title: "Code Copied",
-        description: "Code example copied to clipboard.",
-        duration: 2000,
-      })
-    })
-  }
-  
-  // Find the selected code example
-  const selectedExample = codeExamples.find(example => example.language === selectedLanguage) || codeExamples[0]
-  
-  const getStatusVariant = (): 'success' | 'error' | 'info' | 'muted' => {
-    switch (status) {
-      case 'connected': return 'success'
-      case 'error': return 'error'
-      case 'connecting':
-      case 'syncing': return 'info'
-      default: return 'muted'
-    }
-  }
-  
-  const getStatusLabel = (): string => {
-    switch (status) {
-      case 'connected': return 'Connected'
-      case 'error': return 'Error'
-      case 'connecting': return 'Connecting...'
-      case 'syncing': return 'Syncing Data...'
-      default: return 'Disconnected'
-    }
+  if (connecting) {
+    statusBadge = (
+      <StatusBadge 
+        variant="info" 
+        label="Connecting..." 
+        withDot 
+        loading
+      />
+    )
+  } else if (disconnecting) {
+    statusBadge = (
+      <StatusBadge 
+        variant="info" 
+        label="Disconnecting..." 
+        withDot 
+        loading
+      />
+    )
+  } else if (syncing) {
+    statusBadge = (
+      <StatusBadge 
+        variant="info" 
+        label="Syncing data..." 
+        withDot 
+        loading
+      />
+    )
+  } else if (connectionStatus == 'connected') {
+    statusBadge = (
+      <StatusBadge 
+        variant="success" 
+        label="Connected" 
+        withDot 
+      />
+    )
+  } else if (connectionStatus == 'error') {
+    statusBadge = (
+      <StatusBadge 
+        variant="destructive" 
+        label="Error" 
+        withDot 
+      />
+    )
+  } else {
+    statusBadge = (
+      <StatusBadge 
+        variant="secondary" 
+        label="Not Connected" 
+        withDot={false}
+      />
+    )
   }
   
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
+    <Card className="transition-all duration-200 hover:shadow-md">
+      <CardHeader className="pb-2">
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-md bg-muted">
+            {icon}
           </div>
-          {apiLogo && (
-            <img src={apiLogo} alt={`${title} logo`} className="h-8 w-8" />
-          )}
+          <CardTitle className="text-base">{platformName}</CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
+      <CardContent>
+        <CardDescription>{description}</CardDescription>
+        
+        <div className="mt-4 space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor={`api-key-${apiId}`}>API Key</Label>
-            <StatusBadge 
-              variant={getStatusVariant()}
-              label={getStatusLabel()}
-              withDot
-              loading={status === 'connecting' || status === 'syncing'}
-            />
+            <span className="text-sm font-medium">Status:</span>
+            {statusBadge}
           </div>
           
-          <div className="flex gap-2">
-            <Input
-              id={`api-key-${apiId}`}
-              type="password"
-              placeholder="Enter your API key"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="flex-1"
-              disabled={status === 'connected' || status === 'connecting' || status === 'syncing'}
-            />
-            
-            {status === 'connected' || status === 'syncing' ? (
-              <Button 
-                variant="outline" 
-                onClick={handleDisconnect}
-                disabled={connecting || status === 'syncing'}
-                className="shrink-0"
-                id={`disconnect-${apiId}`}
-              >
-                {connecting ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <X className="h-4 w-4 mr-2" />
-                )}
-                Disconnect
-              </Button>
-            ) : (
-              <Button 
-                onClick={handleConnect}
-                disabled={connecting || !apiKey.trim()}
-                className="shrink-0"
-                id={`connect-${apiId}`}
-              >
-                {connecting ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Check className="h-4 w-4 mr-2" />
-                )}
-                Connect
-              </Button>
-            )}
-          </div>
-          
-          {status === 'syncing' && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Synchronizing data...</span>
-                <span>{Math.round(syncProgress)}%</span>
-              </div>
-              <Progress value={syncProgress} className="h-2" />
+          {lastSync && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Last Sync:</span>
+              <span className="text-sm">{lastSync}</span>
             </div>
           )}
           
           {errorMessage && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{errorMessage}</AlertDescription>
-            </Alert>
+            <div className="mt-2 text-sm text-destructive">
+              <AlertTriangle className="h-4 w-4 inline-block mr-1" />
+              {errorMessage}
+            </div>
           )}
         </div>
-        
-        {status === 'connected' && (
+      </CardContent>
+      <CardFooter className="flex justify-between items-center">
+        {connectionStatus == 'connected' ? (
           <>
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                <span>
-                  {lastSyncTime 
-                    ? `Last synced: ${lastSyncTime.toLocaleTimeString()}`
-                    : 'Never synced'}
-                </span>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={syncData}
-                  disabled={loading || status === 'syncing'}
-                  className="gap-1"
-                  id={`sync-${apiId}`}
-                >
-                  {loading ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <RefreshCw className="h-3 w-3" />
-                  )}
-                  Sync Now
-                </Button>
-                
-                {syncIntervalRef.current ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={stopAutoSync}
-                    className="gap-1"
-                    id={`stop-autosync-${apiId}`}
-                  >
-                    <X className="h-3 w-3" />
-                    Stop Auto-Sync
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={startAutoSync}
-                    className="gap-1"
-                    id={`start-autosync-${apiId}`}
-                  >
-                    <Clock className="h-3 w-3" />
-                    Auto-Sync
-                  </Button>
-                )}
-              </div>
-            </div>
+            <Button 
+              variant="outline" 
+              onClick={handleDisconnect} 
+              disabled={disconnecting}
+              id={`disconnect-${platformName.toLowerCase().replace(/\s+/g, '-')}`}
+            >
+              {disconnecting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Disconnecting...
+                </>
+              ) : (
+                "Disconnect"
+              )}
+            </Button>
             
-            {dataFreshness === 'stale' && (
-              <Alert className="bg-warning/10 border-warning/30 text-warning-foreground">
-                <Info className="h-4 w-4" />
-                <AlertDescription>
-                  Data is out of sync. Click "Sync Now" to update.
-                </AlertDescription>
-              </Alert>
+            <Button 
+              onClick={handleSync} 
+              disabled={syncing}
+              id={`sync-${platformName.toLowerCase().replace(/\s+/g, '-')}`}
+            >
+              {syncing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Syncing...
+                </>
+              ) : (
+                "Sync Data"
+              )}
+            </Button>
+          </>
+        ) : (
+          <Button 
+            onClick={handleConnect} 
+            disabled={connecting}
+            id={`connect-${platformName.toLowerCase().replace(/\s+/g, '-')}`}
+          >
+            {connecting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Connecting...
+              </>
+            ) : (
+              "Connect"
             )}
-            
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">Data Retrieval</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor={`metric-${apiId}`}>Metric</Label>
-                  <Select value={selectedMetric} onValueChange={setSelectedMetric}>
-                    <SelectTrigger id={`metric-${apiId}`}>
-                      <SelectValue placeholder="Select metric" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {metrics.map(metric => (
-                        <SelectItem key={metric} value={metric}>
-                          {metric.charAt(0).toUpperCase() + metric.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor={`date-range-${apiId}`}>Date Range</Label>
-                  <Select value={selectedDateRange} onValueChange={setSelectedDateRange}>
-                    <SelectTrigger id={`date-range-${apiId}`}>
-                      <SelectValue placeholder="Select date range" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {dateRanges.map(range => (
-                        <SelectItem key={range} value={range}>
-                          {range === '7d' ? 'Last 7 Days' : 
-                           range === '30d' ? 'Last 30 Days' : 
-                           range === '90d' ? 'Last 90 Days' : 
-                           'Custom Range'}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="flex items-end">
-                  <Button 
-                    className="w-full"
-                    onClick={handleFetchData}
-                    disabled={loading || status === 'syncing'}
-                    id={`fetch-${apiId}`}
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        Fetching...
-                      </>
-                    ) : (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        Fetch Data
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
+          </Button>
+        )}
+      </CardFooter>
+    </Card>
+  )
+}
+
+interface CredentialsDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  platformName: string
+  onSave: (credentials: Record<string, string>) => Promise<void>
+  credentialFields: {
+    label: string
+    key: string
+    type?: string
+  }[]
+}
+
+export function CredentialsDialog({
+  open,
+  onOpenChange,
+  platformName,
+  onSave,
+  credentialFields
+}: CredentialsDialogProps) {
+  const [credentials, setCredentials] = useState<Record<string, string>>({})
+  const [saving, setSaving] = useState(false)
+  const { toast } = useToast()
+  
+  const handleInputChange = (key: string, value: string) => {
+    setCredentials(prev => ({ ...prev, [key]: value }))
+  }
+  
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      await onSave(credentials)
+      toast({
+        title: "Credentials Saved",
+        description: `Successfully saved credentials for ${platformName}.`,
+      })
+      onOpenChange(false)
+    } catch (error) {
+      console.error("Error saving credentials:", error)
+      toast({
+        title: "Save Failed",
+        description: `Failed to save credentials for ${platformName}. Please try again.`,
+        variant: "destructive",
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+  
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Connect to {platformName}</DialogTitle>
+          <DialogDescription>
+            Enter your API credentials to connect to {platformName}.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="grid gap-4 py-4">
+          {credentialFields.map(field => (
+            <div className="grid gap-2" key={field.key}>
+              <Label htmlFor={field.key}>{field.label}</Label>
+              <Input 
+                type={field.type || "text"}
+                id={field.key}
+                placeholder={`Enter your ${field.label.toLowerCase()}`}
+                value={credentials[field.key] || ""}
+                onChange={(e) => handleInputChange(field.key, e.target.value)}
+              />
             </div>
-            
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">Code Examples</h3>
-              <Tabs value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                <TabsList className="mb-2">
-                  {codeExamples.map(example => (
-                    <TabsTrigger key={example.language} value={example.language}>
-                      {example.language}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-                
-                <div className="relative">
-                  <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
-                    <code>{selectedExample?.code}</code>
-                  </pre>
+          ))}
+        </div>
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Credentials"
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+interface ApiDataTableProps {
+  platformName: string
+  data: any[]
+  columns: {
+    header: string
+    key: string
+  }[]
+  onRowClick?: (row: any) => void
+}
+
+export function ApiDataTable({
+  platformName,
+  data,
+  columns,
+  onRowClick
+}: ApiDataTableProps) {
+  const [selectedRows, setSelectedRows] = useState<any[]>([])
+  const { toast } = useToast()
+  
+  const handleCopy = () => {
+    if (selectedRows.length === 0) {
+      toast({
+        title: "No Rows Selected",
+        description: "Please select rows to copy.",
+        variant: "destructive",
+      })
+      return
+    }
+    
+    const textToCopy = selectedRows.map(row => {
+      return columns.map(col => row[col.key]).join('\t')
+    }).join('\n')
+    
+    navigator.clipboard.writeText(textToCopy)
+      .then(() => {
+        toast({
+          title: "Copied to Clipboard",
+          description: `${selectedRows.length} rows copied to clipboard.`,
+        })
+      })
+      .catch(err => {
+        console.error("Failed to copy:", err)
+        toast({
+          title: "Copy Failed",
+          description: "Failed to copy data to clipboard.",
+          variant: "destructive",
+        })
+      })
+  }
+  
+  const handleSelectRow = (row: any) => {
+    const isSelected = selectedRows.some(selectedRow => 
+      columns.every(col => selectedRow[col.key] === row[col.key])
+    )
+    
+    if (isSelected) {
+      setSelectedRows(prev => prev.filter(selectedRow =>
+        !columns.every(col => selectedRow[col.key] === row[col.key])
+      ))
+    } else {
+      setSelectedRows(prev => [...prev, row])
+    }
+  }
+  
+  const isRowSelected = (row: any) => {
+    return selectedRows.some(selectedRow =>
+      columns.every(col => selectedRow[col.key] === row[col.key])
+    )
+  }
+  
+  return (
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-medium">{platformName} Data</h3>
+        
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" size="sm" onClick={handleCopy} disabled={data.length === 0}>
+            <Copy className="h-4 w-4 mr-2" />
+            Copy Selected
+          </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm">
+                Actions <MoreHorizontal className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh Data
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Plus className="h-4 w-4 mr-2" />
+                Add New Entry
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Selected
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+      
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[50px]">Select</TableHead>
+              {columns.map(column => (
+                <TableHead key={column.key}>{column.header}</TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((row, index) => (
+              <TableRow 
+                key={index}
+                onClick={() => onRowClick ? onRowClick(row) : null}
+                className={cn(
+                  "cursor-pointer hover:bg-muted",
+                  isRowSelected(row) ? "bg-accent hover:bg-accent" : ""
+                )}
+              >
+                <TableCell className="w-[50px]">
                   <Button 
                     variant="ghost" 
-                    size="sm"
-                    className="absolute top-2 right-2"
-                    onClick={() => copyToClipboard(selectedExample?.code || "")}
-                    id={`copy-code-${apiId}`}
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleSelectRow(row)
+                    }}
                   >
-                    {copied ? (
-                      <Check className="h-4 w-4" />
+                    {isRowSelected(row) ? (
+                      <CheckCircle className="h-4 w-4 text-primary" />
                     ) : (
-                      <Copy className="h-4 w-4" />
+                      <div className="h-4 w-4 rounded-full border border-border" />
                     )}
+                    <span className="sr-only">Select row</span>
                   </Button>
-                </div>
-              </Tabs>
-            </div>
-          </>
-        )}
+                </TableCell>
+                {columns.map(column => (
+                  <TableCell key={column.key}>{row[column.key]}</TableCell>
+                ))}
+              </TableRow>
+            ))}
+            {data.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={columns.length + 1} className="text-center">
+                  No data available.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  )
+}
+
+interface ScriptEditorDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  platformName: string
+  script: string
+  onSave: (script: string) => Promise<void>
+}
+
+export function ScriptEditorDialog({
+  open,
+  onOpenChange,
+  platformName,
+  script,
+  onSave
+}: ScriptEditorDialogProps) {
+  const [currentScript, setCurrentScript] = useState(script)
+  const [saving, setSaving] = useState(false)
+  const { toast } = useToast()
+  
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      await onSave(currentScript)
+      toast({
+        title: "Script Saved",
+        description: `Successfully saved script for ${platformName}.`,
+      })
+      onOpenChange(false)
+    } catch (error) {
+      console.error("Error saving script:", error)
+      toast({
+        title: "Save Failed",
+        description: `Failed to save script for ${platformName}. Please try again.`,
+        variant: "destructive",
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+  
+  // Detect script version
+  const detectScriptVersion = (script: string) => {
+    if (script.includes("v2")) {
+      return "v2"
+    } else if (script.includes("v1")) {
+      return "v1"
+    } else {
+      return "unknown"
+    }
+  }
+  
+  const scriptVersion = detectScriptVersion(script)
+  
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[700px]">
+        <DialogHeader>
+          <DialogTitle>Edit Script for {platformName}</DialogTitle>
+          <DialogDescription>
+            Modify the script used to interact with the {platformName} API.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="grid gap-4 py-4">
+          <div className="flex items-center justify-between">
+            <Badge variant="secondary">
+              Script Version: {scriptVersion}
+            </Badge>
+            
+            <Button variant="ghost" size="sm">
+              <BookCopy className="h-4 w-4 mr-2" />
+              View Documentation
+            </Button>
+          </div>
+          
+          <Textarea 
+            className="min-h-[300px]"
+            value={currentScript}
+            onChange={(e) => setCurrentScript(e.target.value)}
+          />
+        </div>
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Script"
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+interface TrafficQualityOptimizerProps {
+  platformName: string
+  trafficQuality: 'low' | 'medium' | 'high'
+  onTrafficQualityChange: (quality: 'low' | 'medium' | 'high') => Promise<void>
+}
+
+export function TrafficQualityOptimizer({
+  platformName,
+  trafficQuality,
+  onTrafficQualityChange
+}: TrafficQualityOptimizerProps) {
+  const [optimizing, setOptimizing] = useState(false)
+  const { toast } = useToast()
+  
+  const handleOptimize = async () => {
+    setOptimizing(true)
+    try {
+      await onTrafficQualityChange(trafficQuality)
+      toast({
+        title: "Traffic Quality Optimized",
+        description: `Successfully optimized traffic quality for ${platformName}.`,
+      })
+    } catch (error) {
+      console.error("Error optimizing traffic quality:", error)
+      toast({
+        title: "Optimization Failed",
+        description: `Failed to optimize traffic quality for ${platformName}. Please try again.`,
+        variant: "destructive",
+      })
+    } finally {
+      setOptimizing(false)
+    }
+  }
+  
+  return (
+    <Card className="transition-all duration-200 hover:shadow-md">
+      <CardHeader>
+        <CardTitle>Traffic Quality Optimization</CardTitle>
+        <CardDescription>
+          Adjust settings to improve the quality of traffic from {platformName}.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="traffic-quality">Current Traffic Quality</Label>
+          <Input 
+            type="text"
+            id="traffic-quality"
+            value={trafficQuality}
+            disabled
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="optimization-suggestions">Optimization Suggestions</Label>
+          <Textarea 
+            className="min-h-[100px]"
+            id="optimization-suggestions"
+            value="Implement advanced filtering rules to block low-quality traffic sources."
+            disabled
+          />
+        </div>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <p className="text-xs text-muted-foreground">
-          {status === 'connected' 
-            ? 'API connection is active and healthy.' 
-            : 'Connect your API to start retrieving data.'}
-        </p>
+      <CardFooter>
+        <Button onClick={handleOptimize} disabled={optimizing}>
+          {optimizing ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Optimizing...
+            </>
+          ) : (
+            "Apply Fix"
+          )}
+        </Button>
       </CardFooter>
+    </Card>
+  )
+}
+
+interface BudgetOptimizationSettingsProps {
+  platformName: string
+  budgetOptimizationEnabled: boolean
+  onBudgetOptimizationToggle: (enabled: boolean) => Promise<void>
+  optimizationTarget: 'roi' | 'traffic' | 'conversions'
+  onOptimizationTargetChange: (target: 'roi' | 'traffic' | 'conversions') => Promise<void>
+}
+
+export function BudgetOptimizationSettings({
+  platformName,
+  budgetOptimizationEnabled,
+  onBudgetOptimizationToggle,
+  optimizationTarget,
+  onOptimizationTargetChange
+}: BudgetOptimizationSettingsProps) {
+  const [optimizing, setOptimizing] = useState(false)
+  const { toast } = useToast()
+  
+  const handleToggle = async (enabled: boolean) => {
+    setOptimizing(true)
+    try {
+      await onBudgetOptimizationToggle(enabled)
+      toast({
+        title: "Budget Optimization Updated",
+        description: `Budget optimization ${enabled ? 'enabled' : 'disabled'} for ${platformName}.`,
+      })
+    } catch (error) {
+      console.error("Error toggling budget optimization:", error)
+      toast({
+        title: "Update Failed",
+        description: `Failed to update budget optimization settings for ${platformName}. Please try again.`,
+        variant: "destructive",
+      })
+    } finally {
+      setOptimizing(false)
+    }
+  }
+  
+  const handleTargetChange = async (target: 'roi' | 'traffic' | 'conversions') => {
+    setOptimizing(true)
+    try {
+      await onOptimizationTargetChange(target)
+      toast({
+        title: "Optimization Target Updated",
+        description: `Optimization target updated to ${target} for ${platformName}.`,
+      })
+    } catch (error) {
+      console.error("Error changing optimization target:", error)
+      toast({
+        title: "Update Failed",
+        description: `Failed to update optimization target for ${platformName}. Please try again.`,
+        variant: "destructive",
+      })
+    } finally {
+      setOptimizing(false)
+    }
+  }
+  
+  return (
+    <Card className="transition-all duration-200 hover:shadow-md">
+      <CardHeader>
+        <CardTitle>Budget Optimization Settings</CardTitle>
+        <CardDescription>
+          Configure budget optimization settings for {platformName}.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="budget-optimization">Enable Budget Optimization</Label>
+          <Switch 
+            id="budget-optimization"
+            checked={budgetOptimizationEnabled}
+            onCheckedChange={handleToggle}
+            disabled={optimizing}
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="optimization-target">Optimization Target</Label>
+          <select 
+            id="optimization-target"
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            value={optimizationTarget}
+            onChange={(e) => handleTargetChange(e.target.value as 'roi' | 'traffic' | 'conversions')}
+            disabled={!budgetOptimizationEnabled || optimizing}
+          >
+            <option value="roi">Maximize ROI</option>
+            <option value="traffic">Maximize Traffic</option>
+            <option value="conversions">Maximize Conversions</option>
+          </select>
+        </div>
+      </CardContent>
     </Card>
   )
 }

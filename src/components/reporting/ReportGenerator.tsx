@@ -1,6 +1,6 @@
 
 import * as React from "react"
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { Calendar, Download, FileText, Loader2, AlertCircle, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -39,18 +39,24 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
     to: new Date()
   })
   
+  // Add a trigger count to simulate report generation
+  const [triggerCount, setTriggerCount] = useState(0)
+  
   const generateReport = async () => {
     setLoading(true)
     setError(null)
     setSuccess(false)
     
     try {
+      // Increment trigger count to force re-rendering
+      setTriggerCount(prev => prev + 1)
+      
       // Simulate API call
       console.log(`Generating ${reportInfo.type} report in ${fileFormat} format for date range:`, dateRange)
       await new Promise(resolve => setTimeout(resolve, 1500))
       
-      // Simulate random error (20% chance)
-      if (Math.random() < 0.2) {
+      // Simulate random error (10% chance instead of 20%)
+      if (Math.random() < 0.1) {
         throw new Error("Server connection timeout. Please try again.");
       }
       
@@ -94,6 +100,13 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
     return "Select date range"
   }, [dateRange])
   
+  // Effect to handle button clicking
+  useEffect(() => {
+    if (triggerCount > 0) {
+      console.log(`Report generation triggered ${triggerCount} times`);
+    }
+  }, [triggerCount]);
+  
   return (
     <Card className="transition-all duration-200 hover:shadow-md">
       <CardHeader className="pb-2">
@@ -134,10 +147,15 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
                 <CalendarComponent
                   initialFocus
                   mode="range"
-                  selected={dateRange}
+                  selected={{
+                    from: dateRange.from,
+                    to: dateRange.to
+                  }}
                   onSelect={(range) => {
                     if (range?.from && range?.to) {
                       setDateRange({from: range.from, to: range.to});
+                    } else if (range?.from) {
+                      setDateRange({from: range.from, to: new Date()});
                     }
                   }}
                   numberOfMonths={2}

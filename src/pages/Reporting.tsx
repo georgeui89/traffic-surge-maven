@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Calendar, Download, FileText, BarChart, PieChart, TrendingUp, Server, ArrowDown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -81,6 +80,14 @@ const Reporting = () => {
     }, 2000);
   };
   
+  const handleDateRangeChange = (range: DateRange) => {
+    if (range?.from && range?.to) {
+      setDateRange({from: range.from, to: range.to});
+    } else if (range?.from) {
+      setDateRange({from: range.from, to: new Date()});
+    }
+  };
+  
   const formatDateRange = () => {
     if (dateRange.from && dateRange.to) {
       return `${format(dateRange.from, 'MMM d, yyyy')} - ${format(dateRange.to, 'MMM d, yyyy')}`;
@@ -122,7 +129,7 @@ const Reporting = () => {
                 initialFocus
                 mode="range"
                 selected={dateRange}
-                onSelect={(range) => setDateRange(range || {from: undefined, to: undefined})}
+                onSelect={(range) => handleDateRangeChange(range)}
                 numberOfMonths={2}
               />
             </PopoverContent>

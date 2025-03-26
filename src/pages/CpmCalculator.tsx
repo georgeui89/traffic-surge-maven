@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Calculator, CreditCard, Coins, DollarSign, ArrowRight, Zap, Info, BarChart2, Save, Settings } from 'lucide-react';
+import { Calculator, CreditCard, Coins, DollarSign, ArrowRight, Zap, Info, BarChart2, Save, Settings, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

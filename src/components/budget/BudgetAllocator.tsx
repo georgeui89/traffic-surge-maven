@@ -47,6 +47,7 @@ export function BudgetAllocator({
     roi: 0
   })
   const [loading, setLoading] = useState(false)
+  const [lastUpdated, setLastUpdated] = useState(Date.now())
   const { toast } = useToast()
 
   // Calculate expected results whenever platforms or total budget changes
@@ -68,7 +69,7 @@ export function BudgetAllocator({
     }, 300)
     
     return () => clearTimeout(timer)
-  }, [totalBudget, platforms])
+  }, [totalBudget, platforms, lastUpdated])
 
   const handleSliderChange = (platformId: string, value: number[]) => {
     const newValue = value[0]
@@ -126,6 +127,8 @@ export function BudgetAllocator({
     }
     
     setPlatforms(updatedPlatforms)
+    // Trigger a rerender of results
+    setLastUpdated(Date.now())
     
     // Show a toast notification for significant changes
     if (Math.abs(difference) >= 10) {
@@ -180,6 +183,8 @@ export function BudgetAllocator({
       }
       
       setPlatforms(optimizedPlatforms)
+      // Trigger a rerender of results
+      setLastUpdated(Date.now())
       
       toast({
         title: "Budget Optimized",
