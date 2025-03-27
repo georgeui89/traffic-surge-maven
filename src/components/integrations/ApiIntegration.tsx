@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Check, Copy, ExternalLink, ChevronDown, AlertCircle, Settings, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { CodeBlock } from '@/components/ui/code-block';
+import { StatusBadge } from '@/components/ui/status-badge';
 
 interface CodeExample {
   language: string;
@@ -36,6 +36,7 @@ export function ApiIntegration({
   metrics = [],
   dateRanges = []
 }: ApiIntegrationProps) {
+  
   const [apiKey, setApiKey] = useState('');
   const [testEndpoint, setTestEndpoint] = useState('stats');
   const [isApiConnected, setIsApiConnected] = useState(false);
@@ -487,12 +488,4 @@ function EyeIcon(props: any) {
 
 function Loader2(props: any) {
   return <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>
-}
-
-export function CodeBlock({ children }: { children: React.ReactNode }) {
-  return (
-    <pre className="p-4 rounded-md bg-muted overflow-x-auto text-sm font-mono">
-      {children}
-    </pre>
-  );
 }
