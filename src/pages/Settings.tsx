@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Save, Moon, Sun, BellRing, BellOff, DollarSign, Percent, Server, PlugZap, BarChart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -47,7 +46,6 @@ const Settings = () => {
     });
   };
 
-  // Adsterra API code examples
   const adsterraCodeExamples = [
     {
       language: "PHP",
@@ -311,7 +309,6 @@ print(response.json())`
         
         <TabsContent value="integrations">
           <div className="space-y-6">
-            {/* Adsterra API Integration */}
             <ApiIntegration 
               title="Adsterra Publisher API" 
               description="Connect to Adsterra API to fetch monetization data including impressions, clicks, CPM rates, and revenue across your websites and ad placements."
@@ -391,7 +388,6 @@ print(response.json())`
               </CardContent>
             </Card>
 
-            {/* Documentation Card */}
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">

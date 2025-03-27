@@ -1,18 +1,20 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
-  Settings, BookCopy, Zap, Code, Check, ChevronRight, Plus, 
-  Trash2, Copy, Edit, Info, Loader2 
+  PlayCircle, PauseCircle, Plus, Settings, Zap, BarChart as BarChartIcon, 
+  Clock, FileCog, Activity, AlertTriangle as AlertTriangleIcon, 
+  BadgeCheck, Rocket, Brain as BrainIcon, Cpu, Sparkles as SparklesIcon, 
+  Star as StarIcon, Bot as BotIcon
 } from 'lucide-react';
+import { 
+  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle 
+} from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
+import { Progress } from '@/components/ui/progress';
 import { AutomationRule } from '@/components/automation/AutomationRule';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Dialog, DialogContent, DialogDescription, DialogFooter, 
-  DialogHeader, DialogTitle, DialogTrigger 
-} from '@/components/ui/dialog';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
@@ -21,8 +23,6 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Automation = () => {
   const { toast } = useToast();
@@ -175,7 +175,7 @@ const Automation = () => {
             <AutomationRule
               title="Budget Optimization"
               description="Automatically adjust budget allocation based on platform performance."
-              icon={<BarChart2 />}
+              icon={<BarChartIcon />}
               initialEnabled={rules.budgetOptimization}
               onToggle={(enabled) => handleRuleToggle('budgetOptimization', enabled)}
             />
@@ -199,7 +199,7 @@ const Automation = () => {
             <AutomationRule
               title="Error Handling & Recovery"
               description="Automatically detect and resolve issues with platforms or RDPs."
-              icon={<AlertTriangle />}
+              icon={<AlertTriangleIcon />}
               initialEnabled={rules.errorHandling}
               onToggle={(enabled) => handleRuleToggle('errorHandling', enabled)}
             />
@@ -289,7 +289,7 @@ const Automation = () => {
                     className="w-full gap-2"
                     disabled={!autopilotEnabled || aiProcessing}
                   >
-                    <Sparkles className="h-4 w-4" />
+                    <SparklesIcon className="h-4 w-4" />
                     Advanced AI Settings
                   </Button>
                 </DialogTrigger>
@@ -371,7 +371,7 @@ const Automation = () => {
               
               {aiRecommendation && (
                 <Alert className="bg-primary/5 border-primary/20 transition-all duration-300 hover:bg-primary/10">
-                  <Bot className="h-5 w-5 text-primary" />
+                  <BotIcon className="h-5 w-5 text-primary" />
                   <div className="flex justify-between items-start w-full">
                     <div>
                       <AlertTitle className="flex items-center gap-2">
@@ -617,15 +617,15 @@ const Automation = () => {
                 <h3 className="text-sm font-medium">Resource Allocation Strategy</h3>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button variant="outline" className="flex-1 justify-start gap-2">
-                    <Star className="h-4 w-4 text-warning" />
+                    <StarIcon className="h-4 w-4 text-warning" />
                     Prioritize High Performers
                   </Button>
                   <Button variant="outline" className="flex-1 justify-start gap-2">
-                    <Zap className="h-4 w-4 text-success" />
+                    <ZapIcon className="h-4 w-4 text-success" />
                     Balance Resources
                   </Button>
                   <Button variant="secondary" className="flex-1 justify-start gap-2">
-                    <Brain className="h-4 w-4 text-primary" />
+                    <BrainIcon className="h-4 w-4 text-primary" />
                     AI Optimization
                   </Button>
                 </div>
@@ -655,4 +655,3 @@ const Automation = () => {
 };
 
 export default Automation;
-

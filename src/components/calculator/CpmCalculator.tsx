@@ -1,7 +1,6 @@
-
 import * as React from "react"
 import { useState, useEffect } from "react"
-import { Calculator, DollarSign, CreditCard, Coins, Loader2 } from "lucide-react"
+import { Calculator, DollarSign, CreditCard, Coins, Loader2, Switch } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -37,7 +36,6 @@ export function CpmCalculator({
   const [loadingRates, setLoadingRates] = useState(false)
   const { toast } = useToast()
   
-  // Platform CPM rates - updated to realistic values
   const [platformRates, setPlatformRates] = useState({
     '9hits': 0.8,
     'hitleap': 0.7,
@@ -50,26 +48,22 @@ export function CpmCalculator({
     return platformRates[platform as keyof typeof platformRates] || 0.5
   }
   
-  // Calculate CPM value
   const calculateCPM = () => {
     return (revenue / impressions) * 1000
   }
   
-  // Calculate Revenue
   const calculateRevenue = () => {
     const validImpressions = (credits / secondsPerVisit) * (acceptanceRate / 100)
     const cpmRate = manualCpmRate || getPlatformRate(platform)
     return (validImpressions / 1000) * cpmRate
   }
   
-  // Calculate Required Credits
   const calculateRequiredCredits = () => {
     const cpmRate = manualCpmRate || getPlatformRate(platform)
     const validImpressionsNeeded = impressions * (100 / acceptanceRate)
     return validImpressionsNeeded * secondsPerVisit
   }
   
-  // Handle platform change
   const handlePlatformChange = (newPlatform: string) => {
     setPlatform(newPlatform)
     setManualCpmRate(getPlatformRate(newPlatform))
@@ -81,14 +75,11 @@ export function CpmCalculator({
     })
   }
   
-  // Update CPM rate - modified to simulate API call
   const handleUpdateCpmRates = async () => {
     setLoadingRates(true)
     try {
-      // Simulate API call to fetch latest rates from Adsterra
       await new Promise(resolve => setTimeout(resolve, 1500))
       
-      // Update with more realistic CPM values
       setPlatformRates({
         '9hits': 0.75 + (Math.random() * 0.1),
         'hitleap': 0.65 + (Math.random() * 0.1),
@@ -97,7 +88,6 @@ export function CpmCalculator({
         'webhit': 0.70 + (Math.random() * 0.1)
       })
       
-      // Update current rate if using platform defaults
       if (!useCustomRate) {
         setManualCpmRate(getPlatformRate(platform))
       }
@@ -119,16 +109,13 @@ export function CpmCalculator({
     }
   }
   
-  // Calculate the values
   const cpm = calculationType === 'revenue-to-credits' ? manualCpmRate : calculateCPM()
   const estimatedRevenue = calculateRevenue()
   const requiredCredits = calculateRequiredCredits()
   const expectedImpressions = (credits / secondsPerVisit) * (acceptanceRate / 100)
   
-  // State for custom rate toggle
   const [useCustomRate, setUseCustomRate] = useState(false)
   
-  // Update manual rate when platform changes
   useEffect(() => {
     if (!useCustomRate) {
       setManualCpmRate(getPlatformRate(platform))

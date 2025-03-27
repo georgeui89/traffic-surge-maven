@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-import { CheckCircle, Loader2, AlertTriangle, Copy, RefreshCw, Plus, MoreHorizontal } from "lucide-react"
+import { CheckCircle, Loader2, AlertTriangle, Copy, RefreshCw, Plus, MoreHorizontal, Trash, BookOpen } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
+import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 
 interface ApiConnectionProps {
@@ -459,7 +460,7 @@ export function ApiDataTable({
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive">
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash className="h-4 w-4 mr-2" />
                 Delete Selected
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -563,7 +564,6 @@ export function ScriptEditorDialog({
     }
   }
   
-  // Detect script version
   const detectScriptVersion = (script: string) => {
     if (script.includes("v2")) {
       return "v2"
@@ -593,7 +593,7 @@ export function ScriptEditorDialog({
             </Badge>
             
             <Button variant="ghost" size="sm">
-              <BookCopy className="h-4 w-4 mr-2" />
+              <BookOpen className="h-4 w-4 mr-2" />
               View Documentation
             </Button>
           </div>
@@ -794,6 +794,216 @@ export function BudgetOptimizationSettings({
             <option value="traffic">Maximize Traffic</option>
             <option value="conversions">Maximize Conversions</option>
           </select>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+interface ApiIntegrationProps {
+  title: string
+  description: string
+  apiId: string
+  codeExamples: Array<{
+    language: string
+    code: string
+  }>
+  metrics: string[]
+  dateRanges: string[]
+}
+
+export function ApiIntegration({
+  title,
+  description,
+  apiId,
+  codeExamples,
+  metrics,
+  dateRanges
+}: ApiIntegrationProps) {
+  const [activeTab, setActiveTab] = useState<string>("documentation")
+  const [apiKey, setApiKey] = useState<string>("")
+  const [isConnected, setIsConnected] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const { toast } = useToast()
+
+  const handleConnect = () => {
+    if (!apiKey) {
+      toast({
+        title: "API Key Required",
+        description: "Please enter your API key to connect.",
+        variant: "error",
+      })
+      return
+    }
+
+    setIsLoading(true)
+    setTimeout(() => {
+      setIsConnected(true)
+      setIsLoading(false)
+      toast({
+        title: "API Connected",
+        description: `Successfully connected to ${title} API.`,
+        variant: "success",
+      })
+    }, 1500)
+  }
+
+  const handleDisconnect = () => {
+    setIsLoading(true)
+    setTimeout(() => {
+      setIsConnected(false)
+      setIsLoading(false)
+      toast({
+        title: "API Disconnected",
+        description: `Disconnected from ${title} API.`,
+        variant: "default",
+      })
+    }, 1000)
+  }
+
+  return (
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className={cn("grid gap-4", isConnected ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1")}>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Connection Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Status:</span>
+                    <StatusBadge 
+                      variant={isConnected ? "success" : "default"} 
+                      label={isConnected ? "Connected" : "Not Connected"} 
+                      withDot={isConnected}
+                    />
+                  </div>
+                  
+                  {!isConnected && (
+                    <div className="space-y-2">
+                      <Label htmlFor={`${apiId}-api-key`}>API Key</Label>
+                      <Input 
+                        id={`${apiId}-api-key`}
+                        type="password" 
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                        placeholder="Enter your API key"
+                      />
+                    </div>
+                  )}
+                  
+                  {isConnected && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Last Sync:</span>
+                      <span className="text-sm">Today at 09:45 AM</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter>
+                {isConnected ? (
+                  <div className="flex space-x-2 w-full">
+                    <Button 
+                      variant="outline" 
+                      onClick={handleDisconnect}
+                      disabled={isLoading}
+                      className="flex-1"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Disconnecting...
+                        </>
+                      ) : (
+                        "Disconnect"
+                      )}
+                    </Button>
+                    <Button 
+                      variant="default"
+                      className="flex-1"
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Sync Data
+                    </Button>
+                  </div>
+                ) : (
+                  <Button 
+                    onClick={handleConnect}
+                    disabled={isLoading || !apiKey}
+                    className="w-full"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Connecting...
+                      </>
+                    ) : (
+                      "Connect"
+                    )}
+                  </Button>
+                )}
+              </CardFooter>
+            </Card>
+            
+            {isConnected && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Available Metrics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {metrics.map((metric) => (
+                      <Badge key={metric} variant="outline">
+                        {metric}
+                      </Badge>
+                    ))}
+                  </div>
+                  <Separator className="my-4" />
+                  <div className="space-y-2">
+                    <Label>Available Date Ranges</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {dateRanges.map((range) => (
+                        <Badge key={range} variant="outline">
+                          {range}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full">
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copy API Endpoint
+                  </Button>
+                </CardFooter>
+              </Card>
+            )}
+          </div>
+          
+          <div className="mt-6 pt-6 border-t">
+            <h3 className="text-base font-medium mb-4">Code Examples</h3>
+            <div className="space-y-4">
+              {codeExamples.map((example, index) => (
+                <div key={index} className="p-4 rounded-md bg-muted">
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge variant="outline">{example.language}</Badge>
+                    <Button variant="ghost" size="sm">
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <pre className="text-xs overflow-x-auto p-2">
+                    <code>{example.code}</code>
+                  </pre>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
