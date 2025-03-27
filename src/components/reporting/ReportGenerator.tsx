@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { useState, useCallback, useEffect } from "react"
 import { Calendar, Download, FileText, Loader2, AlertCircle, CheckCircle } from "lucide-react"
@@ -43,7 +42,6 @@ export function ReportGenerator({ title, description, icon, metrics = [] }: Repo
     to: new Date()
   })
   
-  // Add a trigger count to simulate report generation
   const [triggerCount, setTriggerCount] = useState(0)
   
   const generateReport = async () => {
@@ -52,14 +50,11 @@ export function ReportGenerator({ title, description, icon, metrics = [] }: Repo
     setSuccess(false)
     
     try {
-      // Increment trigger count to force re-rendering
       setTriggerCount(prev => prev + 1)
       
-      // Simulate API call
       console.log(`Generating report for ${title} in ${fileFormat} format for date range:`, dateRange)
       await new Promise(resolve => setTimeout(resolve, 1500))
       
-      // Simulate random error (10% chance instead of 20%)
       if (Math.random() < 0.1) {
         throw new Error("Server connection timeout. Please try again.");
       }
@@ -71,7 +66,6 @@ export function ReportGenerator({ title, description, icon, metrics = [] }: Repo
         duration: 3000,
       })
       
-      // Simulate download
       const dummyLink = document.createElement('a')
       dummyLink.href = `data:application/octet-stream,${encodeURIComponent(`Sample report data from ${format(dateRange.from || new Date(), 'yyyy-MM-dd')} to ${format(dateRange.to || new Date(), 'yyyy-MM-dd')}`)}`
       dummyLink.download = `report-${format(new Date(), 'yyyy-MM-dd')}.${fileFormat}`
@@ -89,7 +83,6 @@ export function ReportGenerator({ title, description, icon, metrics = [] }: Repo
         duration: 3000,
       })
     } finally {
-      // Reset success state after 3 seconds
       if (success) {
         setTimeout(() => setSuccess(false), 3000)
       }
@@ -104,7 +97,6 @@ export function ReportGenerator({ title, description, icon, metrics = [] }: Repo
     return "Select date range"
   }, [dateRange])
   
-  // Effect to handle button clicking
   useEffect(() => {
     if (triggerCount > 0) {
       console.log(`Report generation triggered ${triggerCount} times`);
@@ -171,8 +163,8 @@ export function ReportGenerator({ title, description, icon, metrics = [] }: Repo
               <StatusBadge 
                 variant="info" 
                 label="Processing..." 
-                withDot 
-                loading 
+                withDot={true} 
+                loading={true} 
               />
             )}
             
@@ -180,7 +172,7 @@ export function ReportGenerator({ title, description, icon, metrics = [] }: Repo
               <StatusBadge 
                 variant="success" 
                 label="Generated" 
-                withDot 
+                withDot={true} 
               />
             )}
           </div>
@@ -235,11 +227,9 @@ export function ReportDownloadButton({ report, format }: { report: { name: strin
   const handleDownload = async () => {
     setLoading(true)
     try {
-      // Simulate API call
       console.log(`Downloading report: ${report.name} in ${format} format`)
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      // Simulate download
       const dummyLink = document.createElement('a')
       dummyLink.href = `data:application/octet-stream,${encodeURIComponent(`Sample report data for ${report.name}`)}`
       dummyLink.download = `${report.name.toLowerCase().replace(/\s+/g, '-')}.${format}`

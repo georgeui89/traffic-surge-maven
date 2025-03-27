@@ -348,7 +348,7 @@ export function ApiIntegration({
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Status:</span>
                     <StatusBadge 
-                      variant={isApiConnected ? "success" : "error"} 
+                      variant={isApiConnected ? "success" : "destructive"} 
                       label={isApiConnected ? "Connected" : "Disconnected"} 
                       withDot 
                     />

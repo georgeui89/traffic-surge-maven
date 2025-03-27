@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { TrendingUp, Clock, Filter, ArrowDown, Calendar, Download, RefreshCw, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { TrafficQualityChart } from '@/components/analytics/TrafficQualityChart';
 import { AcceptanceRateChart } from '@/components/analytics/AcceptanceRateChart';
@@ -175,7 +175,6 @@ const TrafficAnalytics = () => {
           iconBackground="bg-warning/10"
           footnote={`Last ${timeRange}`}
           color="text-warning"
-          helpText="Percentage of traffic that results in valid impressions"
         />
         
         <MetricCard
@@ -189,7 +188,6 @@ const TrafficAnalytics = () => {
           iconBackground="bg-primary/10"
           footnote={`Last ${timeRange}`}
           color="text-primary"
-          helpText="Average duration visitors spend on your pages"
         />
       </div>
       
@@ -266,9 +264,9 @@ const TrafficAnalytics = () => {
               </div>
               
               <div className="space-y-2">
-                <Label>New Time-on-Site Duration</Label>
+                <Label htmlFor="time-on-site">New Time-on-Site Duration</Label>
                 <Select defaultValue="30">
-                  <SelectTrigger>
+                  <SelectTrigger id="time-on-site">
                     <SelectValue placeholder="Select duration" />
                   </SelectTrigger>
                   <SelectContent>
@@ -333,9 +331,9 @@ const TrafficAnalytics = () => {
               </div>
               
               <div className="space-y-2">
-                <Label>Reallocation Strategy</Label>
+                <Label htmlFor="reallocation-strategy">Reallocation Strategy</Label>
                 <Select defaultValue="70-30">
-                  <SelectTrigger>
+                  <SelectTrigger id="reallocation-strategy">
                     <SelectValue placeholder="Select allocation" />
                   </SelectTrigger>
                   <SelectContent>

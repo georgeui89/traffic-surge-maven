@@ -1,4 +1,3 @@
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -49,7 +48,7 @@ const ScriptVariantTable = () => {
               <TableCell className="text-center">{variant.acceptanceRate}%</TableCell>
               <TableCell className="text-center">
                 <StatusBadge 
-                  variant={variant.isActive ? "success" : "muted"}
+                  variant={variant.isActive ? "success" : "default"}
                   withDot={true}
                   label={variant.isActive ? "Active" : "Inactive"}
                 />

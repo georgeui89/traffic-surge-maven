@@ -31,3 +31,21 @@ export function HelpLabel({ htmlFor, label, helpText, className }: HelpLabelProp
     </div>
   );
 }
+
+// Helper function to add tooltip to any component
+export function withTooltip(Component: React.ComponentType<any>, helpText: string) {
+  return (props: any) => (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div>
+            <Component {...props} />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="max-w-xs">{helpText}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}

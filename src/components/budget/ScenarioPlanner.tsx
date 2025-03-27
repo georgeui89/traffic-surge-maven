@@ -12,9 +12,37 @@ import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { TabsList, TabsTrigger, Tabs, TabsContent } from '@/components/ui/tabs';
 
+interface BudgetReallocation {
+  fromPlatform: string;
+  toPlatform: string;
+  percentage: number;
+}
+
+interface FormData {
+  cpmAdjustment: number;
+  acceptanceRateAdjustment: number;
+  rdpCount: number;
+  rdpAction: string;
+  budgetReallocation: BudgetReallocation;
+}
+
+interface BaseMetrics {
+  dailyVisits: number;
+  revenue: number;
+  roi: number;
+  expenses: number;
+}
+
+interface ProjectedMetrics {
+  dailyVisits: number;
+  revenue: number;
+  roi: number;
+  expenses: number;
+}
+
 export function ScenarioPlanner() {
   const [scenarioName, setScenarioName] = useState('New Scenario');
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     cpmAdjustment: 0,
     acceptanceRateAdjustment: 0,
     rdpCount: 0,
@@ -27,7 +55,7 @@ export function ScenarioPlanner() {
   });
   
   // Base metrics for comparison
-  const baseMetrics = {
+  const baseMetrics: BaseMetrics = {
     dailyVisits: 10000,
     revenue: 45.50,
     roi: 132,
@@ -35,10 +63,11 @@ export function ScenarioPlanner() {
   };
   
   // Calculated projected metrics
-  const projectedMetrics = {
+  const projectedMetrics: ProjectedMetrics = {
     dailyVisits: baseMetrics.dailyVisits * (1 + formData.acceptanceRateAdjustment / 100),
     revenue: baseMetrics.revenue * (1 + formData.cpmAdjustment / 100) * (1 + formData.acceptanceRateAdjustment / 100),
-    expenses: baseMetrics.expenses + (formData.rdpAction === 'add' ? formData.rdpCount * 1.2 : formData.rdpAction === 'remove' ? -formData.rdpCount * 1.2 : 0)
+    expenses: baseMetrics.expenses + (formData.rdpAction === 'add' ? formData.rdpCount * 1.2 : formData.rdpAction === 'remove' ? -formData.rdpCount * 1.2 : 0),
+    roi: 0 // Will be calculated below
   };
   
   projectedMetrics.roi = ((projectedMetrics.revenue / projectedMetrics.expenses) - 1) * 100;
@@ -51,7 +80,7 @@ export function ScenarioPlanner() {
       setFormData(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof typeof prev],
+          ...(prev as any)[parent],
           [child]: value
         }
       }));
