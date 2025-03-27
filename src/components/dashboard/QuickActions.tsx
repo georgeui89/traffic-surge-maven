@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
+import { CampaignCreateDialog } from "@/components/campaign/CampaignCreateDialog"
 
 interface QuickActionProps {
   icon: React.ReactNode
@@ -88,27 +89,18 @@ export function QuickActions() {
   const { toast } = useToast()
   const navigate = useNavigate()
   const [showCampaignDialog, setShowCampaignDialog] = useState(false)
-  const [campaignName, setCampaignName] = useState("")
-  const [campaignType, setCampaignType] = useState("traffic")
-  const [campaignBudget, setCampaignBudget] = useState("100")
-  const [creatingCampaign, setCreatingCampaign] = useState(false)
   
   const handleViewEarnings = async () => {
-    // Simulate API call to prepare earnings data
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Navigate to earnings page
     navigate("/reporting")
     
     toast({
       title: "Earnings Report",
-      description: "Preparing your earnings report...",
+      description: "Viewing your earnings report...",
       duration: 3000,
     })
   }
 
   const handleViewTraffic = async () => {
-    await new Promise(resolve => setTimeout(resolve, 800))
     navigate("/traffic-analytics")
     
     toast({
@@ -119,7 +111,6 @@ export function QuickActions() {
   }
 
   const handleManageRDPs = async () => {
-    await new Promise(resolve => setTimeout(resolve, 800))
     navigate("/rdp-management")
     
     toast({
@@ -130,50 +121,13 @@ export function QuickActions() {
   }
 
   const handleCreateCampaign = async () => {
-    setShowCampaignDialog(true)
-  }
-  
-  const handleCreateCampaignSubmit = async () => {
-    if (!campaignName.trim()) {
-      toast({
-        title: "Campaign Name Required",
-        description: "Please enter a name for your campaign.",
-        variant: "destructive",
-        duration: 3000,
-      })
-      return
-    }
+    navigate("/campaigns")
     
-    setCreatingCampaign(true)
-    
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      setShowCampaignDialog(false)
-      navigate("/campaigns")
-      
-      toast({
-        title: "Campaign Created",
-        description: `"${campaignName}" has been created successfully.`,
-        duration: 3000,
-      })
-      
-      // Reset form
-      setCampaignName("")
-      setCampaignType("traffic")
-      setCampaignBudget("100")
-    } catch (error) {
-      console.error("Error creating campaign:", error)
-      toast({
-        title: "Campaign Creation Failed",
-        description: "There was an error creating your campaign. Please try again.",
-        variant: "destructive",
-        duration: 3000,
-      })
-    } finally {
-      setCreatingCampaign(false)
-    }
+    toast({
+      title: "Campaign Creation",
+      description: "Opening campaign creation page...",
+      duration: 3000,
+    })
   }
   
   return (
@@ -242,78 +196,6 @@ export function QuickActions() {
           </div>
         </CardContent>
       </Card>
-      
-      <Dialog open={showCampaignDialog} onOpenChange={setShowCampaignDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Campaign</DialogTitle>
-            <DialogDescription>
-              Set up a new campaign to start driving traffic to your websites.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="campaign-name">Campaign Name</Label>
-              <Input
-                id="campaign-name"
-                placeholder="Enter campaign name"
-                value={campaignName}
-                onChange={(e) => setCampaignName(e.target.value)}
-              />
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="campaign-type">Campaign Type</Label>
-              <Select value={campaignType} onValueChange={setCampaignType}>
-                <SelectTrigger id="campaign-type">
-                  <SelectValue placeholder="Select campaign type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="traffic">Traffic Campaign</SelectItem>
-                  <SelectItem value="conversion">Conversion Campaign</SelectItem>
-                  <SelectItem value="engagement">Engagement Campaign</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="campaign-budget">Initial Budget ($)</Label>
-              <Input
-                id="campaign-budget"
-                type="number"
-                placeholder="Enter budget amount"
-                value={campaignBudget}
-                onChange={(e) => setCampaignBudget(e.target.value)}
-              />
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setShowCampaignDialog(false)}
-              disabled={creatingCampaign}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleCreateCampaignSubmit}
-              disabled={creatingCampaign}
-              id="create-campaign-btn"
-            >
-              {creatingCampaign ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                "Create Campaign"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   )
 }

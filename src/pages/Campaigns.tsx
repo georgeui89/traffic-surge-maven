@@ -26,20 +26,13 @@ import { cn } from '@/lib/utils';
 import { formatCurrency, formatNumber, getStatusColor } from '@/utils/formatters';
 import { campaigns } from '@/utils/mockData';
 import { useToast } from '@/hooks/use-toast';
+import { CampaignCreateDialog } from '@/components/campaign/CampaignCreateDialog';
 
 const Campaigns = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [platformFilter, setPlatformFilter] = useState('all');
   const { toast } = useToast();
-
-  const handleAddCampaign = () => {
-    toast({
-      title: "New Campaign",
-      description: "Campaign creation form would open here.",
-      duration: 3000,
-    });
-  };
 
   const toggleCampaignStatus = (campaignId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'paused' : 'active';
@@ -144,10 +137,7 @@ const Campaigns = () => {
           </div>
         </div>
         
-        <Button onClick={handleAddCampaign} className="gap-2 w-full md:w-auto">
-          <Plus className="h-4 w-4" />
-          New Campaign
-        </Button>
+        <CampaignCreateDialog />
       </div>
       
       <div className="rounded-md border">

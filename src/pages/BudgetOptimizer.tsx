@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DollarSign, BarChart2, Zap, TrendingUp, Download, Calculator, RefreshCw, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,17 +45,7 @@ const BudgetDistributionCard = ({ data }: { data: any[] }) => {
   );
 };
 
-const RecommendationCard = () => {
-  const { toast } = useToast();
-  
-  const handleApply = () => {
-    toast({
-      title: "Recommendations Applied",
-      description: "Budget allocations have been updated based on AI recommendations.",
-      duration: 3000,
-    });
-  };
-  
+const RecommendationCard = ({ onApply }: { onApply: () => void }) => {
   return (
     <Card className="border-primary/20">
       <CardHeader className="bg-primary/5">
@@ -88,7 +78,7 @@ const RecommendationCard = () => {
         </div>
       </CardContent>
       <CardFooter className="border-t bg-muted/10 pt-3">
-        <Button onClick={handleApply} className="w-full">
+        <Button onClick={onApply} className="w-full">
           <Check className="h-4 w-4 mr-2" />
           Apply Recommendations
         </Button>
@@ -101,16 +91,51 @@ const BudgetOptimizer = () => {
   const [totalBudget, setTotalBudget] = useState(50);
   const [optimizationTarget, setOptimizationTarget] = useState('roi');
   const [autoAdjust, setAutoAdjust] = useState(false);
+  const [platformAllocations, setPlatformAllocations] = useState<{[key: string]: number}>({});
+  const [expectedResults, setExpectedResults] = useState({
+    visits: 0,
+    impressions: 0,
+    revenue: 0,
+    roi: 0
+  });
   const { toast } = useToast();
   
-  // Mock data for budget distribution
-  const budgetData = [
-    { name: '9Hits', budget: totalBudget * 0.35, percentage: 35, color: 'traffic' },
-    { name: 'HitLeap', budget: totalBudget * 0.25, percentage: 25, color: 'platforms' },
-    { name: 'Otohits', budget: totalBudget * 0.20, percentage: 20, color: 'earnings' },
-    { name: 'EasyHits4U', budget: totalBudget * 0.10, percentage: 10, color: 'primary' },
-    { name: 'Others', budget: totalBudget * 0.10, percentage: 10, color: 'muted-foreground' },
-  ];
+  // Initialize platform allocations
+  useEffect(() => {
+    const initialAllocations: {[key: string]: number} = {};
+    platforms.slice(0, 5).forEach((platform, index) => {
+      initialAllocations[platform.id] = [35, 25, 20, 10, 10][index];
+    });
+    setPlatformAllocations(initialAllocations);
+  }, []);
+  
+  // Mock data for budget distribution based on current allocations
+  const budgetData = Object.keys(platformAllocations).map((platformId, index) => {
+    const platform = platforms.find(p => p.id === platformId) || platforms[index];
+    const percentage = platformAllocations[platformId] || 0;
+    return {
+      name: platform.name,
+      budget: totalBudget * percentage / 100,
+      percentage,
+      color: ['traffic', 'platforms', 'earnings', 'primary', 'muted-foreground'][index % 5]
+    };
+  });
+  
+  // Update expected results when budget or allocations change
+  useEffect(() => {
+    // Calculate based on current budget and allocations
+    const expectedDailyVisits = totalBudget * 200; // 200 visits per $1
+    const expectedDailyImpressions = expectedDailyVisits * 0.4; // 40% acceptance rate
+    const expectedDailyRevenue = expectedDailyImpressions * 0.005; // $0.005 per impression
+    const expectedROI = ((expectedDailyRevenue - totalBudget) / totalBudget) * 100;
+    
+    setExpectedResults({
+      visits: expectedDailyVisits,
+      impressions: expectedDailyImpressions,
+      revenue: expectedDailyRevenue,
+      roi: expectedROI
+    });
+  }, [totalBudget, platformAllocations]);
   
   const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
@@ -119,7 +144,33 @@ const BudgetOptimizer = () => {
     }
   };
   
+  const handleAllocationChange = (platformId: string, value: number[]) => {
+    const newAllocations = { ...platformAllocations, [platformId]: value[0] };
+    setPlatformAllocations(newAllocations);
+  };
+  
   const handleOptimize = () => {
+    // Simulate budget optimization
+    const optimizedAllocations = { ...platformAllocations };
+    
+    if (optimizationTarget === 'roi') {
+      // Adjust for ROI - increase allocations for high ROI platforms
+      optimizedAllocations[platforms[0].id] = 40; // 9Hits
+      optimizedAllocations[platforms[1].id] = 20; // HitLeap
+      optimizedAllocations[platforms[2].id] = 25; // Otohits
+      optimizedAllocations[platforms[3].id] = 5;  // EasyHits4U
+      optimizedAllocations[platforms[4].id] = 10; // Others
+    } else if (optimizationTarget === 'traffic') {
+      // Adjust for traffic - increase allocations for high traffic platforms
+      optimizedAllocations[platforms[0].id] = 35; // 9Hits
+      optimizedAllocations[platforms[1].id] = 30; // HitLeap 
+      optimizedAllocations[platforms[2].id] = 15; // Otohits
+      optimizedAllocations[platforms[3].id] = 10; // EasyHits4U
+      optimizedAllocations[platforms[4].id] = 10; // Others
+    }
+    
+    setPlatformAllocations(optimizedAllocations);
+    
     toast({
       title: "Budget Optimized",
       description: `Budget has been optimized for maximum ${optimizationTarget === 'roi' ? 'ROI' : 'traffic'}.`,
@@ -127,11 +178,23 @@ const BudgetOptimizer = () => {
     });
   };
   
-  // Calculate expected results
-  const expectedDailyVisits = totalBudget * 200; // 200 visits per $1
-  const expectedDailyImpressions = expectedDailyVisits * 0.4; // 40% acceptance rate
-  const expectedDailyRevenue = expectedDailyImpressions * 0.005; // $0.005 per impression
-  const expectedROI = ((expectedDailyRevenue - totalBudget) / totalBudget) * 100;
+  const handleRecommendationApply = () => {
+    // Apply the AI recommendations
+    const recommendedAllocations = { ...platformAllocations };
+    recommendedAllocations[platforms[0].id] = 45; // 9Hits (increase)
+    recommendedAllocations[platforms[1].id] = 15; // HitLeap (decrease)
+    recommendedAllocations[platforms[2].id] = 25; // Otohits (increase)
+    recommendedAllocations[platforms[3].id] = 5;  // EasyHits4U (decrease)
+    recommendedAllocations[platforms[4].id] = 10; // Others (unchanged)
+    
+    setPlatformAllocations(recommendedAllocations);
+    
+    toast({
+      title: "Recommendations Applied",
+      description: "Budget allocations have been updated based on AI recommendations.",
+      duration: 3000,
+    });
+  };
   
   return (
     <div className="page-container">
@@ -207,17 +270,20 @@ const BudgetOptimizer = () => {
               <div className="space-y-6">
                 <h3 className="text-sm font-medium">Platform Allocations</h3>
                 
-                {platforms.slice(0, 6).map((platform, index) => (
-                  <div key={index} className="space-y-2">
+                {platforms.slice(0, 5).map((platform, index) => (
+                  <div key={platform.id} className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <Label htmlFor={`platform-${index}`} className="text-sm">{platform.name}</Label>
-                      <span className="text-sm font-medium">{formatCurrency(totalBudget * budgetData[index % budgetData.length].percentage / 100)}</span>
+                      <Label htmlFor={`platform-${platform.id}`} className="text-sm">{platform.name}</Label>
+                      <span className="text-sm font-medium">
+                        {formatCurrency(totalBudget * (platformAllocations[platform.id] || 0) / 100)}
+                      </span>
                     </div>
                     <Slider
-                      id={`platform-${index}`}
-                      defaultValue={[budgetData[index % budgetData.length].percentage]}
+                      id={`platform-${platform.id}`}
+                      value={[platformAllocations[platform.id] || 0]}
                       max={100}
                       step={5}
+                      onValueChange={(value) => handleAllocationChange(platform.id, value)}
                     />
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span>0%</span>
@@ -248,7 +314,7 @@ const BudgetOptimizer = () => {
                     <TrendingUp className="h-4 w-4 text-traffic mr-2" />
                     <span className="text-sm">Daily Visits</span>
                   </div>
-                  <span className="font-medium">{formatNumber(expectedDailyVisits)}</span>
+                  <span className="font-medium">{formatNumber(expectedResults.visits)}</span>
                 </div>
               </div>
               
@@ -258,7 +324,7 @@ const BudgetOptimizer = () => {
                     <BarChart2 className="h-4 w-4 text-platforms mr-2" />
                     <span className="text-sm">Daily Impressions</span>
                   </div>
-                  <span className="font-medium">{formatNumber(expectedDailyImpressions)}</span>
+                  <span className="font-medium">{formatNumber(expectedResults.impressions)}</span>
                 </div>
               </div>
               
@@ -268,27 +334,27 @@ const BudgetOptimizer = () => {
                     <DollarSign className="h-4 w-4 text-earnings mr-2" />
                     <span className="text-sm">Daily Revenue</span>
                   </div>
-                  <span className="font-medium">{formatCurrency(expectedDailyRevenue)}</span>
+                  <span className="font-medium">{formatCurrency(expectedResults.revenue)}</span>
                 </div>
               </div>
               
               <div className={cn(
                 "bg-background rounded-md p-3 border",
-                expectedROI > 0 ? "border-success/30" : "border-destructive/30"
+                expectedResults.roi > 0 ? "border-success/30" : "border-destructive/30"
               )}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <Zap className={cn(
                       "h-4 w-4 mr-2",
-                      expectedROI > 0 ? "text-success" : "text-destructive"
+                      expectedResults.roi > 0 ? "text-success" : "text-destructive"
                     )} />
                     <span className="text-sm">Expected ROI</span>
                   </div>
                   <span className={cn(
                     "font-medium",
-                    expectedROI > 0 ? "text-success" : "text-destructive"
+                    expectedResults.roi > 0 ? "text-success" : "text-destructive"
                   )}>
-                    {formatPercent(expectedROI, 1)}
+                    {formatPercent(expectedResults.roi, 1)}
                   </span>
                 </div>
               </div>
@@ -297,7 +363,7 @@ const BudgetOptimizer = () => {
           
           <BudgetDistributionCard data={budgetData} />
           
-          <RecommendationCard />
+          <RecommendationCard onApply={handleRecommendationApply} />
         </div>
       </div>
     </div>

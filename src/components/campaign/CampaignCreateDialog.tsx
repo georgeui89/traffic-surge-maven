@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
@@ -29,7 +28,6 @@ import { useState } from "react"
 import { Plus, Loader2, CheckCircle2 } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
-// Validation schema for campaign
 const campaignSchema = z.object({
   name: z.string().min(3, { message: "Campaign name must be at least 3 characters" }),
   url: z.string().url({ message: "Please enter a valid URL" }),
@@ -44,7 +42,6 @@ const campaignSchema = z.object({
 
 type CampaignFormValues = z.infer<typeof campaignSchema>
 
-// Default values for form
 const defaultValues: Partial<CampaignFormValues> = {
   name: "",
   url: "",
@@ -69,20 +66,16 @@ export function CampaignCreateDialog() {
     
     setLoading(true)
     try {
-      // Simulate API request
       console.log("Creating campaign:", data)
       await new Promise(resolve => setTimeout(resolve, 1200))
 
-      // Show success state
       setSuccess(true)
       
-      // Show success message
       toast({
         title: "Campaign created",
         description: `Your campaign "${data.name}" has been created successfully`,
       })
 
-      // Reset and close after a brief delay to show success state
       setTimeout(() => {
         form.reset()
         setSuccess(false)
@@ -102,7 +95,6 @@ export function CampaignCreateDialog() {
     }
   }
 
-  // Reset success/loading state when dialog closes
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       form.reset(defaultValues)
