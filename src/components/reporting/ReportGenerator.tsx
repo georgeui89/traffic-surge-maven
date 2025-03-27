@@ -19,13 +19,17 @@ interface ReportInfo {
   description: string
   type: ReportType
   icon: React.ReactNode
+  metrics?: string[]
 }
 
 interface ReportGeneratorProps {
-  reportInfo: ReportInfo
+  title: string
+  description: string
+  icon: React.ReactNode
+  metrics?: string[]
 }
 
-export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
+export function ReportGenerator({ title, description, icon, metrics = [] }: ReportGeneratorProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -52,7 +56,7 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
       setTriggerCount(prev => prev + 1)
       
       // Simulate API call
-      console.log(`Generating ${reportInfo.type} report in ${fileFormat} format for date range:`, dateRange)
+      console.log(`Generating report for ${title} in ${fileFormat} format for date range:`, dateRange)
       await new Promise(resolve => setTimeout(resolve, 1500))
       
       // Simulate random error (10% chance instead of 20%)
@@ -63,14 +67,14 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
       setSuccess(true)
       toast({
         title: "Report Generated",
-        description: `${reportInfo.title} has been generated successfully.`,
+        description: `${title} has been generated successfully.`,
         duration: 3000,
       })
       
       // Simulate download
       const dummyLink = document.createElement('a')
-      dummyLink.href = `data:application/octet-stream,${encodeURIComponent(`Sample ${reportInfo.type} report data from ${format(dateRange.from || new Date(), 'yyyy-MM-dd')} to ${format(dateRange.to || new Date(), 'yyyy-MM-dd')}`)}`
-      dummyLink.download = `${reportInfo.type}-report-${format(new Date(), 'yyyy-MM-dd')}.${fileFormat}`
+      dummyLink.href = `data:application/octet-stream,${encodeURIComponent(`Sample report data from ${format(dateRange.from || new Date(), 'yyyy-MM-dd')} to ${format(dateRange.to || new Date(), 'yyyy-MM-dd')}`)}`
+      dummyLink.download = `report-${format(new Date(), 'yyyy-MM-dd')}.${fileFormat}`
       document.body.appendChild(dummyLink)
       dummyLink.click()
       document.body.removeChild(dummyLink)
@@ -112,19 +116,19 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-md bg-muted">
-            {reportInfo.icon}
+            {icon}
           </div>
-          <CardTitle className="text-base">{reportInfo.title}</CardTitle>
+          <CardTitle className="text-base">{title}</CardTitle>
         </div>
       </CardHeader>
       <CardContent>
-        <CardDescription>{reportInfo.description}</CardDescription>
+        <CardDescription>{description}</CardDescription>
         
         <div className="mt-4 space-y-3">
           <div>
             <label className="text-sm font-medium block mb-1">Format</label>
             <Select value={fileFormat} onValueChange={(value: "pdf" | "csv" | "excel") => setFileFormat(value)}>
-              <SelectTrigger className="w-full" id={`format-select-${reportInfo.type}`}>
+              <SelectTrigger className="w-full" id={`format-select-${title.toLowerCase().replace(/\s+/g, '-')}`}>
                 <SelectValue placeholder="Select format" />
               </SelectTrigger>
               <SelectContent>
@@ -138,7 +142,7 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
           <div className="flex items-center justify-between">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2" id={`date-range-${reportInfo.type}`}>
+                <Button variant="outline" size="sm" className="gap-2" id={`date-range-${title.toLowerCase().replace(/\s+/g, '-')}`}>
                   <Calendar className="h-4 w-4" />
                   {formatDateRange()}
                 </Button>
@@ -205,7 +209,7 @@ export function ReportGenerator({ reportInfo }: ReportGeneratorProps) {
           onClick={generateReport} 
           disabled={loading} 
           className="gap-2 w-full"
-          id={`generate-report-btn-${reportInfo.type}`}
+          id={`generate-report-btn-${title.toLowerCase().replace(/\s+/g, '-')}`}
         >
           {loading ? (
             <>

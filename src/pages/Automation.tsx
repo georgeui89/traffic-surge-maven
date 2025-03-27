@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  PlayCircle, PauseCircle, Plus, Settings, Zap, BarChart as BarChartIcon, 
-  Clock, FileCog, Activity, AlertTriangle as AlertTriangleIcon, 
-  BadgeCheck, Rocket, Brain as BrainIcon, Cpu, Sparkles as SparklesIcon, 
-  Star as StarIcon, Bot as BotIcon
+  PlayCircle, PauseCircle, Plus, Settings, Zap, 
+  Clock, FileCog, Activity, AlertTriangle, 
+  BadgePlus, Rocket, Bot, Cpu, Sparkles, 
+  Star, Info, Loader2
 } from 'lucide-react';
 import { 
   Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle 
 } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { AutomationRule } from '@/components/automation/AutomationRule';
@@ -23,6 +23,13 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
+import { 
+  Tabs, TabsContent, TabsList, TabsTrigger 
+} from '@/components/ui/tabs';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader,
+  DialogTitle, DialogTrigger
+} from '@/components/ui/dialog';
 
 const Automation = () => {
   const { toast } = useToast();

@@ -1,347 +1,258 @@
 import * as React from "react"
-import { useState, useEffect } from "react"
-import { Calculator, DollarSign, CreditCard, Coins, Loader2, Switch } from "lucide-react"
+import { useState } from "react"
+import { DollarSign, Search, BarChart, Percent, ArrowDown, ArrowUp, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Switch } from "@/components/ui/switch"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
 
-interface CpmCalculatorProps {
-  defaultCpmRate?: number
-  defaultImpressions?: number
-  defaultRevenue?: number
-  defaultCredits?: number
-  defaultAcceptanceRate?: number
-  defaultSecondsPerVisit?: number
+interface CalculatorState {
+  impressions: number
+  revenue: number
+  cpm: number
+  ctr: number
+  acceptanceRate: number
+  cost: number
 }
 
-export function CpmCalculator({
-  defaultCpmRate = 0.8,
-  defaultImpressions = 10000,
-  defaultRevenue = 10,
-  defaultCredits = 1000,
-  defaultAcceptanceRate = 40,
-  defaultSecondsPerVisit = 30
-}: CpmCalculatorProps) {
-  const [calculationType, setCalculationType] = useState<'impressions-to-revenue' | 'revenue-to-credits'>('impressions-to-revenue')
-  const [platform, setPlatform] = useState('9hits')
-  const [impressions, setImpressions] = useState(defaultImpressions)
-  const [revenue, setRevenue] = useState(defaultRevenue)
-  const [credits, setCredits] = useState(defaultCredits)
-  const [acceptanceRate, setAcceptanceRate] = useState(defaultAcceptanceRate)
-  const [secondsPerVisit, setSecondsPerVisit] = useState(defaultSecondsPerVisit)
-  const [manualCpmRate, setManualCpmRate] = useState(defaultCpmRate)
-  const [loadingRates, setLoadingRates] = useState(false)
-  const { toast } = useToast()
+const defaultCalculatorState: CalculatorState = {
+  impressions: 1000,
+  revenue: 10,
+  cpm: 10,
+  ctr: 1,
+  acceptanceRate: 75,
+  cost: 1,
+}
+
+export function CpmCalculator() {
+  const [calculatorState, setCalculatorState] = useState<CalculatorState>(defaultCalculatorState)
+  const [activeTab, setActiveTab] = useState<"cpm" | "revenue" | "cost">("cpm")
+  const [showHelp, setShowHelp] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
   
-  const [platformRates, setPlatformRates] = useState({
-    '9hits': 0.8,
-    'hitleap': 0.7,
-    'otohits': 0.65,
-    'bigHitsU': 0.85,
-    'webhit': 0.75
-  })
-  
-  const getPlatformRate = (platform: string) => {
-    return platformRates[platform as keyof typeof platformRates] || 0.5
-  }
-  
-  const calculateCPM = () => {
-    return (revenue / impressions) * 1000
+  const calculateCpm = () => {
+    return (calculatorState.revenue / calculatorState.impressions) * 1000
   }
   
   const calculateRevenue = () => {
-    const validImpressions = (credits / secondsPerVisit) * (acceptanceRate / 100)
-    const cpmRate = manualCpmRate || getPlatformRate(platform)
-    return (validImpressions / 1000) * cpmRate
+    return (calculatorState.cpm / 1000) * calculatorState.impressions
   }
   
-  const calculateRequiredCredits = () => {
-    const cpmRate = manualCpmRate || getPlatformRate(platform)
-    const validImpressionsNeeded = impressions * (100 / acceptanceRate)
-    return validImpressionsNeeded * secondsPerVisit
+  const calculateImpressions = () => {
+    return calculatorState.revenue / (calculatorState.cpm / 1000)
   }
   
-  const handlePlatformChange = (newPlatform: string) => {
-    setPlatform(newPlatform)
-    setManualCpmRate(getPlatformRate(newPlatform))
-    
-    toast({
-      title: "Platform Changed",
-      description: `CPM rate updated for ${newPlatform}.`,
-      duration: 3000,
+  const calculateCostPerImpression = () => {
+    return calculatorState.cost / calculatorState.impressions
+  }
+  
+  const calculateEffectiveCpm = () => {
+    return (calculatorState.revenue * (calculatorState.acceptanceRate / 100) / calculatorState.impressions) * 1000
+  }
+  
+  const handleInputChange = (field: keyof CalculatorState, value: number) => {
+    setCalculatorState({
+      ...calculatorState,
+      [field]: value,
     })
   }
   
-  const handleUpdateCpmRates = async () => {
-    setLoadingRates(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      setPlatformRates({
-        '9hits': 0.75 + (Math.random() * 0.1),
-        'hitleap': 0.65 + (Math.random() * 0.1),
-        'otohits': 0.60 + (Math.random() * 0.1),
-        'bigHitsU': 0.80 + (Math.random() * 0.1),
-        'webhit': 0.70 + (Math.random() * 0.1)
-      })
-      
-      if (!useCustomRate) {
-        setManualCpmRate(getPlatformRate(platform))
-      }
-      
-      toast({
-        title: "CPM Rates Updated",
-        description: "The latest market CPM rates have been fetched from Adsterra API.",
-        duration: 3000,
-      })
-    } catch (error) {
-      toast({
-        title: "Update Failed",
-        description: "Could not fetch latest CPM rates. Please try again later.",
-        variant: "destructive",
-        duration: 3000,
-      })
-    } finally {
-      setLoadingRates(false)
-    }
-  }
-  
-  const cpm = calculationType === 'revenue-to-credits' ? manualCpmRate : calculateCPM()
-  const estimatedRevenue = calculateRevenue()
-  const requiredCredits = calculateRequiredCredits()
-  const expectedImpressions = (credits / secondsPerVisit) * (acceptanceRate / 100)
-  
-  const [useCustomRate, setUseCustomRate] = useState(false)
-  
-  useEffect(() => {
-    if (!useCustomRate) {
-      setManualCpmRate(getPlatformRate(platform))
-    }
-  }, [platform, platformRates, useCustomRate])
-
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap gap-4 mb-6">
-        <Button 
-          variant={calculationType === 'impressions-to-revenue' ? 'default' : 'outline'}
-          onClick={() => setCalculationType('impressions-to-revenue')}
-          className="flex-1"
-        >
-          Calculate Revenue
-        </Button>
-        <Button 
-          variant={calculationType === 'revenue-to-credits' ? 'default' : 'outline'}
-          onClick={() => setCalculationType('revenue-to-credits')}
-          className="flex-1"
-        >
-          Calculate Credits
-        </Button>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="platform">Select Platform</Label>
-            <Select value={platform} onValueChange={handlePlatformChange}>
-              <SelectTrigger id="platform">
-                <SelectValue placeholder="Select platform" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="9hits">9Hits</SelectItem>
-                <SelectItem value="hitleap">HitLeap</SelectItem>
-                <SelectItem value="otohits">Otohits</SelectItem>
-                <SelectItem value="bigHitsU">BigHits4U</SelectItem>
-                <SelectItem value="webhit">Webhit.net</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>CPM Calculator</CardTitle>
+          <Popover open={showHelp} onOpenChange={setShowHelp}>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <HelpCircle className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <h4 className="font-medium leading-none">CPM Calculator</h4>
+              <p className="text-sm text-muted-foreground">
+                Calculate CPM, revenue, and cost per impression based on your traffic data.
+              </p>
+              <ul className="list-disc pl-5 mt-2 text-sm text-muted-foreground">
+                <li>CPM: Cost per mille (1000 impressions)</li>
+                <li>Revenue: Total earnings</li>
+                <li>Cost: Total cost</li>
+                <li>CTR: Click-through rate</li>
+                <li>Acceptance Rate: Percentage of impressions accepted</li>
+              </ul>
+            </PopoverContent>
+          </Popover>
+        </div>
+        <CardDescription>Calculate CPM, revenue, and cost per impression</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Tabs defaultValue="cpm" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="cpm" onClick={() => setActiveTab("cpm")}>CPM</TabsTrigger>
+            <TabsTrigger value="revenue" onClick={() => setActiveTab("revenue")}>Revenue</TabsTrigger>
+            <TabsTrigger value="cost" onClick={() => setActiveTab("cost")}>Cost</TabsTrigger>
+          </TabsList>
           
-          <div className="flex items-center justify-between space-x-2">
-            <Label htmlFor="cpm-value" className="text-sm">CPM Rate ($)</Label>
-            <div className="flex items-center space-x-2">
-              <Switch 
-                id="use-custom-rate"
-                checked={useCustomRate}
-                onCheckedChange={setUseCustomRate}
-              />
-              <Label htmlFor="use-custom-rate" className="text-xs">Custom Rate</Label>
-            </div>
-          </div>
-          
-          <div className="relative">
-            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="cpm-value"
-              type="number"
-              step="0.01"
-              min="0.01"
-              max="1.00"
-              className="pl-10"
-              value={manualCpmRate}
-              onChange={(e) => setManualCpmRate(parseFloat(e.target.value))}
-              disabled={!useCustomRate}
-            />
-          </div>
-          
-          {calculationType === 'impressions-to-revenue' ? (
-            <>
-              <div>
-                <Label htmlFor="credits">Available Credits</Label>
-                <div className="relative mt-1.5">
-                  <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="credits"
-                    type="number"
-                    className="pl-10"
-                    value={credits}
-                    onChange={(e) => setCredits(Number(e.target.value))}
-                  />
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <div>
-                <Label htmlFor="impressions">Target Impressions</Label>
-                <div className="relative mt-1.5">
-                  <Coins className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="impressions"
-                    type="number"
-                    className="pl-10"
-                    value={impressions}
-                    onChange={(e) => setImpressions(Number(e.target.value))}
-                  />
-                </div>
+          <TabsContent value="cpm" className="space-y-4">
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="revenue">Revenue</Label>
+                <Input
+                  id="revenue"
+                  type="number"
+                  value={calculatorState.revenue}
+                  onChange={(e) => handleInputChange("revenue", parseFloat(e.target.value))}
+                />
               </div>
               
-              <div>
-                <Label htmlFor="revenue">Expected Revenue ($)</Label>
-                <div className="relative mt-1.5">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <div className="space-y-2">
+                <Label htmlFor="impressions">Impressions</Label>
+                <Input
+                  id="impressions"
+                  type="number"
+                  value={calculatorState.impressions}
+                  onChange={(e) => handleInputChange("impressions", parseFloat(e.target.value))}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Calculated CPM</Label>
+                <div className="grid gap-2">
                   <Input
-                    id="revenue"
+                    id="cpm"
                     type="number"
-                    step="0.01"
-                    min="0.01"
-                    className="pl-10"
-                    value={revenue}
-                    onChange={(e) => setRevenue(Number(e.target.value))}
+                    value={calculateCpm().toFixed(2)}
+                    readOnly
                   />
                 </div>
               </div>
-            </>
-          )}
-        </div>
-        
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between">
-              <Label htmlFor="seconds-per-visit">Seconds Per Visit</Label>
-              <span className="text-sm text-muted-foreground">{secondsPerVisit}s</span>
             </div>
-            <Slider
-              id="seconds-per-visit"
-              min={5}
-              max={60}
-              step={1}
-              value={[secondsPerVisit]}
-              onValueChange={(value) => setSecondsPerVisit(value[0])}
-              className="mt-2"
-            />
-          </div>
+          </TabsContent>
           
-          <div>
-            <div className="flex justify-between">
-              <Label htmlFor="acceptance-rate">Acceptance Rate</Label>
-              <span className="text-sm text-muted-foreground">{acceptanceRate}%</span>
+          <TabsContent value="revenue" className="space-y-4">
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="cpm-revenue">CPM</Label>
+                <Input
+                  id="cpm-revenue"
+                  type="number"
+                  value={calculatorState.cpm}
+                  onChange={(e) => handleInputChange("cpm", parseFloat(e.target.value))}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="impressions-revenue">Impressions</Label>
+                <Input
+                  id="impressions-revenue"
+                  type="number"
+                  value={calculatorState.impressions}
+                  onChange={(e) => handleInputChange("impressions", parseFloat(e.target.value))}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Calculated Revenue</Label>
+                <div className="grid gap-2">
+                  <Input
+                    id="revenue-calculated"
+                    type="number"
+                    value={calculateRevenue().toFixed(2)}
+                    readOnly
+                  />
+                </div>
+              </div>
             </div>
-            <Slider
-              id="acceptance-rate"
-              min={10}
-              max={100}
-              step={1}
-              value={[acceptanceRate]}
-              onValueChange={(value) => setAcceptanceRate(value[0])}
-              className="mt-2"
-            />
-          </div>
+          </TabsContent>
           
-          {calculationType === 'revenue-to-credits' && !useCustomRate && (
-            <div>
-              <Label htmlFor="current-cpm">Current Platform CPM Rate</Label>
-              <div className="p-3 bg-muted rounded-md border text-center">
-                <span className="font-semibold">${getPlatformRate(platform).toFixed(2)}</span>
+          <TabsContent value="cost" className="space-y-4">
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="cost">Cost</Label>
+                <Input
+                  id="cost"
+                  type="number"
+                  value={calculatorState.cost}
+                  onChange={(e) => handleInputChange("cost", parseFloat(e.target.value))}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="impressions-cost">Impressions</Label>
+                <Input
+                  id="impressions-cost"
+                  type="number"
+                  value={calculatorState.impressions}
+                  onChange={(e) => handleInputChange("impressions", parseFloat(e.target.value))}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Cost per Impression</Label>
+                <div className="grid gap-2">
+                  <Input
+                    id="cost-per-impression"
+                    type="number"
+                    value={calculateCostPerImpression().toFixed(5)}
+                    readOnly
+                  />
+                </div>
               </div>
             </div>
-          )}
+          </TabsContent>
+        </Tabs>
+        
+        <div className="flex items-center justify-between">
+          <Label htmlFor="show-advanced">Show Advanced Settings</Label>
+          <Switch id="show-advanced" checked={showAdvanced} onCheckedChange={setShowAdvanced} />
         </div>
-      </div>
-      
-      <div className="w-full p-4 rounded-lg border border-primary/20 bg-primary/5">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {calculationType === 'impressions-to-revenue' ? (
-            <>
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Expected Valid Impressions</p>
-                <p className="text-2xl font-bold">
-                  {Math.round(expectedImpressions).toLocaleString()}
-                </p>
+        
+        {showAdvanced && (
+          <div className="space-y-4 border-t pt-4">
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="ctr">Click-Through Rate (%)</Label>
+                <Input
+                  id="ctr"
+                  type="number"
+                  value={calculatorState.ctr}
+                  onChange={(e) => handleInputChange("ctr", parseFloat(e.target.value))}
+                />
               </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Estimated Revenue</p>
-                <p className="text-2xl font-bold text-success">${estimatedRevenue.toFixed(2)}</p>
+              
+              <div className="space-y-2">
+                <Label htmlFor="acceptance-rate">Acceptance Rate (%)</Label>
+                <Input
+                  id="acceptance-rate"
+                  type="number"
+                  value={calculatorState.acceptanceRate}
+                  onChange={(e) => handleInputChange("acceptanceRate", parseFloat(e.target.value))}
+                />
               </div>
-            </>
-          ) : (
-            <>
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Required Credits</p>
-                <p className="text-2xl font-bold">{Math.round(requiredCredits).toLocaleString()}</p>
+              
+              <div className="space-y-2">
+                <Label>Effective CPM</Label>
+                <div className="grid gap-2">
+                  <Input
+                    id="effective-cpm"
+                    type="number"
+                    value={calculateEffectiveCpm().toFixed(2)}
+                    readOnly
+                  />
+                </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Target Revenue</p>
-                <p className="text-2xl font-bold text-success">${revenue}</p>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-      
-      <div className="mt-4">
-        <h3 className="text-sm font-medium mb-4">Current CPM Rates by Platform</h3>
-        <div className="space-y-2">
-          {Object.entries(platformRates).map(([key, rate]) => (
-            <div key={key} className="flex justify-between items-center p-2 border-b">
-              <span>{key === 'bigHitsU' ? 'BigHits4U' : key === 'webhit' ? 'Webhit.net' : key}</span>
-              <span className="font-medium">${rate.toFixed(2)}</span>
             </div>
-          ))}
-        </div>
-        
-        <div className="mt-6 p-3 bg-muted rounded-md border">
-          <p className="text-sm text-muted-foreground">
-            CPM rates are retrieved from Adsterra API. These rates reflect current market conditions and may vary based on traffic quality, niche, and other factors.
-          </p>
-        </div>
-        
-        <Button onClick={handleUpdateCpmRates} variant="outline" className="w-full mt-4" disabled={loadingRates}>
-          {loadingRates ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Updating Rates...
-            </>
-          ) : (
-            <>
-              <Calculator className="mr-2 h-4 w-4" />
-              Update CPM Rates from Adsterra
-            </>
-          )}
-        </Button>
-      </div>
-    </div>
+          </div>
+        )}
+      </CardContent>
+      <CardFooter>
+        <Button variant="outline">Reset</Button>
+      </CardFooter>
+    </Card>
   )
 }

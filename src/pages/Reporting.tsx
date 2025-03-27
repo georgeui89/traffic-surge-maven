@@ -1,7 +1,8 @@
+
 import { useState } from 'react';
 import { 
   FileText, Download, Filter, ChevronDown, Calendar, BarChart, PieChart, 
-  LineChart, Sliders, ChevronRight, FileSpreadsheet 
+  LineChart, Sliders, ChevronRight, FileSpreadsheet, Plus
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
