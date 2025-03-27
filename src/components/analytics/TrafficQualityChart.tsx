@@ -1,135 +1,143 @@
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatNumber } from '@/utils/formatters';
-import { generateDailyTrafficData } from '@/utils/mockData';
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { HelpCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-type TrafficQualityChartProps = {
+interface TrafficQualityChartProps {
   timeRange: string;
   platformFilter: string;
-};
+}
 
-export const TrafficQualityChart = ({ timeRange, platformFilter }: TrafficQualityChartProps) => {
-  // Generate data based on the selected time range
-  const getDaysFromRange = () => {
-    switch (timeRange) {
-      case '24h': return 1;
-      case '7d': return 7;
-      case '30d': return 30;
-      case '90d': return 90;
-      default: return 7;
-    }
-  };
+export function TrafficQualityChart({ timeRange, platformFilter }: TrafficQualityChartProps) {
+  const [dataType, setDataType] = useState('acceptanceRate');
   
-  // Mock data for traffic quality
-  const rawData = generateDailyTrafficData(getDaysFromRange());
-  
-  // Enhance data with quality metrics
-  const data = rawData.map(day => ({
-    ...day,
-    qualityScore: Math.round(Math.random() * 40 + 60), // 60-100 scale
-    bounceRate: Math.round(Math.random() * 30 + 20), // 20-50% range
-    sessionTime: Math.round(Math.random() * 100 + 30), // 30-130 seconds
-  }));
-  
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-background/95 backdrop-blur-sm border border-border p-3 rounded-lg shadow-md">
-          <p className="font-medium">{label}</p>
-          <div className="mt-2 space-y-1.5">
-            <p className="text-sm flex items-center">
-              <span className="h-2 w-2 rounded-full bg-traffic mr-2"></span>
-              <span>Quality Score: </span>
-              <span className="ml-1 font-medium">{payload[0].value}/100</span>
-            </p>
-            <p className="text-sm flex items-center">
-              <span className="h-2 w-2 rounded-full bg-destructive mr-2"></span>
-              <span>Bounce Rate: </span>
-              <span className="ml-1 font-medium">{payload[1].value}%</span>
-            </p>
-            <p className="text-sm flex items-center">
-              <span className="h-2 w-2 rounded-full bg-primary mr-2"></span>
-              <span>Session Time: </span>
-              <span className="ml-1 font-medium">{payload[2].value} sec</span>
-            </p>
-          </div>
-        </div>
-      );
+  // Mock data
+  const generateData = () => {
+    const data = [];
+    const days = timeRange === '24h' ? 24 : timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
+    const multiplier = platformFilter === 'all' ? 1 : platformFilter === '9hits' ? 1.1 : platformFilter === 'hitleap' ? 0.9 : 1.05;
+    
+    for (let i = 0; i < days; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - (days - i));
+      
+      const baseAcceptanceRate = 75 + Math.random() * 15;
+      const baseAvgTimeOnSite = 25 + Math.random() * 20;
+      const baseAvgLoadTime = 0.5 + Math.random() * 0.8;
+      
+      data.push({
+        date: timeRange === '24h' 
+          ? `${date.getHours()}:00` 
+          : `${date.getMonth() + 1}/${date.getDate()}`,
+        acceptanceRate: (baseAcceptanceRate * multiplier).toFixed(1),
+        avgTimeOnSite: (baseAvgTimeOnSite * multiplier).toFixed(1),
+        avgLoadTime: (baseAvgLoadTime * (1 / multiplier)).toFixed(2)
+      });
     }
     
-    return null;
+    return data;
   };
   
+  const data = generateData();
+  
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-base font-medium">Traffic Quality Indicators</CardTitle>
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <CardTitle className="flex items-center gap-2">
+              Traffic Quality
+              <TooltipProvider>
+                <UITooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
+                      <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-xs">Traffic quality metrics measure how well your traffic performs in terms of acceptance, engagement, and technical performance.</p>
+                  </TooltipContent>
+                </UITooltip>
+              </TooltipProvider>
+            </CardTitle>
+            <CardDescription>
+              Track key quality metrics over time
+            </CardDescription>
+          </div>
+          <Tabs value={dataType} onValueChange={setDataType}>
+            <TabsList className="h-8">
+              <TabsTrigger value="acceptanceRate" className="text-xs px-3">Acceptance Rate</TabsTrigger>
+              <TabsTrigger value="avgTimeOnSite" className="text-xs px-3">Time on Site</TabsTrigger>
+              <TabsTrigger value="avgLoadTime" className="text-xs px-3">Load Time</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </CardHeader>
-      <CardContent className="pl-2">
+      <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart
-            data={data}
-            margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" vertical={false} />
+          <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#444" />
             <XAxis 
               dataKey="date" 
-              tick={{ fontSize: 12 }} 
-              tickLine={false}
-              axisLine={{ stroke: 'hsl(var(--muted))' }}
-              dy={10}
+              stroke="#666" 
+              style={{ fontSize: '12px' }}
             />
             <YAxis 
-              yAxisId="left"
-              tick={{ fontSize: 12 }} 
-              tickLine={false}
-              axisLine={false}
-              domain={[0, 100]}
+              stroke="#666" 
+              style={{ fontSize: '12px' }}
+              domain={
+                dataType === 'acceptanceRate' ? [50, 100] : 
+                dataType === 'avgTimeOnSite' ? [0, 60] :
+                [0, 2]
+              }
+              label={{ 
+                value: dataType === 'acceptanceRate' ? '% Acceptance' : 
+                       dataType === 'avgTimeOnSite' ? 'Seconds' : 
+                       'Seconds',
+                angle: -90, 
+                position: 'insideLeft',
+                style: { fontSize: '12px', fill: '#888' }
+              }}
             />
-            <YAxis 
-              yAxisId="right"
-              orientation="right"
-              tick={{ fontSize: 12 }} 
-              tickLine={false}
-              axisLine={false}
-              domain={[0, 160]}
+            <Tooltip 
+              contentStyle={{ backgroundColor: '#333', borderColor: '#555' }} 
+              labelStyle={{ color: '#eee' }}
+              formatter={(value) => [
+                `${value}${dataType === 'acceptanceRate' ? '%' : dataType === 'avgLoadTime' ? 's' : 's'}`, 
+                dataType === 'acceptanceRate' ? 'Acceptance Rate' : 
+                dataType === 'avgTimeOnSite' ? 'Avg. Time on Site' : 
+                'Avg. Load Time'
+              ]}
             />
-            <RechartsTooltip content={<CustomTooltip />} />
             <Legend />
             <Line 
-              yAxisId="left"
               type="monotone" 
-              dataKey="qualityScore" 
-              name="Quality Score" 
-              stroke="hsl(var(--traffic))" 
+              dataKey={dataType} 
+              stroke={
+                dataType === 'acceptanceRate' ? '#3b82f6' : 
+                dataType === 'avgTimeOnSite' ? '#10b981' : 
+                '#ef4444'
+              } 
               strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 6, stroke: 'hsl(var(--traffic))', strokeWidth: 2, fill: 'hsl(var(--background))' }}
-            />
-            <Line 
-              yAxisId="left"
-              type="monotone" 
-              dataKey="bounceRate" 
-              name="Bounce Rate %" 
-              stroke="hsl(var(--destructive))" 
-              strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 6, stroke: 'hsl(var(--destructive))', strokeWidth: 2, fill: 'hsl(var(--background))' }}
-            />
-            <Line 
-              yAxisId="right"
-              type="monotone" 
-              dataKey="sessionTime" 
-              name="Session Time (sec)" 
-              stroke="hsl(var(--primary))" 
-              strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 6, stroke: 'hsl(var(--primary))', strokeWidth: 2, fill: 'hsl(var(--background))' }}
+              dot={{ r: 1 }}
+              activeDot={{ r: 6 }}
             />
           </LineChart>
         </ResponsiveContainer>
+        <div className="mt-3 text-sm text-muted-foreground">
+          <p>
+            {dataType === 'acceptanceRate' 
+              ? 'Acceptance rate is the percentage of traffic that is accepted by ad networks. Higher is better.' 
+              : dataType === 'avgTimeOnSite' 
+              ? 'Average time on site measures how long visitors stay on your pages. Longer durations often correlate with higher acceptance rates.'
+              : 'Average load time measures how quickly your pages load. Faster load times improve user experience and ad acceptance.'}
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
-};
+}

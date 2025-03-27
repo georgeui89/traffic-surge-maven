@@ -11,9 +11,11 @@ import ScriptPerformance from '@/components/script-lab/ScriptPerformance';
 import ScriptRecommendations from '@/components/script-lab/ScriptRecommendations';
 import ScriptVariantTable from '@/components/script-lab/ScriptVariantTable';
 import ScriptTemplates from '@/components/script-lab/ScriptTemplates';
-import { PlusCircle, Play, Save, Download, Upload, FileCode, RefreshCw, Share } from 'lucide-react';
+import { ScriptABTesting } from '@/components/script-lab/ScriptABTesting';
+import { PlusCircle, Play, Save, Download, Upload, FileCode, RefreshCw, Share, HelpCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const ScriptLab = () => {
   const [activeTab, setActiveTab] = useState('editor');
@@ -76,41 +78,77 @@ const ScriptLab = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-8 space-y-6">
-          <Card className="shadow-modern border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-hover">
-            <CardHeader className="pb-3 bg-muted/30 border-b border-border/50">
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle className="text-xl font-medium">Script Editor</CardTitle>
-                  <CardDescription>Write and customize your redirection script</CardDescription>
-                </div>
-                <div className="flex gap-2">
-                  <Select value={scriptType} onValueChange={setScriptType}>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Script Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="redirect">Basic Redirect</SelectItem>
-                      <SelectItem value="advanced">Advanced Redirect</SelectItem>
-                      <SelectItem value="custom">Custom Script</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="p-4">
-                <Input 
-                  value={scriptName} 
-                  onChange={e => setScriptName(e.target.value)} 
-                  placeholder="Script Name" 
-                  className="mb-4"
-                />
-                <ScriptEditor code={scriptCode} setCode={setScriptCode} />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <ScriptPerformance scriptId="1" />
+          <Tabs defaultValue="editor" value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="mb-3">
+              <TabsTrigger value="editor">Editor</TabsTrigger>
+              <TabsTrigger value="abtesting">A/B Testing</TabsTrigger>
+              <TabsTrigger value="performance">Performance</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="editor">
+              <Card className="shadow-modern border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-hover">
+                <CardHeader className="pb-3 bg-muted/30 border-b border-border/50">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <CardTitle className="text-xl font-medium">Script Editor</CardTitle>
+                      <CardDescription>Write and customize your redirection script</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm text-muted-foreground flex items-center gap-1">
+                        Script Type
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">The type of script determines how traffic is handled and tracked.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <Select value={scriptType} onValueChange={setScriptType}>
+                        <SelectTrigger className="w-40">
+                          <SelectValue placeholder="Script Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="redirect">Basic Redirect</SelectItem>
+                          <SelectItem value="advanced">Advanced Redirect</SelectItem>
+                          <SelectItem value="custom">Custom Script</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Input 
+                        value={scriptName} 
+                        onChange={e => setScriptName(e.target.value)} 
+                        placeholder="Script Name" 
+                      />
+                      <Button variant="outline" size="icon">
+                        <Upload className="h-4 w-4" />
+                        <span className="sr-only">Upload</span>
+                      </Button>
+                    </div>
+                    <ScriptEditor code={scriptCode} setCode={setScriptCode} />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="abtesting">
+              <ScriptABTesting />
+            </TabsContent>
+            
+            <TabsContent value="performance">
+              <ScriptPerformance scriptId="1" />
+            </TabsContent>
+          </Tabs>
         </div>
         
         <div className="lg:col-span-4 space-y-6">
@@ -122,7 +160,17 @@ const ScriptLab = () => {
             <CardContent className="p-4">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-medium">Current Variants</h3>
-                <Button size="sm" variant="outline">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => {
+                    toast({
+                      title: "Add Variant",
+                      description: "Create a variant of your current script for testing.",
+                      duration: 3000,
+                    });
+                  }}
+                >
                   <PlusCircle className="h-4 w-4 mr-2" />
                   Add Variant
                 </Button>
@@ -137,7 +185,15 @@ const ScriptLab = () => {
               <CardDescription>Use pre-built script templates</CardDescription>
             </CardHeader>
             <CardContent className="p-4">
-              <ScriptTemplates onSelectTemplate={(template) => setScriptCode(template.code)} />
+              <ScriptTemplates onSelectTemplate={(template) => {
+                setScriptCode(template.code);
+                setActiveTab('editor');
+                toast({
+                  title: "Template Applied",
+                  description: `The "${template.name}" template has been applied.`,
+                  duration: 3000,
+                });
+              }} />
             </CardContent>
           </Card>
           

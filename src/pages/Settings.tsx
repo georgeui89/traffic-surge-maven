@@ -1,5 +1,6 @@
+
 import { useState } from 'react';
-import { Save, Moon, Sun, BellRing, BellOff, DollarSign, Percent, Server, PlugZap, BarChart } from 'lucide-react';
+import { Save, Moon, Sun, BellRing, BellOff, DollarSign, Percent, Server, PlugZap, BarChart, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -10,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { defaultSettings } from '@/utils/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { ApiIntegration } from '@/components/integrations/ApiIntegration';
+import { ApiKeyModal } from '@/components/settings/ApiKeyModal';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const Settings = () => {
   const { toast } = useToast();
@@ -21,6 +24,14 @@ const Settings = () => {
     rdpDefaultCost: defaultSettings.rdpDefaultCost,
     notificationsEnabled: defaultSettings.notificationsEnabled,
     autoscalingEnabled: defaultSettings.autoscalingEnabled,
+  });
+  
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    platformName: '',
+    platformId: '',
+    isConnected: false,
+    existingKey: '',
   });
   
   const handleSaveSettings = () => {
@@ -44,6 +55,23 @@ const Settings = () => {
       title: `${enabled ? 'Dark' : 'Light'} Mode Activated`,
       duration: 2000,
     });
+  };
+
+  const handleOpenApiKeyModal = (platformName: string, platformId: string, isConnected: boolean, existingKey?: string) => {
+    setModalState({
+      isOpen: true,
+      platformName,
+      platformId,
+      isConnected,
+      existingKey: existingKey || '',
+    });
+  };
+
+  const handleCloseApiKeyModal = () => {
+    setModalState(prevState => ({
+      ...prevState,
+      isOpen: false,
+    }));
   };
 
   const adsterraCodeExamples = [
@@ -95,6 +123,15 @@ headers = {
 response = requests.get(url, headers=headers, params=params)
 print(response.json())`
     }
+  ];
+  
+  // Platform list with API connection status
+  const platformList = [
+    { id: '9hits', name: '9Hits', connected: true, apiKey: 'abcd1234efgh5678ijkl90' },
+    { id: 'hitleap', name: 'HitLeap', connected: true, apiKey: 'xyz123456789abcdefgh' },
+    { id: 'otohits', name: 'Otohits', connected: false },
+    { id: 'bighits4u', name: 'BigHits4U', connected: false },
+    { id: 'webhitnet', name: 'Webhit.net', connected: true, apiKey: 'webhit987654321abcxyz' },
   ];
   
   return (
@@ -180,6 +217,19 @@ print(response.json())`
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-5 w-5 text-earnings" />
                   <Label htmlFor="daily-revenue-goal">Daily Revenue Goal ($)</Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-5 w-5 p-0 ml-1">
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                          <span className="sr-only">Help</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">Target daily revenue used for progress bars and recommendations. Set this to a realistic goal to better optimize your traffic strategy.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
                 <Input 
                   id="daily-revenue-goal" 
@@ -198,6 +248,19 @@ print(response.json())`
                 <div className="flex items-center gap-2">
                   <Percent className="h-5 w-5 text-warning" />
                   <Label htmlFor="acceptance-rate">Default Acceptance Rate (%)</Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-5 w-5 p-0 ml-1">
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                          <span className="sr-only">Help</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">Percentage of traffic that is accepted by ad networks. Higher rates typically mean better traffic quality and improved revenue.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
                 <Input 
                   id="acceptance-rate" 
@@ -217,6 +280,19 @@ print(response.json())`
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-5 w-5 text-primary" />
                   <Label htmlFor="cpm-rate">Default CPM Rate ($)</Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-5 w-5 p-0 ml-1">
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                          <span className="sr-only">Help</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">Cost Per Mille (1000 impressions). This is the rate you earn for every 1000 ad impressions on your site.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
                 <Input 
                   id="cpm-rate" 
@@ -224,6 +300,7 @@ print(response.json())`
                   value={settings.defaultCpmRate}
                   onChange={(e) => setSettings({ ...settings, defaultCpmRate: parseFloat(e.target.value) })}
                   min="0"
+                  max="1"
                   step="0.01"
                 />
                 <p className="text-sm text-muted-foreground">
@@ -235,6 +312,19 @@ print(response.json())`
                 <div className="flex items-center gap-2">
                   <Server className="h-5 w-5 text-rdp" />
                   <Label htmlFor="rdp-cost">Default RDP Cost ($/day)</Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-5 w-5 p-0 ml-1">
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                          <span className="sr-only">Help</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">The daily operating cost of your Remote Desktop servers. This is used to calculate ROI.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
                 <Input 
                   id="rdp-cost" 
@@ -345,44 +435,33 @@ print(response.json())`
                   <Label htmlFor="api-keys">Platform API Keys</Label>
                   
                   <div className="rounded-md border overflow-hidden">
-                    <div className="p-3 border-b flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
-                          9H
+                    {platformList.map((platform, index) => (
+                      <div key={platform.id} className={`p-3 ${index < platformList.length - 1 ? 'border-b' : ''} flex items-center justify-between`}>
+                        <div className="flex items-center gap-2">
+                          <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                            {platform.name.substring(0, 2)}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">{platform.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {platform.connected ? 'API Key Connected' : 'Not Connected'}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium">9Hits</p>
-                          <p className="text-xs text-muted-foreground">API Key Connected</p>
-                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleOpenApiKeyModal(
+                            platform.name, 
+                            platform.id, 
+                            platform.connected, 
+                            platform.apiKey
+                          )}
+                        >
+                          {platform.connected ? 'Manage' : 'Connect'}
+                        </Button>
                       </div>
-                      <Button variant="outline" size="sm">Manage</Button>
-                    </div>
-                    
-                    <div className="p-3 border-b flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
-                          HL
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Hitleap</p>
-                          <p className="text-xs text-muted-foreground">API Key Connected</p>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">Manage</Button>
-                    </div>
-                    
-                    <div className="p-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
-                          OH
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Otohits</p>
-                          <p className="text-xs text-destructive">Not Connected</p>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">Connect</Button>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </CardContent>
@@ -451,6 +530,15 @@ print(response.json())`
           Save Settings
         </Button>
       </div>
+
+      <ApiKeyModal 
+        isOpen={modalState.isOpen}
+        onClose={handleCloseApiKeyModal}
+        platformName={modalState.platformName}
+        platformId={modalState.platformId}
+        isConnected={modalState.isConnected}
+        existingKey={modalState.existingKey}
+      />
     </div>
   );
 };
