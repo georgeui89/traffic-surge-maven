@@ -31,6 +31,16 @@ import {
   DialogTitle, DialogTrigger
 } from '@/components/ui/dialog';
 
+function BarChartIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="20" x2="12" y2="10"></line>
+      <line x1="18" y1="20" x2="18" y2="4"></line>
+      <line x1="6" y1="20" x2="6" y2="16"></line>
+    </svg>
+  );
+}
+
 const Automation = () => {
   const { toast } = useToast();
   const [autopilotEnabled, setAutopilotEnabled] = useState(false);
@@ -206,7 +216,7 @@ const Automation = () => {
             <AutomationRule
               title="Error Handling & Recovery"
               description="Automatically detect and resolve issues with platforms or RDPs."
-              icon={<AlertTriangleIcon />}
+              icon={<AlertTriangle />}
               initialEnabled={rules.errorHandling}
               onToggle={(enabled) => handleRuleToggle('errorHandling', enabled)}
             />
@@ -296,7 +306,7 @@ const Automation = () => {
                     className="w-full gap-2"
                     disabled={!autopilotEnabled || aiProcessing}
                   >
-                    <SparklesIcon className="h-4 w-4" />
+                    <Sparkles className="h-4 w-4" />
                     Advanced AI Settings
                   </Button>
                 </DialogTrigger>
@@ -378,7 +388,7 @@ const Automation = () => {
               
               {aiRecommendation && (
                 <Alert className="bg-primary/5 border-primary/20 transition-all duration-300 hover:bg-primary/10">
-                  <BotIcon className="h-5 w-5 text-primary" />
+                  <Bot className="h-5 w-5 text-primary" />
                   <div className="flex justify-between items-start w-full">
                     <div>
                       <AlertTitle className="flex items-center gap-2">
@@ -624,15 +634,15 @@ const Automation = () => {
                 <h3 className="text-sm font-medium">Resource Allocation Strategy</h3>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button variant="outline" className="flex-1 justify-start gap-2">
-                    <StarIcon className="h-4 w-4 text-warning" />
+                    <Star className="h-4 w-4 text-warning" />
                     Prioritize High Performers
                   </Button>
                   <Button variant="outline" className="flex-1 justify-start gap-2">
-                    <ZapIcon className="h-4 w-4 text-success" />
+                    <Zap className="h-4 w-4 text-success" />
                     Balance Resources
                   </Button>
                   <Button variant="secondary" className="flex-1 justify-start gap-2">
-                    <BrainIcon className="h-4 w-4 text-primary" />
+                    <Cpu className="h-4 w-4 text-primary" />
                     AI Optimization
                   </Button>
                 </div>
