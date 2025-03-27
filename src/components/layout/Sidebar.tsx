@@ -17,7 +17,9 @@ import {
   Calculator,
   Activity,
   Zap,
-  Code
+  Code,
+  HelpCircle,
+  BookOpen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -164,6 +166,13 @@ export const Sidebar = () => {
           {!collapsed && <div className="text-xs font-medium text-sidebar-foreground/50 mb-2 ml-3">TOOLS</div>}
           <NavItem to="/cpm-calculator" icon={Calculator} label="CPM Calculator" collapsed={collapsed} />
           <NavItem to="/rdp-scaler" icon={Activity} label="RDP Scaler" collapsed={collapsed} />
+        </div>
+
+        {!collapsed && <Separator className="my-3 bg-sidebar-border/30" />}
+        
+        <div className="mb-2">
+          {!collapsed && <div className="text-xs font-medium text-sidebar-foreground/50 mb-2 ml-3">SUPPORT</div>}
+          <NavItem to="/help-center" icon={BookOpen} label="Help Center" collapsed={collapsed} isNew={true} />
         </div>
       </nav>
 

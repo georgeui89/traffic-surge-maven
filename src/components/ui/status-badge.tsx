@@ -32,7 +32,7 @@ const statusBadgeVariants = cva(
   }
 );
 
-interface StatusBadgeProps extends VariantProps<typeof statusBadgeVariants> {
+export interface StatusBadgeProps extends VariantProps<typeof statusBadgeVariants> {
   label: string;
   className?: string;
   withDot?: boolean;
