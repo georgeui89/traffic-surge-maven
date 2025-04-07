@@ -33,108 +33,156 @@ export const helpCategoriesData: HelpCategory[] = [
     description: "Learn the basics of Traffic Manager and how to set up your account.",
     articles: [
       {
-        id: "welcome-guide",
-        title: "Welcome to Traffic Manager",
-        description: "A comprehensive guide for new users",
+        id: "what-is-traffic-manager",
+        title: "What is Traffic Manager?",
+        description: "A comprehensive introduction to Traffic Manager",
         category: "getting-started",
-        lastUpdated: "Sept 10, 2023",
+        lastUpdated: "April 5, 2024",
         tags: ["intro", "overview", "beginner"],
         sections: [
           {
-            title: "What is Traffic Manager?",
-            content: "[Detailed explanation of the Traffic Manager application, its purpose, features, and benefits for managing traffic across multiple platforms.]",
+            title: "Purpose",
+            content: "Welcome to Traffic Manager! This application is designed to help you centralize, analyze, and optimize your traffic arbitrage activities, specifically when using autosurf platforms and monetizing with networks like Adsterra. Our goal is to help you maximize your ROI through better tracking, calculation, and strategic decision-making."
           },
           {
-            title: "Key Features",
-            content: "[Overview of the main features including Dashboard, Campaign Management, RDP Management, Budget Optimizer, etc.]",
-            image: "Screenshot of Dashboard homepage highlighting key features",
+            title: "Who is it for?",
+            content: "Individuals and teams actively engaged in traffic arbitrage."
           },
           {
-            title: "Setting Up Your Account",
-            content: "[Instructions for setting up your account and connecting your first platform.]",
-            steps: [
-              "Create your account with email and password",
-              "Complete your profile information",
-              "Connect your first traffic platform",
-              "Set up your initial budget parameters"
-            ]
+            title: "Key Benefits",
+            content: "Real-time insights, centralized tracking, profit calculation, optimization tools, automation capabilities (future).",
+            image: "Dashboard screenshot showing key features"
           }
         ],
-        relatedArticles: ["connecting-platforms", "first-campaign"]
+        relatedArticles: ["understanding-key-concepts", "setting-up-account"]
       },
       {
-        id: "connecting-platforms",
-        title: "Connecting Traffic Platforms",
-        description: "How to connect your traffic platforms to Traffic Manager",
+        id: "understanding-key-concepts",
+        title: "Understanding Key Concepts",
+        description: "Learn the fundamental concepts and terminology used in Traffic Manager",
         category: "getting-started",
-        lastUpdated: "Aug 15, 2023",
-        tags: ["platforms", "integration", "api", "setup"],
+        lastUpdated: "April 3, 2024",
+        tags: ["concepts", "terminology", "fundamentals"],
         sections: [
           {
-            title: "Supported Platforms",
-            content: "[List of all supported traffic platforms including 9Hits, HitLeap, Otohits, etc.]"
+            title: "Traffic Arbitrage",
+            content: "The practice of buying traffic (e.g., from autosurf platforms) and selling it at a higher price (e.g., by displaying ads from networks like Adsterra on your pages)."
           },
           {
-            title: "Finding Your API Keys",
-            content: "[Instructions for locating API keys within each supported platform.]",
-            image: "Annotated screenshots showing where to find API keys in each platform"
+            title: "Autosurf Platforms",
+            content: "Services like 9Hits, BigHits4U, Hitleap, etc., that provide automated website visits."
           },
           {
-            title: "Connecting a Platform",
-            content: "[Step-by-step guide for connecting a platform to Traffic Manager.]",
-            steps: [
-              "Navigate to Settings > Integrations",
-              "Find your platform in the list",
-              "Click 'Connect' for unconnected platforms",
-              "Enter your API key in the modal",
-              "Click 'Save' to establish the connection"
-            ],
-            tips: [
-              "Always copy and paste API keys to avoid typing errors",
-              "Test the connection immediately after adding a new platform",
-              "If you encounter errors, verify the API key is correct and active",
-              "Some platforms may require additional permissions to be set in their dashboard"
-            ]
+            title: "CPM (Cost Per Mille / Thousand Impressions)",
+            content: "A common advertising metric. Can refer to the rate an ad network pays ($ per 1000 impressions) or sometimes the cost of buying 1000 visits. In Traffic Manager, be mindful of context."
+          },
+          {
+            title: "Actual CPM ($)",
+            content: "CRUCIAL INPUT. This is the effective revenue you actually earn from Adsterra per 1000 valid impressions for a specific traffic source. This depends heavily on traffic quality, geo, ad placements, and Adsterra's evaluation. You must determine and input this based on your Adsterra reports."
+          },
+          {
+            title: "Acceptance Rate (%)",
+            content: "CRUCIAL INPUT. The percentage of estimated visits from an autosurf platform that Adsterra considers valid and counts as a payable ad impression. This is highly variable and depends on traffic quality, visit duration, anti-fraud measures, etc. You must estimate and input this based on your experience and Adsterra reports."
+          },
+          {
+            title: "ROI (Return on Investment)",
+            content: "Calculated as ((Revenue - Costs) / Costs) * 100%. Shows the profitability of your campaigns."
+          },
+          {
+            title: "RDP (Remote Desktop Protocol) / VPS (Virtual Private Server)",
+            content: "Remote computers often used to run autosurf client applications 24/7."
           }
         ],
-        relatedArticles: ["platform-troubleshooting", "managing-api-keys"]
+        relatedArticles: ["what-is-traffic-manager", "cpm-calculator-guide"]
       },
       {
-        id: "first-campaign",
-        title: "Creating Your First Campaign",
-        description: "Step-by-step guide to creating your first traffic campaign",
+        id: "setting-up-account",
+        title: "Setting Up Your Account",
+        description: "How to set up your Traffic Manager account and configure initial settings",
         category: "getting-started",
-        tags: ["campaign", "setup", "beginner"],
+        lastUpdated: "March 29, 2024",
+        tags: ["account", "setup", "configuration"],
         sections: [
           {
-            title: "Campaign Basics",
-            content: "[Explanation of what campaigns are in Traffic Manager and how they work.]"
+            title: "Initial Login",
+            content: "[Instructions specific to your login process]"
           },
           {
-            title: "Creating a New Campaign",
-            content: "[Detailed walkthrough of creating a new campaign.]",
+            title: "Key Settings (Navigate to Settings -> Metrics)",
+            content: "Before starting, it's helpful to set your default values:",
             steps: [
-              "Navigate to the Campaigns page",
-              "Click the 'Create Campaign' button",
-              "Enter the campaign name and URL",
-              "Select target platforms",
-              "Set budget and traffic parameters",
-              "Review and launch campaign"
-            ],
-            image: "Screenshot of campaign creation wizard with annotations"
+              "Daily Revenue Goal ($): Used for dashboard progress bars.",
+              "Default Acceptance Rate (%): Used if you don't specify per campaign.",
+              "Default CPM Rate ($): Note: This is often less useful than Actual CPM per campaign.",
+              "Default RDP Cost ($/day): Used for RDP ROI calculations."
+            ]
           },
           {
-            title: "Monitoring Campaign Performance",
-            content: "[Explanation of how to track campaign performance and key metrics to monitor.]",
-            tips: [
-              "Start with a small budget to test performance",
-              "Monitor acceptance rate closely in the first 24 hours",
-              "Make adjustments based on initial performance data",
-              "Use the Budget Optimizer for automated improvements"
-            ]
+            title: "Appearance",
+            content: "Configure Dark Mode and date/time formats in Settings -> Appearance."
           }
         ],
-        relatedArticles: ["campaign-optimization", "budget-management"]
+        relatedArticles: ["connecting-adsterra", "navigating-dashboard"]
+      },
+      {
+        id: "connecting-adsterra",
+        title: "Connecting Adsterra",
+        description: "How to connect your Adsterra Publisher API to Traffic Manager",
+        category: "getting-started",
+        lastUpdated: "March 25, 2024",
+        tags: ["adsterra", "integration", "api", "setup"],
+        sections: [
+          {
+            title: "Purpose",
+            content: "Connecting your Adsterra Publisher API allows Traffic Manager to fetch reference data (like general CPM trends or reported earnings) for comparison purposes. Important: Traffic Manager's core revenue calculations rely on the Actual CPM and Acceptance Rate you manually input, not automatically pulled real-time data per campaign via API."
+          },
+          {
+            title: "How to Connect",
+            content: "Follow these steps to connect your Adsterra account:",
+            steps: [
+              "Log in to your Adsterra Publisher account.",
+              "Navigate to the API section (or Profile/Developer section).",
+              "Generate a new API token/key with at least read access.",
+              "Copy the API key.",
+              "In Traffic Manager, go to Settings -> Integrations.",
+              "Paste the key into the Adsterra API Key field and click \"Test Connection\" or \"Save\"."
+            ],
+            image: "Screenshot of Settings -> Integrations"
+          }
+        ],
+        relatedArticles: ["managing-integrations", "setting-up-account"]
+      },
+      {
+        id: "navigating-dashboard",
+        title: "Navigating the Dashboard",
+        description: "Understanding the Dashboard interface and key metrics",
+        category: "getting-started",
+        lastUpdated: "March 23, 2024",
+        tags: ["dashboard", "metrics", "navigation", "overview"],
+        sections: [
+          {
+            title: "Overview",
+            content: "The Dashboard provides a real-time snapshot of your entire operation."
+          },
+          {
+            title: "Key Metrics (Top Row)",
+            content: "Shows total visits, valid impressions, revenue, and acceptance rate across all active campaigns (with trend indicators)."
+          },
+          {
+            title: "Charts",
+            content: "Visualize traffic trends (Visits vs. Impressions) and daily earnings over selected periods."
+          },
+          {
+            title: "Status Widgets",
+            content: "Quickly see the health of connected Platforms, active RDPs, and active Campaigns."
+          },
+          {
+            title: "Filters",
+            content: "Use the filters (Date Range, etc.) to adjust the data displayed.",
+            image: "Annotated Screenshot of the Dashboard"
+          }
+        ],
+        relatedArticles: ["what-is-traffic-manager", "campaign-management"]
       }
     ]
   },
@@ -144,56 +192,179 @@ export const helpCategoriesData: HelpCategory[] = [
     description: "Detailed guides for each feature in Traffic Manager.",
     articles: [
       {
-        id: "dashboard-overview",
-        title: "Dashboard Overview",
-        description: "Understanding and customizing your dashboard",
+        id: "campaign-management",
+        title: "Campaign Management Deep Dive",
+        description: "Track individual traffic sources and their performance",
         category: "features",
-        tags: ["dashboard", "metrics", "customize"],
+        lastUpdated: "April 2, 2024",
+        tags: ["campaigns", "tracking", "performance"],
         sections: [
           {
-            title: "Dashboard Elements",
-            content: "[Detailed explanation of all dashboard elements and what they represent.]",
-            image: "Annotated dashboard screenshot showing all key components"
+            title: "Purpose",
+            content: "Track individual traffic sources (autosurf platforms) and their performance."
           },
           {
-            title: "Customizing Your Dashboard",
-            content: "[Instructions for customizing the dashboard layout and visible widgets.]",
+            title: "Creating a Campaign",
+            content: "Click \"+New Campaign\". Fill in the details:",
             steps: [
-              "Click the 'Customize Dashboard' button",
-              "Toggle widgets on/off using the checkboxes",
-              "Save your customized layout"
-            ]
+              "Campaign Name: Your identifier (e.g., \"9Hits - USA Desktop\").",
+              "Platform: Select from the list (affects default Conversion Factor). Add custom platforms in Platform Management.",
+              "Conversion Factor: Auto-filled (e.g., 1 sec/credit, 60 sec/point). Edit if needed. Crucial for calculating estimated visits from credits.",
+              "Credits Earned: MANUAL INPUT. Update this regularly with credits earned from the platform. Traffic Manager typically cannot fetch this automatically.",
+              "Acceptance Rate (%): MANUAL INPUT. Your estimate of valid impressions per visit.",
+              "Actual CPM ($): MANUAL INPUT. Your effective earnings per 1000 valid impressions from Adsterra for this source.",
+              "Campaign Cost / Test Budget ($): Input associated costs (e.g., credit purchase, allocated VPS cost).",
+              "Revenue Goal ($): Optional target for this campaign.",
+              "(Optional) Daily Credit Earning Rate: Used for time-to-goal estimation.",
+              "Average Visit Length (seconds): Used to convert time-based credits to visits."
+            ],
+            image: "Screenshot of Campaign Creation Form"
+          },
+          {
+            title: "Calculated Metrics",
+            content: "The app automatically calculates Estimated Visits, Valid Impressions, Revenue, ROI, Credits Needed for Goal, etc., based on your inputs."
+          },
+          {
+            title: "Table View",
+            content: "Monitor status, visits, revenue, and ROI for all campaigns. Use search and filters."
           }
         ],
-        relatedArticles: ["metrics-explained", "platform-status"]
+        relatedArticles: ["platform-management", "rdp-management"]
       },
       {
-        id: "campaign-management",
-        title: "Campaign Management",
-        description: "Creating, editing, and optimizing campaigns",
+        id: "rdp-management",
+        title: "RDP Management Explained",
+        description: "Track the remote desktops running your autosurf clients",
         category: "features",
-        tags: ["campaigns", "management", "optimization"],
+        lastUpdated: "March 28, 2024",
+        tags: ["rdp", "management", "servers", "infrastructure"],
         sections: [
           {
-            title: "Campaign Management Overview",
-            content: "[Comprehensive explanation of the campaign management interface and capabilities.]"
+            title: "Purpose",
+            content: "Track the remote desktops or servers running your autosurf clients and their associated costs/profitability."
           },
           {
-            title: "Campaign Settings Explained",
-            content: "[Detailed explanation of all campaign settings and parameters.]",
-            image: "Screenshot of campaign settings page with annotations"
+            title: "Adding an RDP",
+            content: "Click \"+ Add RDP\". Enter a name/identifier and its estimated daily or monthly cost."
           },
           {
-            title: "Bulk Campaign Actions",
-            content: "[Instructions for performing actions on multiple campaigns at once.]",
-            steps: [
-              "Select campaigns using the checkboxes",
-              "Choose an action from the bulk actions menu",
-              "Confirm the action"
-            ]
+            title: "Assigning Platforms (Manual)",
+            content: "You can note which platforms/campaigns are running on which RDP in the RDP's details (useful for troubleshooting or allocation)."
+          },
+          {
+            title: "Table View",
+            content: "Monitor status (Online/Offline - manual toggle), assigned platforms, estimated Visits, Revenue, Cost, and ROI per RDP."
+          },
+          {
+            title: "Importance",
+            content: "Helps determine if your infrastructure costs are justified by the revenue generated.",
+            image: "Screenshot of RDP Management Table"
           }
         ],
-        relatedArticles: ["campaign-optimization", "traffic-analysis"]
+        relatedArticles: ["rdp-scaler", "campaign-management"]
+      },
+      {
+        id: "platform-management",
+        title: "Platform Management",
+        description: "Manage your autosurf platforms within Traffic Manager",
+        category: "features",
+        lastUpdated: "March 26, 2024",
+        tags: ["platforms", "management", "integration"],
+        sections: [
+          {
+            title: "Purpose",
+            content: "Manage the list of autosurf platforms used in your campaigns."
+          },
+          {
+            title: "Adding Platforms",
+            content: "Click \"+ Add Platform\" if a platform you use isn't listed. You'll need to define its Conversion Factor (e.g., sec/credit, visits/hit)."
+          },
+          {
+            title: "Status",
+            content: "Indicates potential issues (manual flag or based on campaign performance - clarify implementation)."
+          },
+          {
+            title: "Platform API Keys",
+            content: "Some platforms might offer APIs for specific minor functions (check platform docs). The \"Connect/Manage\" buttons here are for inputting those keys if available and supported. This section generally does NOT enable automatic credit fetching.",
+            image: "Screenshot of Platform Management List"
+          }
+        ],
+        relatedArticles: ["campaign-management", "managing-integrations"]
+      },
+      {
+        id: "traffic-analytics",
+        title: "Traffic Analytics Insights",
+        description: "Analyze traffic quality, sources, and performance trends",
+        category: "features",
+        lastUpdated: "March 24, 2024",
+        tags: ["analytics", "traffic", "performance", "insights"],
+        sections: [
+          {
+            title: "Purpose",
+            content: "Analyze traffic quality, sources, and performance trends in detail."
+          },
+          {
+            title: "Key Sections",
+            content: "The Traffic Analytics page includes several important sections:"
+          },
+          {
+            title: "KPIs",
+            content: "Detailed view of Visits, Impressions, Acceptance Rate, Avg. Time on Site over selected period."
+          },
+          {
+            title: "Traffic Quality Indicators",
+            content: "Visualize trends like session duration or bounce rate (if tracked)."
+          },
+          {
+            title: "Platform Acceptance Rates",
+            content: "Compare which platforms yield higher valid impression rates."
+          },
+          {
+            title: "Traffic Sources Distribution",
+            content: "See which platforms contribute the most visits."
+          },
+          {
+            title: "Key Insights & Suggestions",
+            content: "Automated text highlighting important trends or potential issues, with actionable recommendations."
+          },
+          {
+            title: "Filtering",
+            content: "Use filters (Date, Platform) to drill down into specific segments.",
+            image: "Screenshot of Traffic Analytics Page"
+          }
+        ],
+        relatedArticles: ["reporting", "budget-optimizer"]
+      },
+      {
+        id: "reporting",
+        title: "Using the Reporting Feature",
+        description: "Generate downloadable summaries of your performance",
+        category: "features",
+        lastUpdated: "March 22, 2024",
+        tags: ["reports", "download", "export", "analytics"],
+        sections: [
+          {
+            title: "Purpose",
+            content: "Generate downloadable summaries of your performance."
+          },
+          {
+            title: "Generating Reports",
+            content: "Follow these steps to generate a report:",
+            steps: [
+              "Go to Reporting.",
+              "Select a Report Template (e.g., Performance Overview, RDP Efficiency) or choose \"Create Custom Report\".",
+              "Configure parameters: Date Range, Platforms, Metrics, Group By.",
+              "Choose Export Options: Format (PDF, CSV, Excel, JSON) and Delivery (Download, Email).",
+              "Click \"Generate Report\"."
+            ],
+            image: "Screenshot of Report Generation Options"
+          },
+          {
+            title: "Saved/Scheduled Reports",
+            content: "Access previously generated reports or set up recurring reports."
+          }
+        ],
+        relatedArticles: ["traffic-analytics"]
       }
     ]
   },
@@ -203,85 +374,100 @@ export const helpCategoriesData: HelpCategory[] = [
     description: "Learn how to use specialized tools within Traffic Manager.",
     articles: [
       {
-        id: "cpm-calculator",
-        title: "CPM Calculator",
-        description: "Calculate revenue and optimize CPM rates",
+        id: "cpm-calculator-guide",
+        title: "CPM Calculator Guide",
+        description: "Estimate potential revenue based on credits/traffic",
         category: "tools",
-        tags: ["calculator", "cpm", "revenue"],
+        lastUpdated: "April 4, 2024",
+        tags: ["calculator", "cpm", "revenue", "estimation"],
         sections: [
           {
-            title: "What is CPM?",
-            content: "[Explanation of Cost Per Mille (thousand impressions) and its importance in traffic management.]"
+            title: "Purpose",
+            content: "Estimate potential revenue based on credits/traffic, or estimate credits needed to reach a revenue goal."
           },
           {
-            title: "Using the CPM Calculator",
-            content: "[Step-by-step guide for using the CPM Calculator tool.]",
-            image: "Screenshot of CPM Calculator interface with annotations",
-            steps: [
-              "Enter your target CPM rate",
-              "Input your acceptance rate percentage",
-              "Set your daily visit target or budget",
-              "Review the calculated results",
-              "Adjust parameters to optimize outcomes"
-            ]
+            title: "Mode 1: Calculate Revenue",
+            content: "Inputs: Platform, Credits Earned, Seconds Per Visit (or Avg Visit Length), Acceptance Rate (%), Actual CPM ($).\nOutputs: Expected Valid Impressions, Estimated Revenue."
           },
           {
-            title: "Understanding Calculator Results",
-            content: "[Explanation of all the metrics shown in calculator results and how to interpret them.]",
-            tips: [
-              "Higher CPM isn't always better if acceptance rate is low",
-              "Focus on Actual CPM after accounting for acceptance rate",
-              "Compare results across platforms to find optimal value",
-              "Save your calculations for reference"
-            ]
+            title: "Mode 2: Calculate Credits",
+            content: "Inputs: Platform, Target Revenue ($), Seconds Per Visit (or Avg Visit Length), Acceptance Rate (%), Actual CPM ($).\nOutputs: Credits Needed."
+          },
+          {
+            title: "Use Case",
+            content: "Useful for quick estimations before running a campaign or scaling up. Remember results depend heavily on input accuracy.",
+            image: "Screenshot of CPM Calculator"
           }
         ],
-        relatedArticles: ["acceptance-rate-guide", "budget-optimization"]
+        relatedArticles: ["campaign-management", "understanding-key-concepts"]
       },
       {
         id: "rdp-scaler",
-        title: "RDP Scaler",
+        title: "RDP Scaler Explained",
         description: "Optimize your RDP allocation across platforms",
         category: "tools",
+        lastUpdated: "March 31, 2024",
         tags: ["rdp", "scaling", "optimization"],
         sections: [
           {
-            title: "What is the RDP Scaler?",
-            content: "[Explanation of the RDP Scaler tool, its purpose and benefits.]"
+            title: "Purpose",
+            content: "Estimate the optimal number of RDPs/VPSs to run based on costs and projected revenue, aiming to maximize profit or ROI."
           },
           {
-            title: "Scaling Strategies",
-            content: "[Description of different scaling strategies and when to use them.]",
-            image: "Screenshot of scaling strategy options with annotations"
+            title: "Inputs",
+            content: "Number of RDPs, Cost per RDP, Visits per RDP, Acceptance Rate (%), CPM Rate ($)."
+          },
+          {
+            title: "Outputs",
+            content: "Projected Monthly Cost, Revenue, Profit, and ROI for that configuration."
+          },
+          {
+            title: "Optimization Suggestion",
+            content: "The tool may recommend increasing or decreasing RDPs based on its calculations."
+          },
+          {
+            title: "Insights Panel",
+            content: "Provides tips and typical performance data for reference.",
+            image: "Screenshot of RDP Scaler"
           }
         ],
-        relatedArticles: ["rdp-management", "cost-optimization"]
+        relatedArticles: ["rdp-management", "budget-optimizer"]
       },
       {
         id: "script-lab",
-        title: "Script Lab",
+        title: "Script Lab Introduction",
         description: "Test and optimize traffic scripts",
         category: "tools",
-        tags: ["scripts", "testing", "ab-testing"],
+        lastUpdated: "March 29, 2024",
+        tags: ["scripts", "testing", "optimization"],
         sections: [
           {
-            title: "Script Lab Overview",
-            content: "[Explanation of the Script Lab feature and its capabilities.]"
+            title: "Purpose",
+            content: "Create, test, and manage redirect scripts, often used on the landing pages receiving traffic before redirecting to an offer or final destination. Optimizing these can impact traffic quality and acceptance rates."
           },
           {
-            title: "A/B Testing Scripts",
-            content: "[Guide for setting up and analyzing A/B tests for traffic scripts.]",
-            image: "Screenshot of A/B testing interface",
-            steps: [
-              "Create a control script version",
-              "Create variant script versions with changes",
-              "Set traffic distribution percentages",
-              "Launch the test",
-              "Monitor and analyze results"
-            ]
+            title: "Script Editor",
+            content: "Write or paste your JavaScript redirect code."
+          },
+          {
+            title: "Configuration",
+            content: "Set Target URL, Redirect Delay, and Advanced Options (like tracking impressions via the script, mobile detection, geo-targeting)."
+          },
+          {
+            title: "Templates",
+            content: "Use pre-built basic or advanced redirect scripts as a starting point."
+          },
+          {
+            title: "Testing",
+            content: "Use the \"Run\" button to test the script's behavior."
+          },
+          {
+            title: "Performance",
+            content: "Monitor execution count, success rate, and load times.",
+            image: "Screenshot of Script Lab Interface"
           }
         ],
-        relatedArticles: ["script-optimization", "performance-testing"]
+        relatedArticles: ["script-optimization", "traffic-analytics"]
       }
     ]
   },
@@ -291,47 +477,96 @@ export const helpCategoriesData: HelpCategory[] = [
     description: "Configure integrations, manage API keys, and customize settings.",
     articles: [
       {
-        id: "managing-api-keys",
-        title: "Managing API Keys",
-        description: "How to add, update, and remove platform API keys",
+        id: "managing-integrations",
+        title: "Managing Integrations",
+        description: "Connect external platforms and services to Traffic Manager",
         category: "integrations",
-        tags: ["api", "settings", "integration"],
+        lastUpdated: "March 27, 2024",
+        tags: ["integrations", "api", "setup", "connections"],
         sections: [
           {
-            title: "API Keys Overview",
-            content: "[Explanation of API keys and their importance for platform integration.]"
+            title: "Adsterra Publisher API",
+            content: "Primarily for reference data. See the Getting Started section for details on connecting your Adsterra account."
           },
           {
-            title: "Adding New API Keys",
-            content: "[Instructions for adding new API keys.]",
-            steps: [
-              "Navigate to Settings > Integrations",
-              "Find the platform you want to connect",
-              "Click the 'Connect' button",
-              "Enter your API key in the modal",
-              "Click 'Save' to complete the connection"
-            ],
-            image: "Screenshot of API key connection modal"
+            title: "Platform API Keys",
+            content: "Input API keys provided by specific autosurf platforms if they offer APIs and Traffic Manager supports specific features via those APIs (e.g., potentially checking account status, not usually for credit balance). Check individual platform documentation. Use \"Manage/Connect\" buttons to add/update keys."
           },
           {
-            title: "Updating or Removing API Keys",
-            content: "[Guide for updating or removing existing API keys.]",
-            steps: [
-              "Navigate to Settings > Integrations",
-              "Find the connected platform",
-              "Click the 'Manage' button",
-              "Use 'Update Key' to change the API key",
-              "Use 'Disconnect' to remove the integration"
-            ],
-            tips: [
-              "Always test connections after updating API keys",
-              "If you're experiencing connection issues, try regenerating the API key in the platform",
-              "Some platforms expire API keys after a certain period",
-              "Keep a secure backup of your API keys"
-            ]
+            title: "Auto-Scaling Toggle",
+            content: "Master switch to enable/disable automation features related to performance-based RDP scaling.",
+            image: "Screenshot of Integrations Tab"
           }
         ],
-        relatedArticles: ["platform-troubleshooting", "security-best-practices"]
+        relatedArticles: ["connecting-adsterra", "platform-management"]
+      },
+      {
+        id: "budget-optimizer",
+        title: "Mastering the Budget Optimizer",
+        description: "Intelligently allocate your advertising budget across platforms",
+        category: "intelligence",
+        lastUpdated: "March 30, 2024",
+        tags: ["budget", "optimization", "allocation", "strategy"],
+        sections: [
+          {
+            title: "Purpose",
+            content: "Intelligently allocate your total daily advertising budget across your active platforms to achieve a specific goal (e.g., maximize overall ROI or total revenue)."
+          },
+          {
+            title: "How it Works",
+            content: "Analyzes recent performance data (visits, revenue, costs inferred from campaigns) for each platform."
+          },
+          {
+            title: "Using the Tool",
+            content: "Follow these steps to optimize your budget allocation:",
+            steps: [
+              "Set your Daily Budget ($).",
+              "Choose your Optimization Target (Max ROI, Max Revenue, etc.).",
+              "View the Platform Allocations suggested by the optimizer (or manually adjust the sliders).",
+              "Review the Expected Results (projected visits, revenue, ROI).",
+              "(Optional) Use the AI Budget Recommendations for data-driven suggestions.",
+              "Click \"Apply Recommendations\" or \"Optimize Budget Allocation\" to save the strategy (note: this plans the budget; you still need to manage the actual traffic sources)."
+            ],
+            image: "Screenshot of Budget Optimizer"
+          }
+        ],
+        relatedArticles: ["campaign-management", "rdp-scaler"]
+      },
+      {
+        id: "configuring-automation",
+        title: "Configuring Automation",
+        description: "Set up rules to automate aspects of your traffic management",
+        category: "intelligence",
+        lastUpdated: "March 25, 2024",
+        tags: ["automation", "rules", "ai", "optimization"],
+        sections: [
+          {
+            title: "Purpose",
+            content: "Set up rules to automate certain aspects of your traffic management (feature may be progressively rolled out)."
+          },
+          {
+            title: "AI Autopilot",
+            content: "(If enabled) Allows the system to make automated adjustments based on performance, according to the chosen level (Conservative, Balanced, Aggressive)."
+          },
+          {
+            title: "Automation Rules",
+            content: "Different types of rules you can configure:"
+          },
+          {
+            title: "Time Scheduling",
+            content: "Configure campaigns (or RDPs) to run only during specific high-performing hours/days."
+          },
+          {
+            title: "Performance Scaling",
+            content: "Automatically adjust RDP count based on defined ROI or traffic quality thresholds (requires careful setup)."
+          },
+          {
+            title: "Error Handling",
+            content: "Define actions if a platform shows errors (e.g., pause related campaigns, shift budget - advanced).",
+            image: "Screenshot of Automation Settings"
+          }
+        ],
+        relatedArticles: ["budget-optimizer", "rdp-scaler"]
       }
     ]
   }
@@ -344,4 +579,44 @@ export function findArticleById(id: string): HelpArticle | undefined {
     if (article) return article;
   }
   return undefined;
+}
+
+// Helper function to search articles by keyword
+export function searchArticles(keyword: string): HelpArticle[] {
+  const results: HelpArticle[] = [];
+  
+  if (!keyword || keyword.trim() === '') return results;
+  
+  const searchTerm = keyword.toLowerCase().trim();
+  
+  for (const category of helpCategoriesData) {
+    for (const article of category.articles) {
+      // Search in title, description, and tags
+      if (
+        article.title.toLowerCase().includes(searchTerm) ||
+        article.description.toLowerCase().includes(searchTerm) ||
+        article.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+      ) {
+        results.push(article);
+        continue;
+      }
+      
+      // Search in section content
+      let foundInSections = false;
+      for (const section of article.sections) {
+        if (
+          section.title.toLowerCase().includes(searchTerm) ||
+          section.content.toLowerCase().includes(searchTerm)
+        ) {
+          results.push(article);
+          foundInSections = true;
+          break;
+        }
+      }
+      
+      if (foundInSections) continue;
+    }
+  }
+  
+  return results;
 }

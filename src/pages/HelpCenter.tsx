@@ -25,6 +25,107 @@ export default function HelpCenter() {
     setTourOpen(true);
   };
 
+  const tutorials = [
+    {
+      id: "getting-started",
+      title: "Getting Started with Traffic Manager",
+      description: "Learn the basics of Traffic Manager in just 5 minutes",
+      duration: "5:21"
+    },
+    {
+      id: "first-campaign",
+      title: "Setting Up Your First Campaign",
+      description: "A step-by-step guide to creating and configuring your first campaign",
+      duration: "8:45"
+    },
+    {
+      id: "rdp-management",
+      title: "Understanding RDP Management",
+      description: "How to track and optimize your RDP infrastructure",
+      duration: "6:38"
+    },
+    {
+      id: "budget-optimization",
+      title: "Advanced Budget Optimization",
+      description: "Maximize your ROI with intelligent budget allocation",
+      duration: "7:12"
+    },
+    {
+      id: "scripts",
+      title: "Working with Scripts",
+      description: "Create and test redirect scripts for improved traffic quality",
+      duration: "10:05"
+    },
+    {
+      id: "analytics",
+      title: "Traffic Analytics Deep Dive",
+      description: "Understanding your traffic quality and performance metrics",
+      duration: "9:30"
+    }
+  ];
+
+  const guidedTours = [
+    {
+      id: "dashboard",
+      title: "Dashboard Tour",
+      description: "Learn how to use the dashboard to monitor your traffic performance and earnings.",
+      icon: "Compass"
+    },
+    {
+      id: "campaign",
+      title: "Campaign Management",
+      description: "Learn how to create, edit and manage your traffic campaigns effectively.",
+      icon: "Compass"
+    },
+    {
+      id: "analytics",
+      title: "Analytics Walkthrough",
+      description: "Understand how to analyze traffic quality and performance metrics.",
+      icon: "History"
+    },
+    {
+      id: "budget-optimizer",
+      title: "Budget Optimizer",
+      description: "Learn how to optimize your budget allocation across platforms.",
+      icon: "Settings"
+    }
+  ];
+
+  const faqs = [
+    { 
+      question: "What is Traffic Manager?", 
+      answer: "Traffic Manager is an application designed to help you centralize, analyze, and optimize your traffic arbitrage activities, specifically when using autosurf platforms and monetizing with networks like Adsterra. Our goal is to help you maximize your ROI through better tracking, calculation, and strategic decision-making." 
+    },
+    { 
+      question: "How do I connect my traffic platforms?", 
+      answer: "Navigate to Settings > Integrations, find your platform in the list, click 'Connect' for unconnected platforms, enter your API key in the modal, and click 'Save' to establish the connection. Note that not all platforms provide APIs, and some functionalities may be limited." 
+    },
+    { 
+      question: "What is the difference between CPM and Actual CPM?", 
+      answer: "CPM (cost per mille/thousand impressions) is a general advertising metric. In Traffic Manager, 'Actual CPM ($)' refers to the effective revenue you actually earn from your ad network per 1000 valid impressions for a specific traffic source. This is a crucial input that you must determine based on your reports." 
+    },
+    { 
+      question: "How does the Budget Optimizer work?", 
+      answer: "The Budget Optimizer analyzes recent performance data for each platform, then suggests how to allocate your total budget across platforms to achieve your selected goal (max ROI, max revenue, etc.). The suggestions are based on historical performance data within Traffic Manager." 
+    },
+    { 
+      question: "What is the Script Lab feature?", 
+      answer: "Script Lab lets you create, test, and manage redirect scripts that are often used on landing pages before redirecting to an offer. You can write custom JavaScript, use templates, set parameters like delay and target URL, and test the scripts' behavior. Optimizing these scripts can improve traffic quality and acceptance rates." 
+    },
+    { 
+      question: "How accurate are the AI recommendations?", 
+      answer: "The AI analyzes historical performance data within Traffic Manager to identify patterns and suggest potential optimizations. Accuracy depends on the quality and amount of data available and the inherent unpredictability of traffic arbitrage. Treat them as data-driven suggestions, not guarantees." 
+    },
+    { 
+      question: "Can Traffic Manager automatically get my credit balance from platforms?", 
+      answer: "Generally, no. Most autosurf platforms do not provide reliable APIs for this functionality. You typically need to manually update the 'Credits Earned' field in your campaigns for accurate calculations." 
+    },
+    { 
+      question: "If I connect Adsterra, does the app calculate my revenue automatically?", 
+      answer: "No. The Adsterra API connection is mainly for fetching reference data or comparing reported earnings. The core revenue calculation relies on the Actual CPM ($) and Acceptance Rate (%) you manually input per campaign." 
+    }
+  ];
+
   return (
     <div className="container pb-8 pt-6 h-[calc(100vh-4rem)] flex flex-col">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -76,27 +177,18 @@ export default function HelpCenter() {
 
         <TabsContent value="tutorials" className="flex-1 p-0">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((_, i) => (
-              <div key={i} className="bg-card/30 rounded-lg border border-border/30 overflow-hidden">
-                <div className="h-40 bg-card/50 flex items-center justify-center">
+            {tutorials.map((tutorial) => (
+              <div key={tutorial.id} className="bg-card/30 rounded-lg border border-border/30 overflow-hidden">
+                <div className="h-40 bg-card/50 flex items-center justify-center relative">
                   <PlayCircle className="h-12 w-12 text-neon-cyan opacity-60" />
+                  <div className="absolute bottom-2 right-2 bg-background/80 px-2 py-1 rounded text-xs">
+                    {tutorial.duration}
+                  </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="font-medium">
-                    {i === 0
-                      ? "Getting Started with Traffic Manager"
-                      : i === 1
-                      ? "Setting Up Your First Campaign"
-                      : i === 2
-                      ? "Understanding RDP Management"
-                      : i === 3
-                      ? "Advanced Budget Optimization"
-                      : i === 4
-                      ? "Working with Scripts"
-                      : "Traffic Analytics Deep Dive"}
-                  </h3>
+                  <h3 className="font-medium">{tutorial.title}</h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    [Tutorial description placeholder with timing information]
+                    {tutorial.description}
                   </p>
                   <Button variant="outline" size="sm" className="mt-4 w-full">
                     <PlayCircle className="mr-2 h-4 w-4" />
@@ -110,46 +202,18 @@ export default function HelpCenter() {
 
         <TabsContent value="guided-tours" className="flex-1 p-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="p-6 bg-card/30 rounded-lg border border-border/30">
-              <Compass className="h-8 w-8 text-neon-cyan mb-4" />
-              <h3 className="text-lg font-medium">Dashboard Tour</h3>
-              <p className="text-muted-foreground mt-2">
-                Learn how to use the dashboard to monitor your traffic performance and earnings.
-              </p>
-              <Button onClick={() => startTour("dashboard")} className="mt-4" variant="outline">
-                Start Tour
-              </Button>
-            </div>
-            <div className="p-6 bg-card/30 rounded-lg border border-border/30">
-              <Compass className="h-8 w-8 text-neon-cyan mb-4" />
-              <h3 className="text-lg font-medium">Campaign Management</h3>
-              <p className="text-muted-foreground mt-2">
-                Learn how to create, edit and manage your traffic campaigns effectively.
-              </p>
-              <Button onClick={() => startTour("campaign")} className="mt-4" variant="outline">
-                Start Tour
-              </Button>
-            </div>
-            <div className="p-6 bg-card/30 rounded-lg border border-border/30">
-              <Settings className="h-8 w-8 text-neon-cyan mb-4" />
-              <h3 className="text-lg font-medium">Platform Integration</h3>
-              <p className="text-muted-foreground mt-2">
-                Learn how to connect traffic platforms and manage API keys.
-              </p>
-              <Button className="mt-4" variant="outline" disabled>
-                Coming Soon
-              </Button>
-            </div>
-            <div className="p-6 bg-card/30 rounded-lg border border-border/30">
-              <History className="h-8 w-8 text-neon-cyan mb-4" />
-              <h3 className="text-lg font-medium">RDP Management</h3>
-              <p className="text-muted-foreground mt-2">
-                Learn how to manage your RDPs and track their performance.
-              </p>
-              <Button className="mt-4" variant="outline" disabled>
-                Coming Soon
-              </Button>
-            </div>
+            {guidedTours.map((tour) => (
+              <div key={tour.id} className="p-6 bg-card/30 rounded-lg border border-border/30">
+                <Compass className="h-8 w-8 text-neon-cyan mb-4" />
+                <h3 className="text-lg font-medium">{tour.title}</h3>
+                <p className="text-muted-foreground mt-2">
+                  {tour.description}
+                </p>
+                <Button onClick={() => startTour(tour.id)} className="mt-4" variant="outline">
+                  Start Tour
+                </Button>
+              </div>
+            ))}
           </div>
 
           <GuidedTour
@@ -161,32 +225,7 @@ export default function HelpCenter() {
 
         <TabsContent value="faq" className="flex-1 p-0">
           <div className="space-y-6">
-            {[
-              { 
-                question: "What is Traffic Manager?", 
-                answer: "[Comprehensive explanation of the Traffic Manager application, its purpose, and key features.]" 
-              },
-              { 
-                question: "How do I connect my traffic platforms?", 
-                answer: "[Step-by-step explanation of how to connect traffic platforms using API keys through the Settings > Integrations section.]" 
-              },
-              { 
-                question: "What is the difference between CPM and Actual CPM?", 
-                answer: "[Explanation of CPM (cost per mille/thousand impressions) versus Actual CPM which accounts for acceptance rate and other factors.]" 
-              },
-              { 
-                question: "How does the Budget Optimizer work?", 
-                answer: "[Explanation of how the Budget Optimizer analyzes platform performance and recommends optimal budget allocation to maximize ROI.]" 
-              },
-              { 
-                question: "What is the Script Lab feature?", 
-                answer: "[Explanation of the Script Lab feature, its purpose for testing and optimizing traffic scripts, and how to use A/B testing functionality.]" 
-              },
-              { 
-                question: "How accurate are the AI recommendations?", 
-                answer: "[Information about how AI recommendations work, what data they're based on, and typical accuracy expectations.]" 
-              },
-            ].map((faq, i) => (
+            {faqs.map((faq, i) => (
               <div key={i} className="p-6 bg-card/30 rounded-lg border border-border/30">
                 <h3 className="text-lg font-medium">{faq.question}</h3>
                 <p className="text-muted-foreground mt-2">{faq.answer}</p>

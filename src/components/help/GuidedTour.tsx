@@ -92,9 +92,88 @@ const campaignTour: TourStep[] = [
   }
 ];
 
+const analyticsTour: TourStep[] = [
+  {
+    title: "Traffic Analytics",
+    description: "This quick tour will show you how to analyze your traffic performance.",
+  },
+  {
+    title: "Traffic Overview",
+    description: "This section provides a high-level view of your traffic performance across all platforms.",
+    element: "#traffic-overview",
+  },
+  {
+    title: "Traffic Quality",
+    description: "The traffic quality chart shows how your traffic quality metrics vary over time.",
+    element: "#traffic-quality",
+  },
+  {
+    title: "Source Breakdown",
+    description: "This chart shows the distribution of your traffic across different platforms.",
+    element: "#traffic-sources",
+  },
+  {
+    title: "Optimization Suggestions",
+    description: "Based on your traffic data, the system provides suggestions to improve performance.",
+    element: "#optimization-suggestions",
+  },
+  {
+    title: "Filters and Controls",
+    description: "Use these filters to drill down into specific time periods, platforms, or campaigns.",
+    element: "#analytics-filters",
+  },
+  {
+    title: "That's it!",
+    description: "You've completed the analytics tour. Use these insights to optimize your campaigns!",
+  }
+];
+
+const budgetOptimizerTour: TourStep[] = [
+  {
+    title: "Budget Optimizer",
+    description: "This quick tour will show you how to optimize your budget allocation.",
+  },
+  {
+    title: "Budget Input",
+    description: "Set your total daily budget that will be allocated across platforms.",
+    element: "#budget-input",
+  },
+  {
+    title: "Optimization Target",
+    description: "Choose what you want to optimize for: maximum ROI, maximum traffic, or balanced growth.",
+    element: "#optimization-target",
+  },
+  {
+    title: "Platform Allocation",
+    description: "These sliders show the recommended budget allocation for each platform. You can manually adjust them.",
+    element: "#platform-allocation",
+  },
+  {
+    title: "Expected Results",
+    description: "This section shows the projected results based on the current allocation.",
+    element: "#expected-results",
+  },
+  {
+    title: "AI Recommendations",
+    description: "The AI analyzes your historical data to provide tailored optimization suggestions.",
+    element: "#ai-recommendations",
+  },
+  {
+    title: "Apply Changes",
+    description: "Once you're satisfied with the allocation, click this button to save your strategy.",
+    element: "#apply-budget",
+  },
+  {
+    title: "That's it!",
+    description: "You've completed the budget optimizer tour. Optimize your spending for maximum returns!",
+  }
+];
+
 const tours: Record<string, TourStep[]> = {
   "dashboard": dashboardTour,
   "campaign": campaignTour,
+  "analytics": analyticsTour,
+  "budget-optimizer": budgetOptimizerTour
 };
 
 export default function GuidedTour({ tourId, open, onClose }: GuidedTourProps) {
