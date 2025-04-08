@@ -6,8 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <>
-      <TooltipProvider>
+    <TooltipProvider>
+      <>
         <Sidebar />
         <div className="flex flex-col flex-1 overflow-hidden">
           <Header />
@@ -15,7 +15,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
             {children}
           </main>
         </div>
-      </TooltipProvider>
-    </>
+      </>
+    </TooltipProvider>
   );
 };

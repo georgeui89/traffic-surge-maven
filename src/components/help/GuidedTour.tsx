@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -169,11 +168,48 @@ const budgetOptimizerTour: TourStep[] = [
   }
 ];
 
+const workflowGuideTour: TourStep[] = [
+  {
+    title: "Traffic Strategy Workflow",
+    description: "This guide will show you how to use the new Workflow Guide to optimize your daily, weekly, and monthly tasks.",
+  },
+  {
+    title: "Daily Workflow",
+    description: "These are tasks you should perform daily to keep your traffic management on track, including morning checks, credit updates, and end-of-day reconciliation.",
+    element: "accordion-item[data-value='daily']",
+  },
+  {
+    title: "Weekly Workflow",
+    description: "Weekly tasks help you optimize your campaigns, budget allocation, and experiment with new strategies to improve performance.",
+    element: "accordion-item[data-value='weekly']",
+  },
+  {
+    title: "Monthly Workflow",
+    description: "Monthly reviews ensure long-term profitability, strategic planning, and system maintenance for continued success.",
+    element: "accordion-item[data-value='monthly']",
+  },
+  {
+    title: "Task Tracking",
+    description: "Use the 'Mark Complete' buttons to track your progress through each task and maintain consistency in your workflows.",
+    element: "button:contains('Mark Complete')",
+  },
+  {
+    title: "Feature Links",
+    description: "Each workflow section contains links to the relevant features in Traffic Manager, making it easy to navigate as you complete tasks.",
+    element: "button:contains('Go to')",
+  },
+  {
+    title: "That's it!",
+    description: "You're now ready to use the Workflow Guide to optimize your traffic management process. We recommend starting with the Daily Workflow to get familiar with the basic tasks.",
+  }
+];
+
 const tours: Record<string, TourStep[]> = {
   "dashboard": dashboardTour,
   "campaign": campaignTour,
   "analytics": analyticsTour,
-  "budget-optimizer": budgetOptimizerTour
+  "budget-optimizer": budgetOptimizerTour,
+  "workflow-guide": workflowGuideTour
 };
 
 export default function GuidedTour({ tourId, open, onClose }: GuidedTourProps) {

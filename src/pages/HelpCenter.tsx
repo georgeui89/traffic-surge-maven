@@ -11,9 +11,11 @@ import {
   History,
   Search,
   PlayCircle,
+  CalendarDays,
 } from "lucide-react";
 import HelpCategories from "@/components/help/HelpCategories";
 import GuidedTour from "@/components/help/GuidedTour";
+import WorkflowGuide from "@/components/help/WorkflowGuide";
 
 export default function HelpCenter() {
   const [activeTab, setActiveTab] = useState("documentation");
@@ -152,7 +154,7 @@ export default function HelpCenter() {
         onValueChange={setActiveTab}
         className="flex-1 flex flex-col"
       >
-        <TabsList className="grid w-full grid-cols-4 h-auto mb-6">
+        <TabsList className="grid w-full grid-cols-5 h-auto mb-6">
           <TabsTrigger value="documentation" className="flex gap-2 py-3 data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan">
             <BookOpen className="h-4 w-4" />
             <span className="hidden sm:inline">Documentation</span>
@@ -164,6 +166,11 @@ export default function HelpCenter() {
           <TabsTrigger value="guided-tours" className="flex gap-2 py-3 data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan">
             <Compass className="h-4 w-4" />
             <span className="hidden sm:inline">Guided Tours</span>
+          </TabsTrigger>
+          <TabsTrigger value="workflow-guide" className="flex gap-2 py-3 data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan relative">
+            <CalendarDays className="h-4 w-4" />
+            <span className="hidden sm:inline">Workflow Guide</span>
+            <span className="absolute -top-1 -right-1 bg-neon-cyan text-xs px-1 py-0.5 rounded text-background font-medium">NEW</span>
           </TabsTrigger>
           <TabsTrigger value="faq" className="flex gap-2 py-3 data-[state=active]:bg-neon-cyan/10 data-[state=active]:text-neon-cyan">
             <Search className="h-4 w-4" />
@@ -221,6 +228,10 @@ export default function HelpCenter() {
             open={tourOpen}
             onClose={() => setTourOpen(false)}
           />
+        </TabsContent>
+        
+        <TabsContent value="workflow-guide" className="flex-1 p-0">
+          <WorkflowGuide />
         </TabsContent>
 
         <TabsContent value="faq" className="flex-1 p-0">
