@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -90,6 +89,12 @@ export default function HelpCenter() {
       title: "Budget Optimizer",
       description: "Learn how to optimize your budget allocation across platforms.",
       icon: "Settings"
+    },
+    {
+      id: "workflow-guide",
+      title: "Traffic Strategy Workflow",
+      description: "Learn how to implement daily, weekly, and monthly workflows to maximize ROI.",
+      icon: "CalendarDays"
     }
   ];
 
