@@ -1,10 +1,13 @@
-
 import { useState } from "react";
 import { 
-  Tabs, TabsContent, TabsList, TabsTrigger,
-  Card, CardContent, CardDescription, CardHeader, CardTitle,
-  Accordion, AccordionContent, AccordionItem, AccordionTrigger
+  Tabs, TabsContent, TabsList, TabsTrigger
 } from "@/components/ui/tabs";
+import { 
+  Card, CardContent, CardDescription, CardHeader, CardTitle
+} from "@/components/ui/card";
+import { 
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger 
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
