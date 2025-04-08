@@ -1,10 +1,12 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { ChevronLeft, Printer, Share2 } from "lucide-react";
+import { ChevronLeft, Printer, Share2, ThumbsUp, ThumbsDown } from "lucide-react";
 import { findArticleById } from "@/utils/helpData";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { toast } from "sonner";
 
 interface HelpArticleProps {
   articleId: string;
@@ -12,6 +14,7 @@ interface HelpArticleProps {
 }
 
 export default function HelpArticle({ articleId, onBack }: HelpArticleProps) {
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const article = findArticleById(articleId);
 
   if (!article) {
@@ -26,6 +29,11 @@ export default function HelpArticle({ articleId, onBack }: HelpArticleProps) {
     );
   }
 
+  const handleFeedback = (helpful: boolean) => {
+    toast.success(`Thank you for your feedback${helpful ? "!" : "."} We'll use it to improve our documentation.`);
+    setFeedbackSubmitted(true);
+  };
+
   return (
     <div className="flex flex-col h-full bg-card/30 rounded-lg border border-border/30 overflow-hidden">
       <div className="px-6 py-4 border-b border-border/30 flex items-center justify-between">
@@ -34,6 +42,13 @@ export default function HelpArticle({ articleId, onBack }: HelpArticleProps) {
           <span>Back</span>
         </Button>
         <div className="flex items-center gap-2">
+          {article.isNew && (
+            <StatusBadge 
+              variant="success" 
+              label="NEW"
+              size="sm"
+            />
+          )}
           <StatusBadge 
             variant="info" 
             label={`Last Updated: ${article.lastUpdated || 'Recently'}`}
@@ -111,6 +126,33 @@ export default function HelpArticle({ articleId, onBack }: HelpArticleProps) {
                 ) : null;
               })}
             </ul>
+          </div>
+
+          <div className="bg-card/30 p-4 rounded-lg border border-border/30 mt-6">
+            <h3 className="font-medium mb-4">Was this article helpful?</h3>
+            {!feedbackSubmitted ? (
+              <div className="flex gap-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => handleFeedback(true)}
+                  className="flex gap-2"
+                >
+                  <ThumbsUp size={16} /> Yes
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => handleFeedback(false)}
+                  className="flex gap-2"
+                >
+                  <ThumbsDown size={16} /> No
+                </Button>
+              </div>
+            ) : (
+              <p className="text-muted-foreground">Thank you for your feedback!</p>
+            )}
+            <p className="mt-3 text-xs text-muted-foreground">
+              Have more feedback? <Button variant="link" className="h-auto p-0 text-xs text-neon-cyan">Contact Support</Button>
+            </p>
           </div>
         </article>
       </ScrollArea>

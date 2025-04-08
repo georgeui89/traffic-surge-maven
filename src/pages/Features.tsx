@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   Tabs, TabsContent, TabsList, TabsTrigger
@@ -15,6 +16,7 @@ import {
   Sliders, FileBarChart, BarChart, Calendar,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { HelpIcon } from "@/components/ui/help-label";
 
 const Features = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -231,6 +233,17 @@ const Features = () => {
           <p className="text-muted-foreground mt-1">
             Learn about all the features in Traffic Manager and how they work together
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            className="border-neon-cyan/30 text-neon-cyan hover:bg-neon-cyan/10"
+            onClick={() => window.location.href = "/help-center"}
+          >
+            <Compass className="mr-2 h-4 w-4" />
+            Help Center
+          </Button>
+          <HelpIcon text="This page provides an overview of all features and how they fit into your workflow" />
         </div>
       </div>
 

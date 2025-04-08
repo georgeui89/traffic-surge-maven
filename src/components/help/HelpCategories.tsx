@@ -74,8 +74,25 @@ export default function HelpCategories() {
                       onClick={() => handleArticleSelect(article.id)}
                       className="p-4 rounded-lg border border-border/50 hover:border-neon-cyan/50 bg-card/50 cursor-pointer transition-all duration-200 hover:shadow-sm hover:shadow-neon-cyan/20"
                     >
-                      <h3 className="font-medium">{article.title}</h3>
+                      <div className="flex justify-between">
+                        <h3 className="font-medium">{article.title}</h3>
+                        {article.isNew && (
+                          <span className="bg-neon-cyan text-xs px-1.5 py-0.5 rounded text-background font-medium">
+                            NEW
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground mt-1">{article.description}</p>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {article.tags.map((tag) => (
+                          <span 
+                            key={tag} 
+                            className="text-xs bg-muted/30 text-muted-foreground px-2 py-0.5 rounded-full"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>

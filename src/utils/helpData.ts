@@ -16,6 +16,7 @@ export interface HelpArticle {
   tags: string[];
   sections: ArticleSection[];
   relatedArticles?: string[];
+  isNew?: boolean; // Added to mark new articles
 }
 
 export interface HelpCategory {
@@ -37,8 +38,9 @@ export const helpCategoriesData: HelpCategory[] = [
         title: "What is Traffic Manager?",
         description: "A comprehensive introduction to Traffic Manager",
         category: "getting-started",
-        lastUpdated: "April 5, 2024",
+        lastUpdated: "April 8, 2024",
         tags: ["intro", "overview", "beginner"],
+        isNew: true,
         sections: [
           {
             title: "Purpose",
@@ -46,12 +48,23 @@ export const helpCategoriesData: HelpCategory[] = [
           },
           {
             title: "Who is it for?",
-            content: "Individuals and teams actively engaged in traffic arbitrage."
+            content: "Traffic Manager is built for individuals and teams actively engaged in traffic arbitrage who need a centralized system to monitor performance, calculate profitability, and make data-driven decisions."
           },
           {
             title: "Key Benefits",
-            content: "Real-time insights, centralized tracking, profit calculation, optimization tools, automation capabilities (future).",
+            content: "Traffic Manager provides several important benefits:",
+            steps: [
+              "Real-time insights into traffic quality and performance",
+              "Centralized tracking of all platforms and campaigns",
+              "Accurate profit calculation based on your inputs",
+              "Optimization tools to maximize ROI",
+              "Automation capabilities to save time and improve results"
+            ],
             image: "Dashboard screenshot showing key features"
+          },
+          {
+            title: "Key Takeaways",
+            content: "Traffic Manager brings together all the tools you need for successful traffic arbitrage in one place, helping you make smarter decisions and increase profitability through data-driven insights."
           }
         ],
         relatedArticles: ["understanding-key-concepts", "setting-up-account"]
@@ -61,8 +74,9 @@ export const helpCategoriesData: HelpCategory[] = [
         title: "Understanding Key Concepts",
         description: "Learn the fundamental concepts and terminology used in Traffic Manager",
         category: "getting-started",
-        lastUpdated: "April 3, 2024",
+        lastUpdated: "April 8, 2024",
         tags: ["concepts", "terminology", "fundamentals"],
+        isNew: true,
         sections: [
           {
             title: "Traffic Arbitrage",
@@ -91,6 +105,10 @@ export const helpCategoriesData: HelpCategory[] = [
           {
             title: "RDP (Remote Desktop Protocol) / VPS (Virtual Private Server)",
             content: "Remote computers often used to run autosurf client applications 24/7."
+          },
+          {
+            title: "Key Takeaways",
+            content: "Accurate inputs for Actual CPM ($) and Acceptance Rate (%) are essential for reliable ROI calculations. These values must be manually determined based on your experience and ad network reports."
           }
         ],
         relatedArticles: ["what-is-traffic-manager", "cpm-calculator-guide"]
@@ -100,12 +118,13 @@ export const helpCategoriesData: HelpCategory[] = [
         title: "Setting Up Your Account",
         description: "How to set up your Traffic Manager account and configure initial settings",
         category: "getting-started",
-        lastUpdated: "March 29, 2024",
+        lastUpdated: "April 7, 2024",
         tags: ["account", "setup", "configuration"],
+        isNew: true,
         sections: [
           {
             title: "Initial Login",
-            content: "[Instructions specific to your login process]"
+            content: "After creating your account, log in using your credentials. You'll be directed to the Dashboard, which provides an overview of your traffic arbitrage operations."
           },
           {
             title: "Key Settings (Navigate to Settings -> Metrics)",
@@ -120,6 +139,10 @@ export const helpCategoriesData: HelpCategory[] = [
           {
             title: "Appearance",
             content: "Configure Dark Mode and date/time formats in Settings -> Appearance."
+          },
+          {
+            title: "Key Takeaways",
+            content: "Setting up your default values will save time when creating new campaigns and provide meaningful metrics on your dashboard."
           }
         ],
         relatedArticles: ["connecting-adsterra", "navigating-dashboard"]
@@ -129,8 +152,9 @@ export const helpCategoriesData: HelpCategory[] = [
         title: "Connecting Adsterra",
         description: "How to connect your Adsterra Publisher API to Traffic Manager",
         category: "getting-started",
-        lastUpdated: "March 25, 2024",
+        lastUpdated: "April 6, 2024",
         tags: ["adsterra", "integration", "api", "setup"],
+        isNew: true,
         sections: [
           {
             title: "Purpose",
@@ -148,6 +172,10 @@ export const helpCategoriesData: HelpCategory[] = [
               "Paste the key into the Adsterra API Key field and click \"Test Connection\" or \"Save\"."
             ],
             image: "Screenshot of Settings -> Integrations"
+          },
+          {
+            title: "Key Takeaways",
+            content: "The Adsterra API connection is primarily for reference data and comparison, not for automatic revenue calculations. You still need to manually input Actual CPM and Acceptance Rate for each campaign."
           }
         ],
         relatedArticles: ["managing-integrations", "setting-up-account"]
@@ -157,8 +185,9 @@ export const helpCategoriesData: HelpCategory[] = [
         title: "Navigating the Dashboard",
         description: "Understanding the Dashboard interface and key metrics",
         category: "getting-started",
-        lastUpdated: "March 23, 2024",
+        lastUpdated: "April 5, 2024",
         tags: ["dashboard", "metrics", "navigation", "overview"],
+        isNew: true,
         sections: [
           {
             title: "Overview",
@@ -180,6 +209,10 @@ export const helpCategoriesData: HelpCategory[] = [
             title: "Filters",
             content: "Use the filters (Date Range, etc.) to adjust the data displayed.",
             image: "Annotated Screenshot of the Dashboard"
+          },
+          {
+            title: "Key Takeaways",
+            content: "Check your Dashboard daily to get a quick overview of performance and identify any issues that need attention."
           }
         ],
         relatedArticles: ["what-is-traffic-manager", "campaign-management"]
@@ -196,8 +229,9 @@ export const helpCategoriesData: HelpCategory[] = [
         title: "Campaign Management Deep Dive",
         description: "Track individual traffic sources and their performance",
         category: "features",
-        lastUpdated: "April 2, 2024",
+        lastUpdated: "April 8, 2024",
         tags: ["campaigns", "tracking", "performance"],
+        isNew: true,
         sections: [
           {
             title: "Purpose",
@@ -227,6 +261,10 @@ export const helpCategoriesData: HelpCategory[] = [
           {
             title: "Table View",
             content: "Monitor status, visits, revenue, and ROI for all campaigns. Use search and filters."
+          },
+          {
+            title: "Key Takeaways",
+            content: "Regularly update Credits Earned to keep calculations accurate. Monitor ROI to identify which campaigns deserve more investment."
           }
         ],
         relatedArticles: ["platform-management", "rdp-management"]
@@ -236,8 +274,9 @@ export const helpCategoriesData: HelpCategory[] = [
         title: "RDP Management Explained",
         description: "Track the remote desktops running your autosurf clients",
         category: "features",
-        lastUpdated: "March 28, 2024",
+        lastUpdated: "April 7, 2024",
         tags: ["rdp", "management", "servers", "infrastructure"],
+        isNew: true,
         sections: [
           {
             title: "Purpose",
@@ -259,6 +298,10 @@ export const helpCategoriesData: HelpCategory[] = [
             title: "Importance",
             content: "Helps determine if your infrastructure costs are justified by the revenue generated.",
             image: "Screenshot of RDP Management Table"
+          },
+          {
+            title: "Key Takeaways",
+            content: "Regularly review RDP performance to identify infrastructure that isn't generating positive ROI and consider reallocating resources."
           }
         ],
         relatedArticles: ["rdp-scaler", "campaign-management"]
@@ -268,8 +311,9 @@ export const helpCategoriesData: HelpCategory[] = [
         title: "Platform Management",
         description: "Manage your autosurf platforms within Traffic Manager",
         category: "features",
-        lastUpdated: "March 26, 2024",
+        lastUpdated: "April 6, 2024",
         tags: ["platforms", "management", "integration"],
+        isNew: true,
         sections: [
           {
             title: "Purpose",
@@ -287,6 +331,10 @@ export const helpCategoriesData: HelpCategory[] = [
             title: "Platform API Keys",
             content: "Some platforms might offer APIs for specific minor functions (check platform docs). The \"Connect/Manage\" buttons here are for inputting those keys if available and supported. This section generally does NOT enable automatic credit fetching.",
             image: "Screenshot of Platform Management List"
+          },
+          {
+            title: "Key Takeaways",
+            content: "Ensure the Conversion Factor for each platform is accurate to get reliable visit estimates from the credits you earn."
           }
         ],
         relatedArticles: ["campaign-management", "managing-integrations"]
@@ -296,8 +344,9 @@ export const helpCategoriesData: HelpCategory[] = [
         title: "Traffic Analytics Insights",
         description: "Analyze traffic quality, sources, and performance trends",
         category: "features",
-        lastUpdated: "March 24, 2024",
+        lastUpdated: "April 5, 2024",
         tags: ["analytics", "traffic", "performance", "insights"],
+        isNew: true,
         sections: [
           {
             title: "Purpose",
@@ -331,6 +380,10 @@ export const helpCategoriesData: HelpCategory[] = [
             title: "Filtering",
             content: "Use filters (Date, Platform) to drill down into specific segments.",
             image: "Screenshot of Traffic Analytics Page"
+          },
+          {
+            title: "Key Takeaways",
+            content: "Weekly analysis of traffic quality helps identify which platforms are sending the most valuable traffic, allowing you to focus your resources accordingly."
           }
         ],
         relatedArticles: ["reporting", "budget-optimizer"]
@@ -340,8 +393,9 @@ export const helpCategoriesData: HelpCategory[] = [
         title: "Using the Reporting Feature",
         description: "Generate downloadable summaries of your performance",
         category: "features",
-        lastUpdated: "March 22, 2024",
+        lastUpdated: "April 4, 2024",
         tags: ["reports", "download", "export", "analytics"],
+        isNew: true,
         sections: [
           {
             title: "Purpose",
@@ -362,6 +416,10 @@ export const helpCategoriesData: HelpCategory[] = [
           {
             title: "Saved/Scheduled Reports",
             content: "Access previously generated reports or set up recurring reports."
+          },
+          {
+            title: "Key Takeaways",
+            content: "Monthly reports provide historical data for tracking progress and identifying long-term trends that may not be obvious in day-to-day operations."
           }
         ],
         relatedArticles: ["traffic-analytics"]
@@ -378,8 +436,9 @@ export const helpCategoriesData: HelpCategory[] = [
         title: "CPM Calculator Guide",
         description: "Estimate potential revenue based on credits/traffic",
         category: "tools",
-        lastUpdated: "April 4, 2024",
+        lastUpdated: "April 8, 2024",
         tags: ["calculator", "cpm", "revenue", "estimation"],
+        isNew: true,
         sections: [
           {
             title: "Purpose",
@@ -397,6 +456,10 @@ export const helpCategoriesData: HelpCategory[] = [
             title: "Use Case",
             content: "Useful for quick estimations before running a campaign or scaling up. Remember results depend heavily on input accuracy.",
             image: "Screenshot of CPM Calculator"
+          },
+          {
+            title: "Key Takeaways",
+            content: "Use the CPM Calculator for planning and forecasting before investing in credits or infrastructure."
           }
         ],
         relatedArticles: ["campaign-management", "understanding-key-concepts"]
@@ -406,8 +469,9 @@ export const helpCategoriesData: HelpCategory[] = [
         title: "RDP Scaler Explained",
         description: "Optimize your RDP allocation across platforms",
         category: "tools",
-        lastUpdated: "March 31, 2024",
+        lastUpdated: "April 7, 2024",
         tags: ["rdp", "scaling", "optimization"],
+        isNew: true,
         sections: [
           {
             title: "Purpose",
@@ -429,6 +493,10 @@ export const helpCategoriesData: HelpCategory[] = [
             title: "Insights Panel",
             content: "Provides tips and typical performance data for reference.",
             image: "Screenshot of RDP Scaler"
+          },
+          {
+            title: "Key Takeaways",
+            content: "Make data-driven scaling decisions rather than guessing how many RDPs you need for optimal profitability."
           }
         ],
         relatedArticles: ["rdp-management", "budget-optimizer"]
@@ -438,8 +506,9 @@ export const helpCategoriesData: HelpCategory[] = [
         title: "Script Lab Introduction",
         description: "Test and optimize traffic scripts",
         category: "tools",
-        lastUpdated: "March 29, 2024",
+        lastUpdated: "April 6, 2024",
         tags: ["scripts", "testing", "optimization"],
+        isNew: true,
         sections: [
           {
             title: "Purpose",
@@ -465,6 +534,10 @@ export const helpCategoriesData: HelpCategory[] = [
             title: "Performance",
             content: "Monitor execution count, success rate, and load times.",
             image: "Screenshot of Script Lab Interface"
+          },
+          {
+            title: "Key Takeaways",
+            content: "Well-optimized redirect scripts can significantly improve traffic quality and acceptance rates, increasing your revenue without additional costs."
           }
         ],
         relatedArticles: ["script-optimization", "traffic-analytics"]
@@ -481,8 +554,9 @@ export const helpCategoriesData: HelpCategory[] = [
         title: "Managing Integrations",
         description: "Connect external platforms and services to Traffic Manager",
         category: "integrations",
-        lastUpdated: "March 27, 2024",
+        lastUpdated: "April 5, 2024",
         tags: ["integrations", "api", "setup", "connections"],
+        isNew: true,
         sections: [
           {
             title: "Adsterra Publisher API",
@@ -496,6 +570,10 @@ export const helpCategoriesData: HelpCategory[] = [
             title: "Auto-Scaling Toggle",
             content: "Master switch to enable/disable automation features related to performance-based RDP scaling.",
             image: "Screenshot of Integrations Tab"
+          },
+          {
+            title: "Key Takeaways",
+            content: "Most platform integrations provide limited functionality due to API restrictions, but they can still be useful for status monitoring and reference data."
           }
         ],
         relatedArticles: ["connecting-adsterra", "platform-management"]
@@ -505,8 +583,9 @@ export const helpCategoriesData: HelpCategory[] = [
         title: "Mastering the Budget Optimizer",
         description: "Intelligently allocate your advertising budget across platforms",
         category: "intelligence",
-        lastUpdated: "March 30, 2024",
+        lastUpdated: "April 4, 2024",
         tags: ["budget", "optimization", "allocation", "strategy"],
+        isNew: true,
         sections: [
           {
             title: "Purpose",
@@ -528,6 +607,10 @@ export const helpCategoriesData: HelpCategory[] = [
               "Click \"Apply Recommendations\" or \"Optimize Budget Allocation\" to save the strategy (note: this plans the budget; you still need to manage the actual traffic sources)."
             ],
             image: "Screenshot of Budget Optimizer"
+          },
+          {
+            title: "Key Takeaways",
+            content: "Weekly budget optimization ensures your money is consistently going to the platforms that deliver the best results based on your goals."
           }
         ],
         relatedArticles: ["campaign-management", "rdp-scaler"]
@@ -537,8 +620,9 @@ export const helpCategoriesData: HelpCategory[] = [
         title: "Configuring Automation",
         description: "Set up rules to automate aspects of your traffic management",
         category: "intelligence",
-        lastUpdated: "March 25, 2024",
+        lastUpdated: "April 3, 2024",
         tags: ["automation", "rules", "ai", "optimization"],
+        isNew: true,
         sections: [
           {
             title: "Purpose",
@@ -564,6 +648,10 @@ export const helpCategoriesData: HelpCategory[] = [
             title: "Error Handling",
             content: "Define actions if a platform shows errors (e.g., pause related campaigns, shift budget - advanced).",
             image: "Screenshot of Automation Settings"
+          },
+          {
+            title: "Key Takeaways",
+            content: "Start with simple automation rules and gradually increase complexity as you become comfortable with how they work and affect your campaigns."
           }
         ],
         relatedArticles: ["budget-optimizer", "rdp-scaler"]
@@ -615,6 +703,21 @@ export function searchArticles(keyword: string): HelpArticle[] {
       }
       
       if (foundInSections) continue;
+    }
+  }
+  
+  return results;
+}
+
+// Helper function to get new articles
+export function getNewArticles(): HelpArticle[] {
+  const results: HelpArticle[] = [];
+  
+  for (const category of helpCategoriesData) {
+    for (const article of category.articles) {
+      if (article.isNew) {
+        results.push(article);
+      }
     }
   }
   
