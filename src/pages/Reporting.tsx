@@ -10,12 +10,50 @@ import { ReportGenerator } from '@/components/reporting/ReportGenerator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DateRangePicker } from '@/components/ui/date-range';
 import { DateRange } from 'react-day-picker';
+import { toast } from 'sonner';
 
 const Reporting = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(2023, 0, 20),
     to: new Date(2023, 0, 25),
   });
+  
+  const handleGenerateReport = () => {
+    toast.success("Generating report...");
+    
+    // Simulate report generation delay
+    setTimeout(() => {
+      toast.success("Report generated successfully!");
+    }, 1500);
+  };
+
+  const handleExportFormat = (format: string) => {
+    toast.loading(`Preparing ${format} export...`);
+    
+    // Simulate export delay
+    setTimeout(() => {
+      toast.success(`${format} report downloaded successfully!`);
+      
+      // Create and trigger a download for demonstration
+      const element = document.createElement('a');
+      const file = new Blob([`Traffic Report (${format}) - Sample Data`], 
+        { type: 'text/plain' });
+      element.href = URL.createObjectURL(file);
+      element.download = `traffic-report.${format.toLowerCase()}`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }, 1500);
+  };
+  
+  const handleOpenSavedReport = (reportName: string) => {
+    toast.loading(`Opening ${reportName}...`);
+    
+    // Simulate loading delay
+    setTimeout(() => {
+      toast.success(`${reportName} loaded successfully!`);
+    }, 1000);
+  };
   
   return (
     <div className="page-container">
@@ -75,19 +113,35 @@ const Reporting = () => {
           <CardContent>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="justify-start">
+                <Button 
+                  variant="outline" 
+                  className="justify-start"
+                  onClick={() => handleExportFormat('PDF')}
+                >
                   <FileText className="h-4 w-4 mr-2" />
                   PDF
                 </Button>
-                <Button variant="outline" className="justify-start">
+                <Button 
+                  variant="outline" 
+                  className="justify-start"
+                  onClick={() => handleExportFormat('Excel')}
+                >
                   <FileSpreadsheet className="h-4 w-4 mr-2" />
                   Excel
                 </Button>
-                <Button variant="outline" className="justify-start">
+                <Button 
+                  variant="outline" 
+                  className="justify-start"
+                  onClick={() => handleExportFormat('CSV')}
+                >
                   <FileText className="h-4 w-4 mr-2" />
                   CSV
                 </Button>
-                <Button variant="outline" className="justify-start">
+                <Button 
+                  variant="outline" 
+                  className="justify-start"
+                  onClick={() => handleExportFormat('JSON')}
+                >
                   <FileText className="h-4 w-4 mr-2" />
                   JSON
                 </Button>
@@ -96,18 +150,26 @@ const Reporting = () => {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Delivery Method</label>
                 <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" className="justify-start">
+                  <Button 
+                    variant="outline" 
+                    className="justify-start"
+                    onClick={() => toast.success("Download option selected")}
+                  >
                     <Download className="h-4 w-4 mr-2" />
                     Download
                   </Button>
-                  <Button variant="outline" className="justify-start">
+                  <Button 
+                    variant="outline" 
+                    className="justify-start"
+                    onClick={() => toast.success("Email delivery selected")}
+                  >
                     <FileText className="h-4 w-4 mr-2" />
                     Email
                   </Button>
                 </div>
               </div>
               
-              <Button className="w-full">
+              <Button className="w-full" onClick={handleGenerateReport}>
                 Generate Report
               </Button>
             </div>
@@ -159,7 +221,10 @@ const Reporting = () => {
               metrics={["Date", "Impressions", "Revenue", "CPM"]}
             />
             
-            <Card className="border-dashed border-2 hover:border-primary/50 transition-colors">
+            <Card 
+              className="border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer"
+              onClick={() => toast.success("Custom Report Builder will open here")}
+            >
               <CardContent className="flex flex-col items-center justify-center h-full py-6">
                 <div className="rounded-full bg-muted p-3 mb-3">
                   <Plus className="h-6 w-6 text-muted-foreground" />
@@ -184,7 +249,11 @@ const Reporting = () => {
                     <p className="text-sm text-muted-foreground">Created on April 2, 2023</p>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => handleOpenSavedReport("Q1 Performance Report")}
+                >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -199,7 +268,11 @@ const Reporting = () => {
                     <p className="text-sm text-muted-foreground">Created on April 1, 2023</p>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => handleOpenSavedReport("March Revenue Analysis")}
+                >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -214,7 +287,11 @@ const Reporting = () => {
                     <p className="text-sm text-muted-foreground">Created on March 31, 2023</p>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => handleOpenSavedReport("Platform Comparison - Q1")}
+                >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -229,7 +306,11 @@ const Reporting = () => {
                     <p className="text-sm text-muted-foreground">Created on March 15, 2023</p>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => handleOpenSavedReport("RDP Cost Analysis")}
+                >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -248,7 +329,13 @@ const Reporting = () => {
                     <p className="text-sm text-muted-foreground">Every Monday at 9:00 AM</p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm">Edit</Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => toast.success("Edit scheduled report")}
+                >
+                  Edit
+                </Button>
               </div>
             </div>
             
@@ -261,7 +348,13 @@ const Reporting = () => {
                     <p className="text-sm text-muted-foreground">1st of every month at 8:00 AM</p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm">Edit</Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => toast.success("Edit scheduled report")}
+                >
+                  Edit
+                </Button>
               </div>
             </div>
             
@@ -274,7 +367,13 @@ const Reporting = () => {
                     <p className="text-sm text-muted-foreground">Every 3 months on the 1st at 9:00 AM</p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm">Edit</Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => toast.success("Edit scheduled report")}
+                >
+                  Edit
+                </Button>
               </div>
             </div>
           </div>

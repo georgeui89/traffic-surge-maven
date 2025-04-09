@@ -66,7 +66,7 @@ export default function HelpCategories() {
               <p className="text-muted-foreground mb-4">{category.description}</p>
               <Separator className="mb-4" />
               
-              <ScrollArea className="flex-1 pr-4">
+              <ScrollArea className="flex-1 pr-4" style={{ maxHeight: 'calc(100vh - 300px)' }}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {category.articles.map((article) => (
                     <div 

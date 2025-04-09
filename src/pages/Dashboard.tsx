@@ -11,10 +11,41 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const [timeRange, setTimeRange] = useState<string>('7d');
-
+  const navigate = useNavigate();
+  
+  const handleRefresh = () => {
+    toast.loading("Refreshing dashboard data...");
+    
+    // Simulate refresh delay
+    setTimeout(() => {
+      toast.success("Dashboard data refreshed successfully!");
+    }, 1000);
+  };
+  
+  const handleExport = () => {
+    toast.loading("Preparing export...");
+    
+    // Simulate export delay
+    setTimeout(() => {
+      toast.success("Dashboard data exported successfully!");
+      
+      // Create and trigger a download for demonstration
+      const element = document.createElement('a');
+      const file = new Blob(['Dashboard Export - Sample Data'], 
+        { type: 'text/plain' });
+      element.href = URL.createObjectURL(file);
+      element.download = 'dashboard-export.csv';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }, 1500);
+  };
+  
   return (
     <div className="page-container">
       <div className="page-header backdrop-blur-sm bg-background/60 sticky top-0 z-10 p-4 mb-4 rounded-lg shadow-modern border border-border/30">
@@ -24,15 +55,30 @@ const Dashboard = () => {
         </div>
         
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all duration-200">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="shadow-sm hover:shadow-md transition-all duration-200"
+            onClick={handleRefresh}
+          >
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          <Button variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all duration-200">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="shadow-sm hover:shadow-md transition-all duration-200"
+            onClick={() => toast.success("Filters dialog will open here")}
+          >
             <Filter className="h-4 w-4 mr-2" />
             Filters
           </Button>
-          <Button variant="outline" size="sm" className="shadow-sm hover:shadow-md transition-all duration-200">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="shadow-sm hover:shadow-md transition-all duration-200"
+            onClick={handleExport}
+          >
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -268,19 +314,34 @@ const Dashboard = () => {
         </CardHeader>
         <CardContent className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button className="h-auto py-6 flex flex-col items-center justify-center gap-2 shadow-modern hover:shadow-hover transition-all duration-300">
+            <Button 
+              className="h-auto py-6 flex flex-col items-center justify-center gap-2 shadow-modern hover:shadow-hover transition-all duration-300"
+              onClick={() => navigate('/traffic-analytics')}
+            >
               <Activity className="h-6 w-6" />
               <span>View Traffic</span>
             </Button>
-            <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 shadow-modern hover:shadow-hover transition-all duration-300">
+            <Button 
+              variant="outline" 
+              className="h-auto py-6 flex flex-col items-center justify-center gap-2 shadow-modern hover:shadow-hover transition-all duration-300"
+              onClick={() => navigate('/rdp-management')}
+            >
               <Server className="h-6 w-6" />
               <span>Manage RDPs</span>
             </Button>
-            <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 shadow-modern hover:shadow-hover transition-all duration-300">
+            <Button 
+              variant="outline" 
+              className="h-auto py-6 flex flex-col items-center justify-center gap-2 shadow-modern hover:shadow-hover transition-all duration-300"
+              onClick={() => navigate('/campaigns')}
+            >
               <MonitorPlay className="h-6 w-6" />
               <span>Create Campaign</span>
             </Button>
-            <Button variant="outline" className="h-auto py-6 flex flex-col items-center justify-center gap-2 shadow-modern hover:shadow-hover transition-all duration-300">
+            <Button 
+              variant="outline" 
+              className="h-auto py-6 flex flex-col items-center justify-center gap-2 shadow-modern hover:shadow-hover transition-all duration-300"
+              onClick={() => navigate('/reporting')}
+            >
               <DollarSign className="h-6 w-6" />
               <span>View Earnings</span>
             </Button>

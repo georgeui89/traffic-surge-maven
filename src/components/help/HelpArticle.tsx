@@ -34,6 +34,33 @@ export default function HelpArticle({ articleId, onBack }: HelpArticleProps) {
     setFeedbackSubmitted(true);
   };
 
+  // Print functionality
+  const handlePrint = () => {
+    toast.success("Preparing document for printing...");
+    setTimeout(() => {
+      window.print();
+    }, 500);
+  };
+
+  // Share functionality
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: article.title,
+        text: article.description,
+        url: window.location.href,
+      }).then(() => {
+        toast.success("Shared successfully");
+      }).catch(() => {
+        toast.error("Error sharing content");
+      });
+    } else {
+      // Fallback for browsers that don't support the Web Share API
+      navigator.clipboard.writeText(window.location.href);
+      toast.success("Link copied to clipboard");
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-card/30 rounded-lg border border-border/30 overflow-hidden">
       <div className="px-6 py-4 border-b border-border/30 flex items-center justify-between">
@@ -54,10 +81,10 @@ export default function HelpArticle({ articleId, onBack }: HelpArticleProps) {
             label={`Last Updated: ${article.lastUpdated || 'Recently'}`}
             size="sm"
           />
-          <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handlePrint}>
             <Printer className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleShare}>
             <Share2 className="h-4 w-4" />
           </Button>
         </div>
