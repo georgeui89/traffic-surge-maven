@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { 
   FileText, Download, Filter, ChevronDown, Calendar, BarChart, PieChart, 
-  LineChart, Sliders, ChevronRight, FileSpreadsheet, Plus
+  LineChart, Sliders, ChevronRight, FileSpreadsheet, Plus, Loader2
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,31 +18,82 @@ const Reporting = () => {
     to: new Date(2023, 0, 25),
   });
   
+  const [loadingReport, setLoadingReport] = useState<string | null>(null);
+  const [loadingExport, setLoadingExport] = useState<string | null>(null);
+  
   const handleGenerateReport = () => {
     toast.success("Generating report...");
+    setLoadingReport("main");
     
     // Simulate report generation delay
     setTimeout(() => {
+      // Create and trigger a download for demonstration
+      const reportData = {
+        title: "Traffic Performance Report",
+        dateRange: {
+          from: dateRange?.from?.toISOString() || new Date().toISOString(),
+          to: dateRange?.to?.toISOString() || new Date().toISOString()
+        },
+        platforms: "All Platforms",
+        metrics: ["Impressions", "Clicks", "Revenue", "CPM"],
+        groupBy: "Day",
+        data: [
+          { date: "2023-01-20", impressions: 12500, clicks: 350, revenue: 75.25, cpm: 6.02 },
+          { date: "2023-01-21", impressions: 13200, clicks: 375, revenue: 81.35, cpm: 6.16 },
+          { date: "2023-01-22", impressions: 14100, clicks: 402, revenue: 86.42, cpm: 6.13 }
+        ]
+      };
+      
+      const element = document.createElement('a');
+      const file = new Blob(
+        [JSON.stringify(reportData, null, 2)], 
+        { type: 'application/json' }
+      );
+      element.href = URL.createObjectURL(file);
+      element.download = `traffic-report.json`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      
       toast.success("Report generated successfully!");
+      setLoadingReport(null);
     }, 1500);
   };
 
   const handleExportFormat = (format: string) => {
+    setLoadingExport(format);
     toast.loading(`Preparing ${format} export...`);
     
     // Simulate export delay
     setTimeout(() => {
-      toast.success(`${format} report downloaded successfully!`);
-      
       // Create and trigger a download for demonstration
+      const exportData = {
+        title: `Traffic Report (${format})`,
+        format: format,
+        dateRange: {
+          from: dateRange?.from?.toISOString() || new Date().toISOString(),
+          to: dateRange?.to?.toISOString() || new Date().toISOString()
+        },
+        data: [
+          { date: "2023-01-20", impressions: 12500, clicks: 350, revenue: 75.25, cpm: 6.02 },
+          { date: "2023-01-21", impressions: 13200, clicks: 375, revenue: 81.35, cpm: 6.16 },
+          { date: "2023-01-22", impressions: 14100, clicks: 402, revenue: 86.42, cpm: 6.13 }
+        ]
+      };
+      
       const element = document.createElement('a');
-      const file = new Blob([`Traffic Report (${format}) - Sample Data`], 
-        { type: 'text/plain' });
+      const file = new Blob(
+        [JSON.stringify(exportData, null, 2)], 
+        { type: format === 'PDF' ? 'application/pdf' : format === 'Excel' ? 'application/vnd.ms-excel' : format === 'CSV' ? 'text/csv' : 'application/json' }
+      );
       element.href = URL.createObjectURL(file);
       element.download = `traffic-report.${format.toLowerCase()}`;
       document.body.appendChild(element);
       element.click();
       document.body.removeChild(element);
+      
+      toast.success(`${format} report downloaded successfully!`);
+      setLoadingExport(null);
     }, 1500);
   };
   
@@ -51,6 +102,31 @@ const Reporting = () => {
     
     // Simulate loading delay
     setTimeout(() => {
+      // Create and trigger a download for demonstration
+      const reportData = {
+        title: reportName,
+        dateRange: {
+          from: "2023-01-01",
+          to: "2023-03-31"
+        },
+        data: [
+          { date: "2023-01-20", impressions: 12500, clicks: 350, revenue: 75.25, cpm: 6.02 },
+          { date: "2023-02-15", impressions: 13200, clicks: 375, revenue: 81.35, cpm: 6.16 },
+          { date: "2023-03-10", impressions: 14100, clicks: 402, revenue: 86.42, cpm: 6.13 }
+        ]
+      };
+      
+      const element = document.createElement('a');
+      const file = new Blob(
+        [JSON.stringify(reportData, null, 2)], 
+        { type: 'application/json' }
+      );
+      element.href = URL.createObjectURL(file);
+      element.download = `${reportName.toLowerCase().replace(/\s+/g, '-')}.json`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      
       toast.success(`${reportName} loaded successfully!`);
     }, 1000);
   };
@@ -117,32 +193,52 @@ const Reporting = () => {
                   variant="outline" 
                   className="justify-start"
                   onClick={() => handleExportFormat('PDF')}
+                  disabled={loadingExport !== null}
                 >
-                  <FileText className="h-4 w-4 mr-2" />
+                  {loadingExport === 'PDF' ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <FileText className="h-4 w-4 mr-2" />
+                  )}
                   PDF
                 </Button>
                 <Button 
                   variant="outline" 
                   className="justify-start"
                   onClick={() => handleExportFormat('Excel')}
+                  disabled={loadingExport !== null}
                 >
-                  <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  {loadingExport === 'Excel' ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  )}
                   Excel
                 </Button>
                 <Button 
                   variant="outline" 
                   className="justify-start"
                   onClick={() => handleExportFormat('CSV')}
+                  disabled={loadingExport !== null}
                 >
-                  <FileText className="h-4 w-4 mr-2" />
+                  {loadingExport === 'CSV' ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <FileText className="h-4 w-4 mr-2" />
+                  )}
                   CSV
                 </Button>
                 <Button 
                   variant="outline" 
                   className="justify-start"
                   onClick={() => handleExportFormat('JSON')}
+                  disabled={loadingExport !== null}
                 >
-                  <FileText className="h-4 w-4 mr-2" />
+                  {loadingExport === 'JSON' ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <FileText className="h-4 w-4 mr-2" />
+                  )}
                   JSON
                 </Button>
               </div>
@@ -169,8 +265,19 @@ const Reporting = () => {
                 </div>
               </div>
               
-              <Button className="w-full" onClick={handleGenerateReport}>
-                Generate Report
+              <Button 
+                className="w-full" 
+                onClick={handleGenerateReport}
+                disabled={loadingReport === "main"}
+              >
+                {loadingReport === "main" ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  "Generate Report"
+                )}
               </Button>
             </div>
           </CardContent>

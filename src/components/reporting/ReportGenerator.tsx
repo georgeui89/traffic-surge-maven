@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { useState, useCallback, useEffect } from "react"
 import { Calendar, Download, FileText, Loader2, AlertCircle, CheckCircle } from "lucide-react"
@@ -10,6 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { format } from "date-fns"
 import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 
 type ReportType = 'traffic' | 'earnings' | 'platforms' | 'rdps'
 
@@ -32,7 +34,6 @@ export function ReportGenerator({ title, description, icon, metrics = [] }: Repo
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const { toast } = useToast()
   const [fileFormat, setFileFormat] = useState<"pdf" | "csv" | "excel">("pdf")
   const [dateRange, setDateRange] = useState<{
     from: Date
@@ -55,32 +56,46 @@ export function ReportGenerator({ title, description, icon, metrics = [] }: Repo
       console.log(`Generating report for ${title} in ${fileFormat} format for date range:`, dateRange)
       await new Promise(resolve => setTimeout(resolve, 1500))
       
-      if (Math.random() < 0.1) {
-        throw new Error("Server connection timeout. Please try again.");
+      // Generate dummy report data
+      const reportData = {
+        title,
+        format: fileFormat,
+        dateRange: {
+          from: format(dateRange.from || new Date(), 'yyyy-MM-dd'),
+          to: format(dateRange.to || new Date(), 'yyyy-MM-dd')
+        },
+        metrics: metrics || ["Impressions", "Clicks", "Revenue", "CPM"],
+        data: [
+          { date: format(dateRange.from, 'yyyy-MM-dd'), impressions: 12500, clicks: 350, revenue: 75.25, cpm: 6.02 },
+          { date: format(new Date(dateRange.from.getTime() + 86400000), 'yyyy-MM-dd'), impressions: 13200, clicks: 375, revenue: 81.35, cpm: 6.16 },
+          { date: format(new Date(dateRange.from.getTime() + 86400000 * 2), 'yyyy-MM-dd'), impressions: 14100, clicks: 402, revenue: 86.42, cpm: 6.13 }
+        ]
       }
       
       setSuccess(true)
-      toast({
-        title: "Report Generated",
-        description: `${title} has been generated successfully.`,
-        duration: 3000,
+      toast.success("Report Generated", {
+        description: `${title} has been generated successfully.`
       })
       
-      const dummyLink = document.createElement('a')
-      dummyLink.href = `data:application/octet-stream,${encodeURIComponent(`Sample report data from ${format(dateRange.from || new Date(), 'yyyy-MM-dd')} to ${format(dateRange.to || new Date(), 'yyyy-MM-dd')}`)}`
-      dummyLink.download = `report-${format(new Date(), 'yyyy-MM-dd')}.${fileFormat}`
-      document.body.appendChild(dummyLink)
-      dummyLink.click()
-      document.body.removeChild(dummyLink)
+      // Create and download the file
+      const blob = new Blob(
+        [JSON.stringify(reportData, null, 2)], 
+        { type: fileFormat === 'pdf' ? 'application/pdf' : fileFormat === 'excel' ? 'application/vnd.ms-excel' : 'text/csv' }
+      )
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${title.toLowerCase().replace(/\s+/g, '-')}-report.${fileFormat}`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
       
     } catch (error) {
       console.error("Error generating report:", error)
       setError(error instanceof Error ? error.message : "Unknown error occurred")
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to generate report. Please try again.",
-        variant: "destructive",
-        duration: 3000,
+      toast.error("Error", {
+        description: error instanceof Error ? error.message : "Failed to generate report. Please try again."
       })
     } finally {
       if (success) {
@@ -222,7 +237,6 @@ export function ReportGenerator({ title, description, icon, metrics = [] }: Repo
 
 export function ReportDownloadButton({ report, format }: { report: { name: string, date: string }, format: string }) {
   const [loading, setLoading] = useState(false)
-  const { toast } = useToast()
   
   const handleDownload = async () => {
     setLoading(true)
@@ -230,25 +244,39 @@ export function ReportDownloadButton({ report, format }: { report: { name: strin
       console.log(`Downloading report: ${report.name} in ${format} format`)
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      const dummyLink = document.createElement('a')
-      dummyLink.href = `data:application/octet-stream,${encodeURIComponent(`Sample report data for ${report.name}`)}`
-      dummyLink.download = `${report.name.toLowerCase().replace(/\s+/g, '-')}.${format}`
-      document.body.appendChild(dummyLink)
-      dummyLink.click()
-      document.body.removeChild(dummyLink)
+      // Create sample report data
+      const reportData = {
+        name: report.name,
+        date: report.date,
+        format: format,
+        data: [
+          { date: "2023-01-20", impressions: 12500, clicks: 350, revenue: 75.25, cpm: 6.02 },
+          { date: "2023-01-21", impressions: 13200, clicks: 375, revenue: 81.35, cpm: 6.16 },
+          { date: "2023-01-22", impressions: 14100, clicks: 402, revenue: 86.42, cpm: 6.13 }
+        ]
+      }
       
-      toast({
-        title: "Download Started",
-        description: `${report.name} is downloading.`,
-        duration: 3000,
+      // Create and download the file
+      const blob = new Blob(
+        [JSON.stringify(reportData, null, 2)], 
+        { type: format === 'PDF' ? 'application/pdf' : format === 'Excel' ? 'application/vnd.ms-excel' : 'text/csv' }
+      )
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${report.name.toLowerCase().replace(/\s+/g, '-')}.${format.toLowerCase()}`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      
+      toast.success("Download Started", {
+        description: `${report.name} is downloading.`
       })
     } catch (error) {
       console.error("Error downloading report:", error)
-      toast({
-        title: "Error",
-        description: "Failed to download report. Please try again.",
-        variant: "destructive",
-        duration: 3000,
+      toast.error("Error", {
+        description: "Failed to download report. Please try again."
       })
     } finally {
       setLoading(false)

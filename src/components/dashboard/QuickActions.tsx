@@ -3,130 +3,43 @@ import * as React from "react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
-import { Activity, Server, MonitorPlay, DollarSign, Loader2, Zap, BarChart, TimerReset } from "lucide-react"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { CampaignCreateDialog } from "@/components/campaign/CampaignCreateDialog"
-
-interface QuickActionProps {
-  icon: React.ReactNode
-  label: string
-  route?: string
-  action?: () => Promise<void>
-  description?: string
-  quickAction?: boolean
-}
-
-export function QuickActionButton({ 
-  icon, 
-  label, 
-  route, 
-  action, 
-  description,
-  quickAction = false
-}: QuickActionProps) {
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
-  const { toast } = useToast()
-  
-  const handleClick = async () => {
-    if (loading) return
-    
-    setLoading(true)
-    
-    try {
-      // Add a small delay to show loading state
-      await new Promise(resolve => setTimeout(resolve, 600))
-      
-      if (action) {
-        await action()
-      } else if (route) {
-        navigate(route)
-        
-        toast({
-          title: `Navigating to ${label}`,
-          description: description || `You are now viewing the ${label.toLowerCase()} section.`,
-          duration: 3000,
-        })
-      }
-    } catch (error) {
-      console.error("Error executing quick action:", error)
-      toast({
-        title: "Action Failed",
-        description: "There was an error executing this action. Please try again.",
-        variant: "destructive",
-        duration: 3000,
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-  
-  return (
-    <Button 
-      className={`${quickAction ? 'h-auto py-6 flex flex-col items-center justify-center gap-2' : 'flex items-center gap-2'} shadow-modern hover:shadow-hover transition-all duration-300`}
-      variant={route ? "default" : "outline"}
-      onClick={handleClick}
-      disabled={loading}
-      id={`quick-action-${label.toLowerCase().replace(/\s+/g, '-')}`}
-      data-testid={`quick-action-${label.toLowerCase().replace(/\s+/g, '-')}`}
-    >
-      {loading ? (
-        <Loader2 className="h-6 w-6 animate-spin" />
-      ) : (
-        React.cloneElement(icon as React.ReactElement, { className: "h-6 w-6" })
-      )}
-      <span>{label}</span>
-    </Button>
-  )
-}
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { toast } from "sonner"
+import { Activity, Server, MonitorPlay, DollarSign, Zap, BarChart, TimerReset } from "lucide-react"
+import { QuickActionButton } from "./QuickActionButton"
 
 export function QuickActions() {
-  const { toast } = useToast()
   const navigate = useNavigate()
-  const [showCampaignDialog, setShowCampaignDialog] = useState(false)
   
   const handleViewEarnings = async () => {
     navigate("/reporting")
     
-    toast({
-      title: "Earnings Report",
-      description: "Viewing your earnings report...",
-      duration: 3000,
+    toast.success("Earnings Report", {
+      description: "Viewing your earnings report..."
     })
   }
 
   const handleViewTraffic = async () => {
     navigate("/traffic-analytics")
     
-    toast({
-      title: "Traffic Analytics",
-      description: "Loading your traffic analytics dashboard...",
-      duration: 3000,
+    toast.success("Traffic Analytics", {
+      description: "Loading your traffic analytics dashboard..."
     })
   }
 
   const handleManageRDPs = async () => {
     navigate("/rdp-management")
     
-    toast({
-      title: "RDP Management",
-      description: "Loading your RDP management console...",
-      duration: 3000,
+    toast.success("RDP Management", {
+      description: "Loading your RDP management console..."
     })
   }
 
   const handleCreateCampaign = async () => {
     navigate("/campaigns")
     
-    toast({
-      title: "Campaign Creation",
-      description: "Opening campaign creation page...",
-      duration: 3000,
+    toast.success("Campaign Creation", {
+      description: "Opening campaign creation page..."
     })
   }
   
