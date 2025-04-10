@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Server, Search, Plus, Power, Wifi, DollarSign, BarChart2, MoreHorizontal, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,8 +22,9 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { getStatusColor, formatCurrency, formatNumber } from '@/utils/formatters';
-import { rdps } from '@/utils/mockData';
+import { rdps as initialRdps } from '@/utils/mockData';
 import { useToast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import { RdpMetricsCards } from '@/components/rdp-management/RdpMetricsCards';
 import { RdpDetailsDialog } from '@/components/rdp-management/RdpDetailsDialog';
 import { RdpCreateDialog } from '@/components/rdp-management/RdpCreateDialog';
@@ -36,10 +36,57 @@ const RdpManagement = () => {
   const [selectedRdp, setSelectedRdp] = useState<any | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
-  const { toast } = useToast();
+  const [rdps, setRdps] = useState(initialRdps);
+  const { toast: uiToast } = useToast();
 
   const handleAddRdp = () => {
     setIsCreateDialogOpen(true);
+  };
+
+  const handleCreateRdp = (newRdp: any) => {
+    // Generate a random ID for the new RDP
+    const newId = `rdp-${Math.floor(Math.random() * 1000)}`;
+    
+    const rdpToAdd = {
+      ...newRdp,
+      id: newId,
+      visits: 0,
+      revenue: 0,
+      cost: parseFloat(newRdp.cost) || 5, // Default to 5 if parsing fails
+      status: 'offline', // New RDPs start as offline
+    };
+    
+    setRdps(prevRdps => [...prevRdps, rdpToAdd]);
+    toast.success(`RDP Added`, {
+      description: `${newRdp.name} has been added successfully`
+    });
+    setIsCreateDialogOpen(false);
+  };
+
+  const handleDeleteRdp = (rdpId: string) => {
+    const rdpToDelete = rdps.find(rdp => rdp.id === rdpId);
+    if (!rdpToDelete) return;
+    
+    setRdps(prevRdps => prevRdps.filter(rdp => rdp.id !== rdpId));
+    
+    toast.success(`RDP Deleted`, {
+      description: `${rdpToDelete.name} has been removed successfully`
+    });
+  };
+
+  const handleToggleStatus = (rdpId: string) => {
+    setRdps(prevRdps => prevRdps.map(rdp => {
+      if (rdp.id === rdpId) {
+        const newStatus = rdp.status === 'online' ? 'offline' : 'online';
+        
+        toast.success(`RDP Status Changed`, {
+          description: `${rdp.name} is now ${newStatus}`
+        });
+        
+        return { ...rdp, status: newStatus };
+      }
+      return rdp;
+    }));
   };
 
   const handleViewDetails = (rdp: any) => {
@@ -212,13 +259,16 @@ const RdpManagement = () => {
                           <DropdownMenuItem onClick={() => handleViewDetails(rdp)}>
                             View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleToggleStatus(rdp.id)}>
                             <Power className="h-4 w-4 mr-2" />
                             {rdp.status === 'online' ? 'Turn Off' : 'Turn On'}
                           </DropdownMenuItem>
                           <DropdownMenuItem>Edit</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive">
+                          <DropdownMenuItem 
+                            className="text-destructive"
+                            onClick={() => handleDeleteRdp(rdp.id)}
+                          >
                             Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -285,6 +335,7 @@ const RdpManagement = () => {
       <RdpCreateDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
+        onCreateRdp={handleCreateRdp}
       />
     </div>
   );

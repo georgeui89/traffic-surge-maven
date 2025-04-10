@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Dialog,
@@ -27,9 +26,10 @@ import { Badge } from "@/components/ui/badge";
 interface RdpCreateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCreateRdp?: (rdpData: any) => void;
 }
 
-export function RdpCreateDialog({ open, onOpenChange }: RdpCreateDialogProps) {
+export function RdpCreateDialog({ open, onOpenChange, onCreateRdp }: RdpCreateDialogProps) {
   const [formData, setFormData] = useState({
     name: "",
     provider: "digitalocean",
@@ -114,12 +114,28 @@ export function RdpCreateDialog({ open, onOpenChange }: RdpCreateDialogProps) {
       return;
     }
     
-    toast({
-      title: "RDP Created",
-      description: `${formData.name} has been created successfully with ${selectedPlatforms.length} platforms`,
+    if (onCreateRdp) {
+      onCreateRdp({
+        ...formData,
+        platforms: selectedPlatforms
+      });
+    } else {
+      toast({
+        title: "RDP Created",
+        description: `${formData.name} has been created successfully with ${selectedPlatforms.length} platforms`,
+      });
+      onOpenChange(false);
+    }
+
+    // Reset the form
+    setFormData({
+      name: "",
+      provider: "digitalocean",
+      cpuCores: "4",
+      memory: "8",
+      cost: "5",
     });
-    
-    onOpenChange(false);
+    setSelectedPlatforms([]);
   };
   
   // Calculate available platforms for selection
