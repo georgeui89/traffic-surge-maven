@@ -242,7 +242,6 @@ export function ReportDownloadButton({ report, format }: { report: { name: strin
     setLoading(true)
     try {
       console.log(`Downloading report: ${report.name} in ${format} format`)
-      await new Promise(resolve => setTimeout(resolve, 1000))
       
       // Create sample report data
       const reportData = {

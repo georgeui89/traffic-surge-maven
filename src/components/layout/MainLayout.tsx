@@ -8,7 +8,7 @@ import { Toaster as SonnerToaster } from "sonner";
 
 export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={300}>
       <div className="flex h-screen overflow-hidden">
         <Sidebar />
         <div className="flex flex-col flex-1 overflow-hidden">

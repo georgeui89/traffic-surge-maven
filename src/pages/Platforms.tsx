@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { getStatusColor } from '@/utils/formatters';
-import { platforms } from '@/utils/mockData';
+import { platforms as initialPlatforms } from '@/utils/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -31,6 +31,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 const Platforms = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast: uiToast } = useToast();
+  const [platforms, setPlatforms] = useState(initialPlatforms);
   
   // Dialog states
   const [isAddPlatformOpen, setIsAddPlatformOpen] = useState(false);
@@ -72,8 +73,13 @@ const Platforms = () => {
       return;
     }
 
-    // In a real app, this would be an API call
-    // platforms.push({...newPlatform, id: Date.now().toString()});
+    // Create platform with unique ID and add it to the platforms list
+    const platformToAdd = {
+      ...newPlatform,
+      id: Date.now().toString()
+    };
+    
+    setPlatforms(currentPlatforms => [...currentPlatforms, platformToAdd]);
     
     toast.success("Platform Added", {
       description: `${newPlatform.name} was successfully added`
@@ -110,7 +116,13 @@ const Platforms = () => {
       return;
     }
 
-    // In a real app, this would update the platform in the database
+    // Update the platform in the list
+    setPlatforms(currentPlatforms => 
+      currentPlatforms.map(platform => 
+        platform.id === currentPlatform.id ? currentPlatform : platform
+      )
+    );
+    
     toast.success("Platform Updated", {
       description: `${currentPlatform.name} was successfully updated`
     });
@@ -138,10 +150,14 @@ const Platforms = () => {
   const handleDisconnect = (platformId: string) => {
     console.log("Disconnecting platform ID:", platformId);
     
-    toast.warning("Disconnect Platform", {
-      description: "Are you sure you want to disconnect this platform? This action would require confirmation in a production app."
+    // Remove platform from list
+    setPlatforms(currentPlatforms => 
+      currentPlatforms.filter(platform => platform.id !== platformId)
+    );
+    
+    toast.warning("Platform Disconnected", {
+      description: "The platform has been disconnected from your account."
     });
-    // In a real app, this would open a confirmation dialog
   };
 
   return (
@@ -179,59 +195,67 @@ const Platforms = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredPlatforms.map(platform => (
-              <TableRow key={platform.id}>
-                <TableCell className="font-medium">{platform.name}</TableCell>
-                <TableCell>
-                  <div className={cn(
-                    "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                    getStatusColor(platform.status)
-                  )}>
-                    {platform.status}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <a 
-                    href={platform.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-sm text-primary hover:underline"
-                  >
-                    {platform.url.replace('https://', '')}
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => handleEditPlatform(platform.id)} className="cursor-pointer">
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleViewAnalytics(platform.id)} className="cursor-pointer">
-                        <BarChart2 className="mr-2 h-4 w-4" />
-                        View Analytics
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={() => handleDisconnect(platform.id)}
-                        className="text-destructive cursor-pointer"
-                      >
-                        <Link2Off className="mr-2 h-4 w-4" />
-                        Disconnect
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+            {filteredPlatforms.length > 0 ? (
+              filteredPlatforms.map(platform => (
+                <TableRow key={platform.id}>
+                  <TableCell className="font-medium">{platform.name}</TableCell>
+                  <TableCell>
+                    <div className={cn(
+                      "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                      getStatusColor(platform.status)
+                    )}>
+                      {platform.status}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <a 
+                      href={platform.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-sm text-primary hover:underline"
+                    >
+                      {platform.url.replace('https://', '')}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">Open menu</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => handleEditPlatform(platform.id)} className="cursor-pointer">
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleViewAnalytics(platform.id)} className="cursor-pointer">
+                          <BarChart2 className="mr-2 h-4 w-4" />
+                          View Analytics
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => handleDisconnect(platform.id)}
+                          className="text-destructive cursor-pointer"
+                        >
+                          <Link2Off className="mr-2 h-4 w-4" />
+                          Disconnect
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                  No platforms found. Add your first platform to get started.
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </div>
@@ -400,7 +424,40 @@ const Platforms = () => {
             <Button onClick={() => setIsAnalyticsDialogOpen(false)}>
               Close
             </Button>
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => {
+                toast.success("Report Download Started", {
+                  description: `Analytics for ${currentPlatform.name} is downloading.`
+                });
+                
+                // Create sample report data
+                const reportData = {
+                  name: currentPlatform.name,
+                  url: currentPlatform.url,
+                  status: currentPlatform.status,
+                  stats: {
+                    dailyTraffic: 12453,
+                    avgTime: 42.3,
+                    conversionRate: "3.7%"
+                  }
+                };
+                
+                // Create and download the file
+                const blob = new Blob(
+                  [JSON.stringify(reportData, null, 2)], 
+                  { type: 'application/json' }
+                );
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${currentPlatform.name.toLowerCase().replace(/\s+/g, '-')}-report.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+              }}
+            >
               Download Report
             </Button>
           </DialogFooter>
