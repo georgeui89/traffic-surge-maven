@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Server, Search, Plus, Power, Wifi, DollarSign, BarChart2, MoreHorizontal, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -56,26 +57,39 @@ const RdpManagement = () => {
       status: 'offline', // New RDPs start as offline
     };
     
+    // Update the state with the new RDP
     setRdps(prevRdps => [...prevRdps, rdpToAdd]);
+    
     toast.success(`RDP Added`, {
       description: `${newRdp.name} has been added successfully`
     });
+    
     setIsCreateDialogOpen(false);
+    
+    // Log for debugging
+    console.log("Added new RDP:", rdpToAdd);
+    console.log("Current RDPs:", [...rdps, rdpToAdd]);
   };
 
   const handleDeleteRdp = (rdpId: string) => {
     const rdpToDelete = rdps.find(rdp => rdp.id === rdpId);
     if (!rdpToDelete) return;
     
-    setRdps(prevRdps => prevRdps.filter(rdp => rdp.id !== rdpId));
+    // Update state by filtering out the deleted RDP
+    const updatedRdps = rdps.filter(rdp => rdp.id !== rdpId);
+    setRdps(updatedRdps);
     
     toast.success(`RDP Deleted`, {
       description: `${rdpToDelete.name} has been removed successfully`
     });
+    
+    // Log for debugging
+    console.log("Deleted RDP with ID:", rdpId);
+    console.log("Updated RDPs list:", updatedRdps);
   };
 
   const handleToggleStatus = (rdpId: string) => {
-    setRdps(prevRdps => prevRdps.map(rdp => {
+    const updatedRdps = rdps.map(rdp => {
       if (rdp.id === rdpId) {
         const newStatus = rdp.status === 'online' ? 'offline' : 'online';
         
@@ -83,10 +97,16 @@ const RdpManagement = () => {
           description: `${rdp.name} is now ${newStatus}`
         });
         
+        // Log for debugging
+        console.log(`Changing RDP ${rdp.id} status from ${rdp.status} to ${newStatus}`);
+        
         return { ...rdp, status: newStatus };
       }
       return rdp;
-    }));
+    });
+    
+    setRdps(updatedRdps);
+    console.log("Updated RDPs after status change:", updatedRdps);
   };
 
   const handleViewDetails = (rdp: any) => {
@@ -185,143 +205,151 @@ const RdpManagement = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredRdps.map(rdp => {
-              const rdpRoi = rdp.revenue > 0 && rdp.cost > 0 
-                ? ((rdp.revenue - rdp.cost) / rdp.cost) * 100 
-                : 0;
-              
-              // Simulate platform associations for mock data
-              const platformAssociations = [
-                { name: '9Hits', percentage: 60, status: 'healthy', visits: Math.round(rdp.visits * 0.6), revenue: rdp.revenue * 0.6, roi: rdpRoi * 1.15 },
-                { name: 'Otohits', percentage: 40, status: 'warning', visits: Math.round(rdp.visits * 0.4), revenue: rdp.revenue * 0.4, roi: rdpRoi * 0.85 }
-              ];
-              
-              const isExpanded = expandedRdp === rdp.id;
-              
-              return (
-                <>
-                  <TableRow key={rdp.id} className={cn(isExpanded && "bg-muted/30")}>
-                    <TableCell>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-5 w-5" 
-                        onClick={() => toggleExpandRow(rdp.id)}
-                      >
-                        {isExpanded ? 
-                          <ChevronUp className="h-4 w-4" /> : 
-                          <ChevronDown className="h-4 w-4" />
-                        }
-                      </Button>
-                    </TableCell>
-                    <TableCell className="font-medium">{rdp.name}</TableCell>
-                    <TableCell>
-                      <div className={cn(
-                        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                        getStatusColor(rdp.status)
-                      )}>
-                        {rdp.status}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1 text-xs">
-                        {platformAssociations.map((platform, index) => (
-                          <div key={index} className="flex items-center gap-1.5">
-                            <span className={cn(
-                              "h-2 w-2 rounded-full",
-                              platform.status === 'healthy' ? "bg-success" : 
-                              platform.status === 'warning' ? "bg-warning" : "bg-destructive"
-                            )}></span>
-                            <span>{platform.name} ({platform.percentage}%)</span>
-                          </div>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">{formatNumber(rdp.visits)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(rdp.revenue)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(rdp.cost)}</TableCell>
-                    <TableCell className={cn(
-                      "text-right font-medium",
-                      rdpRoi > 0 ? "text-success" : rdpRoi < 0 ? "text-destructive" : ""
-                    )}>
-                      {rdpRoi.toFixed(1)}%
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Open menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => handleViewDetails(rdp)}>
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleToggleStatus(rdp.id)}>
-                            <Power className="h-4 w-4 mr-2" />
-                            {rdp.status === 'online' ? 'Turn Off' : 'Turn On'}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem 
-                            className="text-destructive"
-                            onClick={() => handleDeleteRdp(rdp.id)}
-                          >
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                  
-                  {isExpanded && (
-                    <TableRow className="bg-muted/10">
-                      <TableCell colSpan={9} className="p-0">
-                        <div className="px-8 py-4">
-                          <h4 className="text-sm font-medium mb-3">Platform Details</h4>
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Platform</TableHead>
-                                <TableHead>Visits</TableHead>
-                                <TableHead>Revenue</TableHead>
-                                <TableHead>ROI</TableHead>
-                                <TableHead>Health</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {platformAssociations.map((platform, index) => (
-                                <TableRow key={index}>
-                                  <TableCell>{platform.name}</TableCell>
-                                  <TableCell>{formatNumber(platform.visits)}</TableCell>
-                                  <TableCell>{formatCurrency(platform.revenue)}</TableCell>
-                                  <TableCell className={cn(
-                                    "font-medium",
-                                    platform.roi > 0 ? "text-success" : "text-destructive"
-                                  )}>
-                                    {platform.roi.toFixed(1)}%
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className={cn(
-                                      "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                                      getStatusColor(platform.status)
-                                    )}>
-                                      {platform.status}
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
+            {filteredRdps.length > 0 ? (
+              filteredRdps.map(rdp => {
+                const rdpRoi = rdp.revenue > 0 && rdp.cost > 0 
+                  ? ((rdp.revenue - rdp.cost) / rdp.cost) * 100 
+                  : 0;
+                
+                // Simulate platform associations for mock data
+                const platformAssociations = [
+                  { name: '9Hits', percentage: 60, status: 'healthy', visits: Math.round(rdp.visits * 0.6), revenue: rdp.revenue * 0.6, roi: rdpRoi * 1.15 },
+                  { name: 'Otohits', percentage: 40, status: 'warning', visits: Math.round(rdp.visits * 0.4), revenue: rdp.revenue * 0.4, roi: rdpRoi * 0.85 }
+                ];
+                
+                const isExpanded = expandedRdp === rdp.id;
+                
+                return (
+                  <>
+                    <TableRow key={rdp.id} className={cn(isExpanded && "bg-muted/30")}>
+                      <TableCell>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-5 w-5" 
+                          onClick={() => toggleExpandRow(rdp.id)}
+                        >
+                          {isExpanded ? 
+                            <ChevronUp className="h-4 w-4" /> : 
+                            <ChevronDown className="h-4 w-4" />
+                          }
+                        </Button>
+                      </TableCell>
+                      <TableCell className="font-medium">{rdp.name}</TableCell>
+                      <TableCell>
+                        <div className={cn(
+                          "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                          getStatusColor(rdp.status)
+                        )}>
+                          {rdp.status}
                         </div>
                       </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1 text-xs">
+                          {platformAssociations.map((platform, index) => (
+                            <div key={index} className="flex items-center gap-1.5">
+                              <span className={cn(
+                                "h-2 w-2 rounded-full",
+                                platform.status === 'healthy' ? "bg-success" : 
+                                platform.status === 'warning' ? "bg-warning" : "bg-destructive"
+                              )}></span>
+                              <span>{platform.name} ({platform.percentage}%)</span>
+                            </div>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">{formatNumber(rdp.visits)}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(rdp.revenue)}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(rdp.cost)}</TableCell>
+                      <TableCell className={cn(
+                        "text-right font-medium",
+                        rdpRoi > 0 ? "text-success" : rdpRoi < 0 ? "text-destructive" : ""
+                      )}>
+                        {rdpRoi.toFixed(1)}%
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Open menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => handleViewDetails(rdp)}>
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleToggleStatus(rdp.id)}>
+                              <Power className="h-4 w-4 mr-2" />
+                              {rdp.status === 'online' ? 'Turn Off' : 'Turn On'}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              className="text-destructive"
+                              onClick={() => handleDeleteRdp(rdp.id)}
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
                     </TableRow>
-                  )}
-                </>
-              );
-            })}
+                    
+                    {isExpanded && (
+                      <TableRow className="bg-muted/10">
+                        <TableCell colSpan={9} className="p-0">
+                          <div className="px-8 py-4">
+                            <h4 className="text-sm font-medium mb-3">Platform Details</h4>
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Platform</TableHead>
+                                  <TableHead>Visits</TableHead>
+                                  <TableHead>Revenue</TableHead>
+                                  <TableHead>ROI</TableHead>
+                                  <TableHead>Health</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {platformAssociations.map((platform, index) => (
+                                  <TableRow key={index}>
+                                    <TableCell>{platform.name}</TableCell>
+                                    <TableCell>{formatNumber(platform.visits)}</TableCell>
+                                    <TableCell>{formatCurrency(platform.revenue)}</TableCell>
+                                    <TableCell className={cn(
+                                      "font-medium",
+                                      platform.roi > 0 ? "text-success" : "text-destructive"
+                                    )}>
+                                      {platform.roi.toFixed(1)}%
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className={cn(
+                                        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                                        getStatusColor(platform.status)
+                                      )}>
+                                        {platform.status}
+                                      </div>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
+                );
+              })
+            ) : (
+              <TableRow>
+                <TableCell colSpan={9} className="text-center py-6">
+                  No RDPs found. Add one to get started.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>

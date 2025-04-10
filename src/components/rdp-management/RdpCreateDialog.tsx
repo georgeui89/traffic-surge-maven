@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   Dialog,
@@ -115,10 +116,21 @@ export function RdpCreateDialog({ open, onOpenChange, onCreateRdp }: RdpCreateDi
     }
     
     if (onCreateRdp) {
+      // Call the parent component's callback with the form data
       onCreateRdp({
         ...formData,
         platforms: selectedPlatforms
       });
+      
+      // Reset the form
+      setFormData({
+        name: "",
+        provider: "digitalocean",
+        cpuCores: "4",
+        memory: "8",
+        cost: "5",
+      });
+      setSelectedPlatforms([]);
     } else {
       toast({
         title: "RDP Created",
@@ -126,16 +138,6 @@ export function RdpCreateDialog({ open, onOpenChange, onCreateRdp }: RdpCreateDi
       });
       onOpenChange(false);
     }
-
-    // Reset the form
-    setFormData({
-      name: "",
-      provider: "digitalocean",
-      cpuCores: "4",
-      memory: "8",
-      cost: "5",
-    });
-    setSelectedPlatforms([]);
   };
   
   // Calculate available platforms for selection
