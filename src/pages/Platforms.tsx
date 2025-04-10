@@ -23,25 +23,48 @@ import { cn } from '@/lib/utils';
 import { getStatusColor } from '@/utils/formatters';
 import { platforms } from '@/utils/mockData';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Platforms = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast: uiToast } = useToast();
+  
+  // Dialog states
   const [isAddPlatformOpen, setIsAddPlatformOpen] = useState(false);
-  const [newPlatform, setNewPlatform] = useState({ name: '', url: '', status: 'inactive' });
+  const [isEditPlatformOpen, setIsEditPlatformOpen] = useState(false);
+  const [isAnalyticsDialogOpen, setIsAnalyticsDialogOpen] = useState(false);
+  
+  // Platform data states
+  const [newPlatform, setNewPlatform] = useState({ 
+    name: '', 
+    url: '', 
+    status: 'inactive' 
+  });
+  const [currentPlatform, setCurrentPlatform] = useState({
+    id: '',
+    name: '',
+    url: '',
+    status: ''
+  });
 
   const filteredPlatforms = platforms.filter(platform => 
     platform.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Handler for opening Add Platform dialog
   const handleAddPlatform = () => {
+    console.log("Opening Add Platform dialog");
+    setNewPlatform({ name: '', url: '', status: 'inactive' });
     setIsAddPlatformOpen(true);
   };
 
+  // Handler for saving a new platform
   const handleSavePlatform = () => {
+    console.log("Attempting to save platform:", newPlatform);
+    
     if (!newPlatform.name || !newPlatform.url) {
       toast.error("Missing Information", {
         description: "Please fill in all required fields"
@@ -60,23 +83,63 @@ const Platforms = () => {
     setNewPlatform({ name: '', url: '', status: 'inactive' });
   };
 
+  // Handler for opening Edit Platform dialog
   const handleEditPlatform = (platformId: string) => {
-    toast.info("Edit Platform", {
-      description: `Opening edit form for platform ID: ${platformId}`
-    });
-    // In a real app, this would open an edit dialog
+    console.log("Opening edit dialog for platform ID:", platformId);
+    
+    const platform = platforms.find(p => p.id === platformId);
+    if (platform) {
+      setCurrentPlatform({
+        id: platform.id,
+        name: platform.name,
+        url: platform.url,
+        status: platform.status
+      });
+      setIsEditPlatformOpen(true);
+    }
   };
 
+  // Handler for saving edited platform
+  const handleSaveEditedPlatform = () => {
+    console.log("Saving edited platform:", currentPlatform);
+    
+    if (!currentPlatform.name || !currentPlatform.url) {
+      toast.error("Missing Information", {
+        description: "Please fill in all required fields"
+      });
+      return;
+    }
+
+    // In a real app, this would update the platform in the database
+    toast.success("Platform Updated", {
+      description: `${currentPlatform.name} was successfully updated`
+    });
+    
+    setIsEditPlatformOpen(false);
+  };
+
+  // Handler for viewing analytics
   const handleViewAnalytics = (platformId: string) => {
-    toast.info("View Analytics", {
-      description: `Navigating to analytics for platform ID: ${platformId}`
-    });
-    // In a real app, this would navigate to analytics page
+    console.log("Viewing analytics for platform ID:", platformId);
+    
+    const platform = platforms.find(p => p.id === platformId);
+    if (platform) {
+      setCurrentPlatform({
+        id: platform.id,
+        name: platform.name,
+        url: platform.url,
+        status: platform.status
+      });
+      setIsAnalyticsDialogOpen(true);
+    }
   };
 
+  // Handler for disconnecting platform
   const handleDisconnect = (platformId: string) => {
+    console.log("Disconnecting platform ID:", platformId);
+    
     toast.warning("Disconnect Platform", {
-      description: `Are you sure you want to disconnect this platform? This action would require confirmation in a production app.`
+      description: "Are you sure you want to disconnect this platform? This action would require confirmation in a production app."
     });
     // In a real app, this would open a confirmation dialog
   };
@@ -204,6 +267,24 @@ const Platforms = () => {
                 onChange={(e) => setNewPlatform({...newPlatform, url: e.target.value})}
               />
             </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="platform-status" className="text-right">
+                Status
+              </Label>
+              <Select 
+                value={newPlatform.status} 
+                onValueChange={(value) => setNewPlatform({...newPlatform, status: value})}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddPlatformOpen(false)}>
@@ -211,6 +292,116 @@ const Platforms = () => {
             </Button>
             <Button onClick={handleSavePlatform}>
               Add Platform
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Platform Dialog */}
+      <Dialog open={isEditPlatformOpen} onOpenChange={setIsEditPlatformOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Platform</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-platform-name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="edit-platform-name"
+                placeholder="Platform name"
+                className="col-span-3"
+                value={currentPlatform.name}
+                onChange={(e) => setCurrentPlatform({...currentPlatform, name: e.target.value})}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-platform-url" className="text-right">
+                URL
+              </Label>
+              <Input
+                id="edit-platform-url"
+                placeholder="https://platform-url.com"
+                className="col-span-3"
+                value={currentPlatform.url}
+                onChange={(e) => setCurrentPlatform({...currentPlatform, url: e.target.value})}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-platform-status" className="text-right">
+                Status
+              </Label>
+              <Select 
+                value={currentPlatform.status} 
+                onValueChange={(value) => setCurrentPlatform({...currentPlatform, status: value})}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditPlatformOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEditedPlatform}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Dialog */}
+      <Dialog open={isAnalyticsDialogOpen} onOpenChange={setIsAnalyticsDialogOpen}>
+        <DialogContent className="sm:max-w-[700px]">
+          <DialogHeader>
+            <DialogTitle>Platform Analytics: {currentPlatform.name}</DialogTitle>
+            <DialogDescription>
+              Traffic performance metrics for this platform
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="bg-muted/20 p-6 rounded-lg mb-4">
+              <h3 className="text-lg font-medium mb-3">Traffic Statistics</h3>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-white p-4 rounded-md shadow-sm">
+                  <p className="text-muted-foreground text-sm">Daily Traffic</p>
+                  <p className="text-2xl font-bold">12,453</p>
+                  <p className="text-xs text-emerald-500">↑ 12% from last week</p>
+                </div>
+                <div className="bg-white p-4 rounded-md shadow-sm">
+                  <p className="text-muted-foreground text-sm">Avg. Time (sec)</p>
+                  <p className="text-2xl font-bold">42.3</p>
+                  <p className="text-xs text-emerald-500">↑ 5% from last week</p>
+                </div>
+                <div className="bg-white p-4 rounded-md shadow-sm">
+                  <p className="text-muted-foreground text-sm">Conversion Rate</p>
+                  <p className="text-2xl font-bold">3.7%</p>
+                  <p className="text-xs text-rose-500">↓ 1.2% from last week</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-muted/20 p-6 rounded-lg">
+              <h3 className="text-lg font-medium mb-3">Performance History</h3>
+              <div className="h-[180px] w-full bg-white rounded-md mb-4 flex items-center justify-center">
+                <p className="text-muted-foreground">Analytics chart would appear here in a full implementation</p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsAnalyticsDialogOpen(false)}>
+              Close
+            </Button>
+            <Button variant="outline">
+              Download Report
             </Button>
           </DialogFooter>
         </DialogContent>

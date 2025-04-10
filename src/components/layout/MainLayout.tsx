@@ -4,6 +4,7 @@ import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster as SonnerToaster } from "sonner";
 
 export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
@@ -17,6 +18,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
           </main>
         </div>
         <Toaster />
+        <SonnerToaster position="top-center" expand={true} richColors closeButton />
       </div>
     </TooltipProvider>
   );
