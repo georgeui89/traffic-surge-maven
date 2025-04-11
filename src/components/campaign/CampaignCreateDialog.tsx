@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
@@ -79,8 +80,16 @@ export function CampaignCreateDialog() {
     } catch (error) {
       console.error("Failed to load platforms:", error);
       toast.error("Failed to load platforms", {
-        description: "Could not retrieve the list of platforms"
+        description: "Could not retrieve the list of platforms. Using example platforms."
       });
+      
+      // Load mock platforms as fallback
+      try {
+        const { platforms: mockPlatforms } = await import('@/utils/mockData');
+        setPlatforms(mockPlatforms);
+      } catch (mockError) {
+        console.error("Failed to load mock platforms:", mockError);
+      }
     } finally {
       setIsLoadingPlatforms(false);
     }
@@ -93,6 +102,7 @@ export function CampaignCreateDialog() {
     try {
       console.log("Creating campaign in Firestore:", data)
       
+      // All required fields are explicitly included to satisfy TypeScript
       const campaignData = {
         name: data.name,
         url: data.url,
@@ -109,7 +119,7 @@ export function CampaignCreateDialog() {
       setSuccess(true)
       
       toast.success("Campaign created", {
-        description: `Your campaign "${data.name}" has been saved to Firestore`
+        description: `Your campaign "${data.name}" has been saved successfully`
       });
 
       setTimeout(() => {
@@ -120,7 +130,7 @@ export function CampaignCreateDialog() {
     } catch (error) {
       console.error("Failed to create campaign in Firestore:", error)
       toast.error("Failed to create campaign", {
-        description: "An error occurred while saving to Firestore. Please try again."
+        description: "An error occurred while saving. Please try again."
       });
     } finally {
       if (!success) {

@@ -40,23 +40,71 @@ const RdpManagement = () => {
   const [rdps, setRdps] = useState<RdpData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast: uiToast } = useToast();
+  const [isUsingMockData, setIsUsingMockData] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+    
     console.log("Setting up Firestore subscription for RDPs");
+    
+    // Initial data load
+    const loadInitialData = async () => {
+      try {
+        const data = await fetchRdps();
+        if (isMounted) {
+          setRdps(data);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Error loading initial RDP data:", error);
+        if (isMounted) {
+          // Use mock data as a fallback
+          setRdps(initialRdps as RdpData[]);
+          setIsUsingMockData(true);
+          setIsLoading(false);
+          toast.warning("Using local data", {
+            description: "Could not connect to database. Changes will not be saved."
+          });
+        }
+      }
+    };
+    
+    loadInitialData();
+    
+    // Setup real-time subscription
     const unsubscribe = subscribeToRdps(
       (fetchedRdps) => {
-        console.log("RDPs loaded from Firestore:", fetchedRdps);
-        setRdps(fetchedRdps);
-        setIsLoading(false);
+        if (isMounted) {
+          console.log("RDPs loaded from Firestore:", fetchedRdps);
+          setRdps(fetchedRdps);
+          setIsLoading(false);
+          if (isUsingMockData) {
+            setIsUsingMockData(false);
+            toast.success("Connected to database", {
+              description: "Your changes will now be saved"
+            });
+          }
+        }
       },
       (error) => {
         console.error("Error loading RDPs:", error);
-        toast.error("Failed to load RDPs");
-        setIsLoading(false);
+        if (isMounted && !isUsingMockData) {
+          // Only show toast if we weren't already using mock data
+          toast.error("Failed to load RDPs", {
+            description: "Using local data. Changes will not be saved."
+          });
+          // If we don't have any data yet, use mock data
+          if (rdps.length === 0) {
+            setRdps(initialRdps as RdpData[]);
+          }
+          setIsUsingMockData(true);
+          setIsLoading(false);
+        }
       }
     );
 
     return () => {
+      isMounted = false;
       console.log("Cleaning up Firestore subscription");
       unsubscribe();
     };
@@ -78,7 +126,12 @@ const RdpManagement = () => {
         status: 'offline',
       };
       
-      await addRdp(rdpToAdd);
+      const addedRdp = await addRdp(rdpToAdd);
+      
+      // If we're using mock data, update the local state
+      if (isUsingMockData) {
+        setRdps(prev => [...prev, addedRdp]);
+      }
       
       toast.success(`RDP Added`, {
         description: `${newRdp.name} has been added successfully`
@@ -101,6 +154,11 @@ const RdpManagement = () => {
       
       await deleteRdp(rdpId);
       
+      // If we're using mock data, update the local state
+      if (isUsingMockData) {
+        setRdps(prev => prev.filter(rdp => rdp.id !== rdpId));
+      }
+      
       toast.success(`RDP Deleted`, {
         description: `${rdpToDelete.name} has been removed successfully`
       });
@@ -121,6 +179,13 @@ const RdpManagement = () => {
       console.log(`Changing RDP ${rdpId} status from ${rdpToUpdate.status} to ${newStatus}`);
       
       await updateRdpStatus(rdpId, newStatus);
+      
+      // If we're using mock data, update the local state
+      if (isUsingMockData) {
+        setRdps(prev => prev.map(rdp => 
+          rdp.id === rdpId ? { ...rdp, status: newStatus } : rdp
+        ));
+      }
       
       toast.success(`RDP Status Changed`, {
         description: `${rdpToUpdate.name} is now ${newStatus}`
@@ -168,6 +233,11 @@ const RdpManagement = () => {
       <div className="page-header">
         <h1 className="page-title">RDP Management</h1>
         <p className="page-description">Monitor and manage your remote desktop instances</p>
+        {isUsingMockData && (
+          <div className="mt-2 p-2 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-sm rounded-md">
+            ⚠️ Using local data. Changes will not be saved to the database.
+          </div>
+        )}
       </div>
       
       <RdpMetricsCards 
@@ -233,159 +303,167 @@ const RdpManagement = () => {
                   Loading RDP data...
                 </TableCell>
               </TableRow>
-            ) : filteredRdps.length > 0 ? (
-              filteredRdps.map((rdp) => {
-                const rdpRoi = rdp.revenue > 0 && rdp.cost > 0 
-                  ? ((rdp.revenue - rdp.cost) / rdp.cost) * 100 
-                  : 0;
+            ) : rdps.length > 0 ? (
+              rdps
+                .filter(rdp => {
+                  const matchesSearch = rdp.name.toLowerCase().includes(searchTerm.toLowerCase());
+                  const matchesStatus = viewMode === 'all' || 
+                                      (viewMode === 'online' && rdp.status === 'online') ||
+                                      (viewMode === 'offline' && rdp.status === 'offline');
+                  return matchesSearch && matchesStatus;
+                })
+                .map((rdp) => {
+                  const rdpRoi = rdp.revenue > 0 && rdp.cost > 0 
+                    ? ((rdp.revenue - rdp.cost) / rdp.cost) * 100 
+                    : 0;
                 
-                const platforms = rdp.platforms || [];
+                  const platforms = rdp.platforms || [];
                 
-                const platformAssociations = platforms.length > 0 
-                  ? platforms.map(platform => {
-                      const percentage = platform.weight || 0;
-                      const weight = percentage / 100;
-                      const status = Math.random() > 0.7 ? 'warning' : 'healthy';
-                      return {
-                        name: platform.name,
-                        percentage,
-                        status,
-                        visits: Math.round(rdp.visits * weight),
-                        revenue: rdp.revenue * weight,
-                        roi: rdpRoi * (status === 'healthy' ? 1.15 : 0.85)
-                      };
-                    }) 
-                  : [
-                      { name: '9Hits', percentage: 60, status: 'healthy', visits: Math.round(rdp.visits * 0.6), revenue: rdp.revenue * 0.6, roi: rdpRoi * 1.15 },
-                      { name: 'Otohits', percentage: 40, status: 'warning', visits: Math.round(rdp.visits * 0.4), revenue: rdp.revenue * 0.4, roi: rdpRoi * 0.85 }
-                    ];
+                  const platformAssociations = platforms.length > 0 
+                    ? platforms.map(platform => {
+                        const percentage = platform.weight || 0;
+                        const weight = percentage / 100;
+                        const status = Math.random() > 0.7 ? 'warning' : 'healthy';
+                        return {
+                          name: platform.name,
+                          percentage,
+                          status,
+                          visits: Math.round(rdp.visits * weight),
+                          revenue: rdp.revenue * weight,
+                          roi: rdpRoi * (status === 'healthy' ? 1.15 : 0.85)
+                        };
+                      }) 
+                    : [
+                        { name: '9Hits', percentage: 60, status: 'healthy', visits: Math.round(rdp.visits * 0.6), revenue: rdp.revenue * 0.6, roi: rdpRoi * 1.15 },
+                        { name: 'Otohits', percentage: 40, status: 'warning', visits: Math.round(rdp.visits * 0.4), revenue: rdp.revenue * 0.4, roi: rdpRoi * 0.85 }
+                      ];
                 
-                const isExpanded = expandedRdp === rdp.id;
+                  const isExpanded = expandedRdp === rdp.id;
                 
-                return (
-                  <React.Fragment key={rdp.id}>
-                    <TableRow className={cn(isExpanded && "bg-muted/30")}>
-                      <TableCell>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-5 w-5" 
-                          onClick={() => toggleExpandRow(rdp.id!)}
-                        >
-                          {isExpanded ? 
-                            <ChevronUp className="h-4 w-4" /> : 
-                            <ChevronDown className="h-4 w-4" />
-                          }
-                        </Button>
-                      </TableCell>
-                      <TableCell className="font-medium">{rdp.name}</TableCell>
-                      <TableCell>
-                        <div className={cn(
-                          "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                          getStatusColor(rdp.status)
-                        )}>
-                          {rdp.status}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1 text-xs">
-                          {platformAssociations.map((platform, index) => (
-                            <div key={index} className="flex items-center gap-1.5">
-                              <span className={cn(
-                                "h-2 w-2 rounded-full",
-                                platform.status === 'healthy' ? "bg-success" : 
-                                platform.status === 'warning' ? "bg-warning" : "bg-destructive"
-                              )}></span>
-                              <span>{platform.name} ({platform.percentage}%)</span>
-                            </div>
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">{formatNumber(rdp.visits)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(rdp.revenue)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(rdp.cost)}</TableCell>
-                      <TableCell className={cn(
-                        "text-right font-medium",
-                        rdpRoi > 0 ? "text-success" : rdpRoi < 0 ? "text-destructive" : ""
-                      )}>
-                        {rdpRoi.toFixed(1)}%
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Open menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => handleViewDetails(rdp)}>
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleToggleStatus(rdp.id!)}>
-                              <Power className="h-4 w-4 mr-2" />
-                              {rdp.status === 'online' ? 'Turn Off' : 'Turn On'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                              className="text-destructive"
-                              onClick={() => handleDeleteRdp(rdp.id!)}
-                            >
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                    
-                    {isExpanded && (
-                      <TableRow className="bg-muted/10">
-                        <TableCell colSpan={9} className="p-0">
-                          <div className="px-8 py-4">
-                            <h4 className="text-sm font-medium mb-3">Platform Details</h4>
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead>Platform</TableHead>
-                                  <TableHead>Visits</TableHead>
-                                  <TableHead>Revenue</TableHead>
-                                  <TableHead>ROI</TableHead>
-                                  <TableHead>Health</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {platformAssociations.map((platform, index) => (
-                                  <TableRow key={index}>
-                                    <TableCell>{platform.name}</TableCell>
-                                    <TableCell>{formatNumber(platform.visits)}</TableCell>
-                                    <TableCell>{formatCurrency(platform.revenue)}</TableCell>
-                                    <TableCell className={cn(
-                                      "font-medium",
-                                      platform.roi > 0 ? "text-success" : "text-destructive"
-                                    )}>
-                                      {platform.roi.toFixed(1)}%
-                                    </TableCell>
-                                    <TableCell>
-                                      <div className={cn(
-                                        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                                        getStatusColor(platform.status)
-                                      )}>
-                                        {platform.status}
-                                      </div>
-                                    </TableCell>
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
+                  return (
+                    <React.Fragment key={rdp.id}>
+                      <TableRow className={cn(isExpanded && "bg-muted/30")}>
+                        <TableCell>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-5 w-5" 
+                            onClick={() => toggleExpandRow(rdp.id!)}
+                          >
+                            {isExpanded ? 
+                              <ChevronUp className="h-4 w-4" /> : 
+                              <ChevronDown className="h-4 w-4" />
+                            }
+                          </Button>
+                        </TableCell>
+                        <TableCell className="font-medium">{rdp.name}</TableCell>
+                        <TableCell>
+                          <div className={cn(
+                            "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                            getStatusColor(rdp.status)
+                          )}>
+                            {rdp.status}
                           </div>
                         </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1 text-xs">
+                            {platformAssociations.map((platform, index) => (
+                              <div key={index} className="flex items-center gap-1.5">
+                                <span className={cn(
+                                  "h-2 w-2 rounded-full",
+                                  platform.status === 'healthy' ? "bg-success" : 
+                                  platform.status === 'warning' ? "bg-warning" : "bg-destructive"
+                                )}></span>
+                                <span>{platform.name} ({platform.percentage}%)</span>
+                              </div>
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">{formatNumber(rdp.visits)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(rdp.revenue)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(rdp.cost)}</TableCell>
+                        <TableCell className={cn(
+                          "text-right font-medium",
+                          rdpRoi > 0 ? "text-success" : rdpRoi < 0 ? "text-destructive" : ""
+                        )}>
+                          {rdpRoi.toFixed(1)}%
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Open menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem onClick={() => handleViewDetails(rdp)}>
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleToggleStatus(rdp.id!)}>
+                                <Power className="h-4 w-4 mr-2" />
+                                {rdp.status === 'online' ? 'Turn Off' : 'Turn On'}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>Edit</DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                className="text-destructive"
+                                onClick={() => handleDeleteRdp(rdp.id!)}
+                              >
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
                       </TableRow>
-                    )}
-                  </React.Fragment>
-                );
-              })
+                      
+                      {isExpanded && (
+                        <TableRow className="bg-muted/10">
+                          <TableCell colSpan={9} className="p-0">
+                            <div className="px-8 py-4">
+                              <h4 className="text-sm font-medium mb-3">Platform Details</h4>
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Platform</TableHead>
+                                    <TableHead>Visits</TableHead>
+                                    <TableHead>Revenue</TableHead>
+                                    <TableHead>ROI</TableHead>
+                                    <TableHead>Health</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {platformAssociations.map((platform, index) => (
+                                    <TableRow key={index}>
+                                      <TableCell>{platform.name}</TableCell>
+                                      <TableCell>{formatNumber(platform.visits)}</TableCell>
+                                      <TableCell>{formatCurrency(platform.revenue)}</TableCell>
+                                      <TableCell className={cn(
+                                        "font-medium",
+                                        platform.roi > 0 ? "text-success" : "text-destructive"
+                                      )}>
+                                        {platform.roi.toFixed(1)}%
+                                      </TableCell>
+                                      <TableCell>
+                                        <div className={cn(
+                                          "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                                          getStatusColor(platform.status)
+                                        )}>
+                                          {platform.status}
+                                        </div>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </React.Fragment>
+                  );
+                })
             ) : (
               <TableRow>
                 <TableCell colSpan={9} className="text-center py-6">
