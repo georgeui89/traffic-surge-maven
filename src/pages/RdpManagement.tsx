@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Server, Search, Plus, Power, Wifi, DollarSign, BarChart2, MoreHorizontal, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +28,7 @@ import { toast } from "sonner";
 import { RdpMetricsCards } from '@/components/rdp-management/RdpMetricsCards';
 import { RdpDetailsDialog } from '@/components/rdp-management/RdpDetailsDialog';
 import { RdpCreateDialog } from '@/components/rdp-management/RdpCreateDialog';
+import { fetchRdps, updateRdpStatus, deleteRdp, addRdp, subscribeToRdps, RdpData } from '@/lib/firebase';
 
 const RdpManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,76 +37,100 @@ const RdpManagement = () => {
   const [selectedRdp, setSelectedRdp] = useState<any | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
-  const [rdps, setRdps] = useState(initialRdps);
+  const [rdps, setRdps] = useState<RdpData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast: uiToast } = useToast();
+
+  useEffect(() => {
+    console.log("Setting up Firestore subscription for RDPs");
+    const unsubscribe = subscribeToRdps(
+      (fetchedRdps) => {
+        console.log("RDPs loaded from Firestore:", fetchedRdps);
+        setRdps(fetchedRdps);
+        setIsLoading(false);
+      },
+      (error) => {
+        console.error("Error loading RDPs:", error);
+        toast.error("Failed to load RDPs");
+        setIsLoading(false);
+      }
+    );
+
+    return () => {
+      console.log("Cleaning up Firestore subscription");
+      unsubscribe();
+    };
+  }, []);
 
   const handleAddRdp = () => {
     setIsCreateDialogOpen(true);
   };
 
-  const handleCreateRdp = (newRdp: any) => {
-    // Generate a random ID for the new RDP
-    const newId = `rdp-${Math.floor(Math.random() * 1000)}`;
-    
-    const rdpToAdd = {
-      ...newRdp,
-      id: newId,
-      visits: 0,
-      revenue: 0,
-      cost: parseFloat(newRdp.cost) || 5, // Default to 5 if parsing fails
-      status: 'offline', // New RDPs start as offline
-    };
-    
-    // Update the state with the new RDP
-    setRdps(prevRdps => [...prevRdps, rdpToAdd]);
-    
-    toast.success(`RDP Added`, {
-      description: `${newRdp.name} has been added successfully`
-    });
-    
-    setIsCreateDialogOpen(false);
-    
-    // Log for debugging
-    console.log("Added new RDP:", rdpToAdd);
-    console.log("Current RDPs:", [...rdps, rdpToAdd]);
+  const handleCreateRdp = async (newRdp: any) => {
+    try {
+      console.log("Creating new RDP:", newRdp);
+      
+      const rdpToAdd = {
+        ...newRdp,
+        visits: 0,
+        revenue: 0,
+        cost: parseFloat(newRdp.cost) || 5,
+        status: 'offline',
+      };
+      
+      await addRdp(rdpToAdd);
+      
+      toast.success(`RDP Added`, {
+        description: `${newRdp.name} has been added successfully`
+      });
+      
+      setIsCreateDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to add RDP:", error);
+      toast.error("Failed to add RDP", {
+        description: "An error occurred while adding the RDP. Please try again."
+      });
+    }
   };
 
-  const handleDeleteRdp = (rdpId: string) => {
-    const rdpToDelete = rdps.find(rdp => rdp.id === rdpId);
-    if (!rdpToDelete) return;
-    
-    // Update state by filtering out the deleted RDP
-    const updatedRdps = rdps.filter(rdp => rdp.id !== rdpId);
-    setRdps(updatedRdps);
-    
-    toast.success(`RDP Deleted`, {
-      description: `${rdpToDelete.name} has been removed successfully`
-    });
-    
-    // Log for debugging
-    console.log("Deleted RDP with ID:", rdpId);
-    console.log("Updated RDPs list:", updatedRdps);
+  const handleDeleteRdp = async (rdpId: string) => {
+    try {
+      console.log("Deleting RDP:", rdpId);
+      const rdpToDelete = rdps.find(rdp => rdp.id === rdpId);
+      if (!rdpToDelete) return;
+      
+      await deleteRdp(rdpId);
+      
+      toast.success(`RDP Deleted`, {
+        description: `${rdpToDelete.name} has been removed successfully`
+      });
+    } catch (error) {
+      console.error("Failed to delete RDP:", error);
+      toast.error("Failed to delete RDP", {
+        description: "An error occurred while deleting the RDP. Please try again."
+      });
+    }
   };
 
-  const handleToggleStatus = (rdpId: string) => {
-    const updatedRdps = rdps.map(rdp => {
-      if (rdp.id === rdpId) {
-        const newStatus = rdp.status === 'online' ? 'offline' : 'online';
-        
-        toast.success(`RDP Status Changed`, {
-          description: `${rdp.name} is now ${newStatus}`
-        });
-        
-        // Log for debugging
-        console.log(`Changing RDP ${rdp.id} status from ${rdp.status} to ${newStatus}`);
-        
-        return { ...rdp, status: newStatus };
-      }
-      return rdp;
-    });
-    
-    setRdps(updatedRdps);
-    console.log("Updated RDPs after status change:", updatedRdps);
+  const handleToggleStatus = async (rdpId: string) => {
+    try {
+      const rdpToUpdate = rdps.find(rdp => rdp.id === rdpId);
+      if (!rdpToUpdate) return;
+      
+      const newStatus = rdpToUpdate.status === 'online' ? 'offline' : 'online';
+      console.log(`Changing RDP ${rdpId} status from ${rdpToUpdate.status} to ${newStatus}`);
+      
+      await updateRdpStatus(rdpId, newStatus);
+      
+      toast.success(`RDP Status Changed`, {
+        description: `${rdpToUpdate.name} is now ${newStatus}`
+      });
+    } catch (error) {
+      console.error("Failed to update RDP status:", error);
+      toast.error("Failed to update RDP status", {
+        description: "An error occurred while updating the RDP status. Please try again."
+      });
+    }
   };
 
   const handleViewDetails = (rdp: any) => {
@@ -122,7 +146,6 @@ const RdpManagement = () => {
     }
   };
 
-  // Filter RDPs based on search term and view mode
   const filteredRdps = rdps.filter(rdp => {
     const matchesSearch = rdp.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = viewMode === 'all' || 
@@ -131,7 +154,6 @@ const RdpManagement = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // Calculate summary metrics
   const totalRdps = rdps.length;
   const onlineRdps = rdps.filter(rdp => rdp.status === 'online').length;
   const totalVisits = rdps.reduce((sum, rdp) => sum + rdp.visits, 0);
@@ -205,29 +227,50 @@ const RdpManagement = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredRdps.length > 0 ? (
-              filteredRdps.map(rdp => {
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={9} className="text-center py-6">
+                  Loading RDP data...
+                </TableCell>
+              </TableRow>
+            ) : filteredRdps.length > 0 ? (
+              filteredRdps.map((rdp) => {
                 const rdpRoi = rdp.revenue > 0 && rdp.cost > 0 
                   ? ((rdp.revenue - rdp.cost) / rdp.cost) * 100 
                   : 0;
                 
-                // Simulate platform associations for mock data
-                const platformAssociations = [
-                  { name: '9Hits', percentage: 60, status: 'healthy', visits: Math.round(rdp.visits * 0.6), revenue: rdp.revenue * 0.6, roi: rdpRoi * 1.15 },
-                  { name: 'Otohits', percentage: 40, status: 'warning', visits: Math.round(rdp.visits * 0.4), revenue: rdp.revenue * 0.4, roi: rdpRoi * 0.85 }
-                ];
+                const platforms = rdp.platforms || [];
+                
+                const platformAssociations = platforms.length > 0 
+                  ? platforms.map(platform => {
+                      const percentage = platform.weight || 0;
+                      const weight = percentage / 100;
+                      const status = Math.random() > 0.7 ? 'warning' : 'healthy';
+                      return {
+                        name: platform.name,
+                        percentage,
+                        status,
+                        visits: Math.round(rdp.visits * weight),
+                        revenue: rdp.revenue * weight,
+                        roi: rdpRoi * (status === 'healthy' ? 1.15 : 0.85)
+                      };
+                    }) 
+                  : [
+                      { name: '9Hits', percentage: 60, status: 'healthy', visits: Math.round(rdp.visits * 0.6), revenue: rdp.revenue * 0.6, roi: rdpRoi * 1.15 },
+                      { name: 'Otohits', percentage: 40, status: 'warning', visits: Math.round(rdp.visits * 0.4), revenue: rdp.revenue * 0.4, roi: rdpRoi * 0.85 }
+                    ];
                 
                 const isExpanded = expandedRdp === rdp.id;
                 
                 return (
-                  <>
-                    <TableRow key={rdp.id} className={cn(isExpanded && "bg-muted/30")}>
+                  <React.Fragment key={rdp.id}>
+                    <TableRow className={cn(isExpanded && "bg-muted/30")}>
                       <TableCell>
                         <Button 
                           variant="ghost" 
                           size="icon" 
                           className="h-5 w-5" 
-                          onClick={() => toggleExpandRow(rdp.id)}
+                          onClick={() => toggleExpandRow(rdp.id!)}
                         >
                           {isExpanded ? 
                             <ChevronUp className="h-4 w-4" /> : 
@@ -280,7 +323,7 @@ const RdpManagement = () => {
                             <DropdownMenuItem onClick={() => handleViewDetails(rdp)}>
                               View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleToggleStatus(rdp.id)}>
+                            <DropdownMenuItem onClick={() => handleToggleStatus(rdp.id!)}>
                               <Power className="h-4 w-4 mr-2" />
                               {rdp.status === 'online' ? 'Turn Off' : 'Turn On'}
                             </DropdownMenuItem>
@@ -288,7 +331,7 @@ const RdpManagement = () => {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
                               className="text-destructive"
-                              onClick={() => handleDeleteRdp(rdp.id)}
+                              onClick={() => handleDeleteRdp(rdp.id!)}
                             >
                               Delete
                             </DropdownMenuItem>
@@ -340,7 +383,7 @@ const RdpManagement = () => {
                         </TableCell>
                       </TableRow>
                     )}
-                  </>
+                  </React.Fragment>
                 );
               })
             ) : (
