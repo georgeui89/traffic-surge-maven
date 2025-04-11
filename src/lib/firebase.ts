@@ -1,4 +1,3 @@
-
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, onSnapshot, setDoc } from "firebase/firestore";
@@ -127,6 +126,7 @@ export const fetchRdps = async () => {
         cpuCores: rdp.cpuCores || 4,
         memory: rdp.memory || 8,
         costPeriod: rdp.costPeriod || 'monthly',
+        platforms: rdp.platforms || []
       })) as RdpData[];
     }
     
@@ -205,6 +205,7 @@ export const subscribeToRdps = (
             cpuCores: rdp.cpuCores || 4,
             memory: rdp.memory || 8,
             costPeriod: rdp.costPeriod || 'monthly',
+            platforms: rdp.platforms || []
           })) as RdpData[];
           callback(formattedMockData);
         } catch (mockError) {
