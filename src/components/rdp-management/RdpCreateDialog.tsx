@@ -23,6 +23,17 @@ import { platforms } from "@/utils/mockData";
 import { Slider } from "@/components/ui/slider";
 import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { 
+  Form, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormControl,
+  FormMessage
+} from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 interface RdpCreateDialogProps {
   open: boolean;
@@ -30,15 +41,20 @@ interface RdpCreateDialogProps {
   onCreateRdp?: (rdpData: any) => void;
 }
 
+// Define validation schema
+const formSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  dedicatedIp: z.string().min(1, "Dedicated IP is required"),
+  provider: z.string().min(1, "Provider is required"),
+  cpuCores: z.coerce.number().min(1, "CPU cores must be at least 1"),
+  memory: z.coerce.number().min(1, "Memory must be at least 1 GB"),
+  cost: z.coerce.number().min(0, "Cost must be a positive number"),
+  costPeriod: z.enum(["monthly", "daily"]),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
 export function RdpCreateDialog({ open, onOpenChange, onCreateRdp }: RdpCreateDialogProps) {
-  const [formData, setFormData] = useState({
-    name: "",
-    provider: "digitalocean",
-    cpuCores: "4",
-    memory: "8",
-    cost: "5",
-  });
-  
   const [selectedPlatforms, setSelectedPlatforms] = useState<{
     id: string;
     name: string;
@@ -46,17 +62,21 @@ export function RdpCreateDialog({ open, onOpenChange, onCreateRdp }: RdpCreateDi
   }[]>([]);
   
   const [selectedPlatformId, setSelectedPlatformId] = useState("");
-  
   const { toast } = useToast();
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-  
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+
+  // Initialize the form with default values
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      dedicatedIp: "",
+      provider: "",
+      cpuCores: 4,
+      memory: 8,
+      cost: 10.99,
+      costPeriod: "monthly",
+    }
+  });
   
   const handleAddPlatform = () => {
     if (!selectedPlatformId) return;
@@ -93,8 +113,8 @@ export function RdpCreateDialog({ open, onOpenChange, onCreateRdp }: RdpCreateDi
     ));
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = (values: FormValues) => {
+    console.log("Form submitted with values:", values);
     
     if (selectedPlatforms.length === 0) {
       toast({
@@ -105,36 +125,26 @@ export function RdpCreateDialog({ open, onOpenChange, onCreateRdp }: RdpCreateDi
       return;
     }
     
-    // Validate form data
-    if (!formData.name) {
-      toast({
-        title: "Missing information",
-        description: "Please provide a name for the RDP",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     if (onCreateRdp) {
-      // Call the parent component's callback with the form data
-      onCreateRdp({
-        ...formData,
-        platforms: selectedPlatforms
-      });
+      // Add the platform information to the form data
+      const rdpData = {
+        ...values,
+        platforms: selectedPlatforms,
+        status: 'offline', // New RDPs start as offline
+        visits: 0,
+        revenue: 0,
+      };
       
-      // Reset the form
-      setFormData({
-        name: "",
-        provider: "digitalocean",
-        cpuCores: "4",
-        memory: "8",
-        cost: "5",
-      });
+      console.log("Submitting RDP data:", rdpData);
+      onCreateRdp(rdpData);
+      
+      // Reset form and selected platforms
+      form.reset();
       setSelectedPlatforms([]);
     } else {
       toast({
         title: "RDP Created",
-        description: `${formData.name} has been created successfully with ${selectedPlatforms.length} platforms`,
+        description: `${values.name} has been created successfully with ${selectedPlatforms.length} platforms`,
       });
       onOpenChange(false);
     }
@@ -148,102 +158,151 @@ export function RdpCreateDialog({ open, onOpenChange, onCreateRdp }: RdpCreateDi
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px]">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Create New RDP</DialogTitle>
-            <DialogDescription>
-              Configure your new RDP instance and platform allocation
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Name
-              </Label>
-              <Input
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="col-span-3"
-                placeholder="E.g., RDP-01"
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="provider" className="text-right">
-                Provider
-              </Label>
-              <Select
-                value={formData.provider}
-                onValueChange={(value) => handleSelectChange("provider", value)}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select a provider" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="digitalocean">Digital Ocean</SelectItem>
-                  <SelectItem value="aws">AWS</SelectItem>
-                  <SelectItem value="azure">Azure</SelectItem>
-                  <SelectItem value="gcp">Google Cloud</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="cpuCores" className="text-right">
-                CPU Cores
-              </Label>
-              <Select
-                value={formData.cpuCores}
-                onValueChange={(value) => handleSelectChange("cpuCores", value)}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select CPU cores" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2">2 vCPU</SelectItem>
-                  <SelectItem value="4">4 vCPU</SelectItem>
-                  <SelectItem value="8">8 vCPU</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="memory" className="text-right">
-                Memory
-              </Label>
-              <Select
-                value={formData.memory}
-                onValueChange={(value) => handleSelectChange("memory", value)}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select memory" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="4">4 GB</SelectItem>
-                  <SelectItem value="8">8 GB</SelectItem>
-                  <SelectItem value="16">16 GB</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="cost" className="text-right">
-                Cost ($/day)
-              </Label>
-              <Input
-                id="cost"
-                name="cost"
-                value={formData.cost}
-                onChange={handleInputChange}
-                type="number"
-                min="0"
-                step="0.01"
-                className="col-span-3"
-              />
-            </div>
+        <DialogHeader>
+          <DialogTitle>Create New RDP</DialogTitle>
+          <DialogDescription>
+            Configure your new RDP instance and assign platforms
+          </DialogDescription>
+        </DialogHeader>
+        
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="grid grid-cols-4 items-center gap-4">
+                  <FormLabel className="text-right">Name</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="e.g., RDP-01, Contabo-DE" 
+                      className="col-span-3" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage className="col-span-3 col-start-2" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="dedicatedIp"
+              render={({ field }) => (
+                <FormItem className="grid grid-cols-4 items-center gap-4">
+                  <FormLabel className="text-right">Dedicated IP</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="e.g., 192.168.1.1" 
+                      className="col-span-3" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage className="col-span-3 col-start-2" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="provider"
+              render={({ field }) => (
+                <FormItem className="grid grid-cols-4 items-center gap-4">
+                  <FormLabel className="text-right">Provider</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="e.g., Digital Ocean, Contabo" 
+                      className="col-span-3" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage className="col-span-3 col-start-2" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="cpuCores"
+              render={({ field }) => (
+                <FormItem className="grid grid-cols-4 items-center gap-4">
+                  <FormLabel className="text-right">CPU Cores</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      min="1"
+                      className="col-span-3" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage className="col-span-3 col-start-2" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="memory"
+              render={({ field }) => (
+                <FormItem className="grid grid-cols-4 items-center gap-4">
+                  <FormLabel className="text-right">Memory (GB)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      min="1"
+                      className="col-span-3" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage className="col-span-3 col-start-2" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="cost"
+              render={({ field }) => (
+                <FormItem className="grid grid-cols-4 items-center gap-4">
+                  <FormLabel className="text-right">Cost</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      step="0.01" 
+                      min="0"
+                      className="col-span-3" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage className="col-span-3 col-start-2" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="costPeriod"
+              render={({ field }) => (
+                <FormItem className="grid grid-cols-4 items-center gap-4">
+                  <FormLabel className="text-right">Cost Period</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="col-span-3">
+                        <SelectValue placeholder="Select period" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="daily">Daily</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage className="col-span-3 col-start-2" />
+                </FormItem>
+              )}
+            />
             
             <div className="border-t my-4"></div>
             
@@ -312,15 +371,15 @@ export function RdpCreateDialog({ open, onOpenChange, onCreateRdp }: RdpCreateDi
                 ))}
               </div>
             )}
-          </div>
-          
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit">Create RDP</Button>
-          </DialogFooter>
-        </form>
+            
+            <DialogFooter className="pt-4">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Create RDP</Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
