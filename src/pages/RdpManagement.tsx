@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Server, Search, Plus, Power, Wifi, DollarSign, BarChart2, MoreHorizontal, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -29,7 +28,7 @@ import { toast } from "sonner";
 import { RdpMetricsCards } from '@/components/rdp-management/RdpMetricsCards';
 import { RdpDetailsDialog } from '@/components/rdp-management/RdpDetailsDialog';
 import { RdpCreateDialog } from '@/components/rdp-management/RdpCreateDialog';
-import { fetchRdps, updateRdpStatus, deleteRdp, addRdp, subscribeToRdps, RdpData } from '@/lib/firebase';
+import { fetchRdps, updateRdpStatus, deleteRdp, addRdp, subscribeToRdps, RdpData } from '@/lib/supabase';
 
 const RdpManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,7 +45,7 @@ const RdpManagement = () => {
   useEffect(() => {
     let isMounted = true;
     
-    console.log("Setting up Firestore subscription for RDPs");
+    console.log("Setting up Supabase subscription for RDPs");
     
     // Initial data load
     const loadInitialData = async () => {
@@ -76,7 +75,7 @@ const RdpManagement = () => {
     const unsubscribe = subscribeToRdps(
       (fetchedRdps) => {
         if (isMounted) {
-          console.log("RDPs loaded from Firestore:", fetchedRdps);
+          console.log("RDPs loaded from Supabase:", fetchedRdps);
           setRdps(fetchedRdps);
           setIsLoading(false);
           if (isUsingMockData) {
@@ -106,7 +105,7 @@ const RdpManagement = () => {
 
     return () => {
       isMounted = false;
-      console.log("Cleaning up Firestore subscription");
+      console.log("Cleaning up Supabase subscription");
       unsubscribe();
     };
   }, []);

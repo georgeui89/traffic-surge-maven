@@ -1,7 +1,8 @@
 import { subDays, format, subHours, addDays, addHours } from 'date-fns';
+import { PlatformData, RdpData, CampaignData } from '@/lib/supabase';
 
 // Platforms
-export const platforms = [
+export const platforms: PlatformData[] = [
   { id: '9hits', name: '9Hits', status: 'healthy', url: 'https://9hits.com' },
   { id: 'bighits4u', name: 'BigHits4U', status: 'healthy', url: 'https://bighits4u.com' },
   { id: 'hitleap', name: 'Hitleap.com', status: 'warning', url: 'https://hitleap.com' },
@@ -17,7 +18,7 @@ export const platforms = [
 ];
 
 // RDPs
-export const rdps = [
+export const rdps: RdpData[] = [
   { 
     id: 'rdp1', 
     name: 'RDP-01', 
@@ -27,7 +28,7 @@ export const rdps = [
     cpuCores: 4,
     memory: 8,
     cost: 1.2, 
-    costPeriod: 'monthly' as const,
+    costPeriod: 'monthly',
     visits: 5420, 
     revenue: 2.71,
     platforms: [
@@ -44,7 +45,7 @@ export const rdps = [
     cpuCores: 2,
     memory: 4,
     cost: 1.2, 
-    costPeriod: 'monthly' as const,
+    costPeriod: 'monthly',
     visits: 4230, 
     revenue: 2.12,
     platforms: [
@@ -60,7 +61,7 @@ export const rdps = [
     cpuCores: 8,
     memory: 16,
     cost: 1.2, 
-    costPeriod: 'monthly' as const,
+    costPeriod: 'monthly',
     visits: 0, 
     revenue: 0,
     platforms: [
@@ -76,7 +77,7 @@ export const rdps = [
     cpuCores: 4,
     memory: 8,
     cost: 1.2, 
-    costPeriod: 'monthly' as const,
+    costPeriod: 'monthly',
     visits: 6180, 
     revenue: 3.09,
     platforms: [
@@ -93,7 +94,7 @@ export const rdps = [
     cpuCores: 2,
     memory: 4,
     cost: 1.2, 
-    costPeriod: 'monthly' as const,
+    costPeriod: 'monthly',
     visits: 3970, 
     revenue: 1.99,
     platforms: [
@@ -103,12 +104,12 @@ export const rdps = [
 ];
 
 // Campaigns
-export const campaigns = [
-  { id: 'camp1', name: 'Main Website', status: 'active', platform: '9hits', visits: 12500, revenue: 6.25, url: 'https://example.com' },
-  { id: 'camp2', name: 'Blog', status: 'active', platform: 'bighits4u', visits: 8700, revenue: 4.35, url: 'https://blog.example.com' },
-  { id: 'camp3', name: 'Landing Page', status: 'paused', platform: 'hitleap', visits: 4300, revenue: 2.15, url: 'https://landing.example.com' },
-  { id: 'camp4', name: 'Product Page', status: 'active', platform: 'otohits', visits: 9200, revenue: 4.60, url: 'https://example.com/product' },
-  { id: 'camp5', name: 'New Promotion', status: 'active', platform: 'webhit', visits: 6800, revenue: 3.40, url: 'https://promo.example.com' },
+export const campaigns: CampaignData[] = [
+  { id: 'camp1', name: 'Main Website', status: 'active', platform: '9hits', visits: 12500, revenue: 6.25, url: 'https://example.com', campaignType: 'direct' },
+  { id: 'camp2', name: 'Blog', status: 'active', platform: 'bighits4u', visits: 8700, revenue: 4.35, url: 'https://blog.example.com', campaignType: 'popup' },
+  { id: 'camp3', name: 'Landing Page', status: 'paused', platform: 'hitleap', visits: 4300, revenue: 2.15, url: 'https://landing.example.com', campaignType: 'banner' },
+  { id: 'camp4', name: 'Product Page', status: 'active', platform: 'otohits', visits: 9200, revenue: 4.60, url: 'https://example.com/product', campaignType: 'direct' },
+  { id: 'camp5', name: 'New Promotion', status: 'active', platform: 'webhit', visits: 6800, revenue: 3.40, url: 'https://promo.example.com', campaignType: 'popup' },
 ];
 
 // Generate daily traffic data for the past 30 days

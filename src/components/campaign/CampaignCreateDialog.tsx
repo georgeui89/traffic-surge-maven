@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
@@ -28,7 +27,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useState, useEffect } from "react"
 import { Plus, Loader2, CheckCircle2 } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { addCampaign, fetchPlatforms, PlatformData } from "@/lib/firebase"
+import { addCampaign, fetchPlatforms, PlatformData } from "@/lib/supabase"
 import { toast } from "sonner"
 
 const campaignSchema = z.object({
@@ -100,7 +99,7 @@ export function CampaignCreateDialog() {
     
     setLoading(true)
     try {
-      console.log("Creating campaign in Firestore:", data)
+      console.log("Creating campaign in Supabase:", data)
       
       // All required fields are explicitly included to satisfy TypeScript
       const campaignData = {
@@ -128,7 +127,7 @@ export function CampaignCreateDialog() {
         setOpen(false)
       }, 1500)
     } catch (error) {
-      console.error("Failed to create campaign in Firestore:", error)
+      console.error("Failed to create campaign in Supabase:", error)
       toast.error("Failed to create campaign", {
         description: "An error occurred while saving. Please try again."
       });

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { ExternalLink, Search, Plus, MoreHorizontal, Edit, BarChart2, Link2Off } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { addPlatform, deletePlatform, updatePlatform, subscribeToPlatforms, PlatformData } from '@/lib/firebase';
+import { addPlatform, deletePlatform, updatePlatform, subscribeToPlatforms, PlatformData } from '@/lib/supabase';
 
 const Platforms = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -52,12 +51,12 @@ const Platforms = () => {
     status: ''
   });
 
-  // Subscribe to platforms data from Firestore
+  // Subscribe to platforms data from Supabase
   useEffect(() => {
-    console.log("Setting up Firestore subscription for platforms");
+    console.log("Setting up Supabase subscription for platforms");
     const unsubscribe = subscribeToPlatforms(
       (fetchedPlatforms) => {
-        console.log("Platforms loaded from Firestore:", fetchedPlatforms);
+        console.log("Platforms loaded from Supabase:", fetchedPlatforms);
         setPlatforms(fetchedPlatforms);
         setIsLoading(false);
       },
@@ -69,7 +68,7 @@ const Platforms = () => {
     );
 
     return () => {
-      console.log("Cleaning up Firestore subscription for platforms");
+      console.log("Cleaning up Supabase subscription for platforms");
       unsubscribe();
     };
   }, []);
@@ -85,9 +84,9 @@ const Platforms = () => {
     setIsAddPlatformOpen(true);
   };
 
-  // Handler for saving a new platform to Firestore
+  // Handler for saving a new platform to Supabase
   const handleSavePlatform = async () => {
-    console.log("Attempting to save platform to Firestore:", newPlatform);
+    console.log("Attempting to save platform to Supabase:", newPlatform);
     
     if (!newPlatform.name || !newPlatform.url) {
       toast.error("Missing Information", {
@@ -100,15 +99,15 @@ const Platforms = () => {
       await addPlatform(newPlatform);
       
       toast.success("Platform Added", {
-        description: `${newPlatform.name} was successfully added to Firestore`
+        description: `${newPlatform.name} was successfully added to Supabase`
       });
       
       setIsAddPlatformOpen(false);
       setNewPlatform({ name: '', url: '', status: 'inactive' });
     } catch (error) {
-      console.error("Error saving platform to Firestore:", error);
+      console.error("Error saving platform to Supabase:", error);
       toast.error("Failed to save platform", {
-        description: "An error occurred while saving to Firestore. Please try again."
+        description: "An error occurred while saving to Supabase. Please try again."
       });
     }
   };
@@ -129,9 +128,9 @@ const Platforms = () => {
     }
   };
 
-  // Handler for saving edited platform to Firestore
+  // Handler for saving edited platform to Supabase
   const handleSaveEditedPlatform = async () => {
-    console.log("Saving edited platform to Firestore:", currentPlatform);
+    console.log("Saving edited platform to Supabase:", currentPlatform);
     
     if (!currentPlatform.name || !currentPlatform.url) {
       toast.error("Missing Information", {
@@ -151,14 +150,14 @@ const Platforms = () => {
       await updatePlatform(id, updateData);
       
       toast.success("Platform Updated", {
-        description: `${currentPlatform.name} was successfully updated in Firestore`
+        description: `${currentPlatform.name} was successfully updated in Supabase`
       });
       
       setIsEditPlatformOpen(false);
     } catch (error) {
-      console.error("Error updating platform in Firestore:", error);
+      console.error("Error updating platform in Supabase:", error);
       toast.error("Failed to update platform", {
-        description: "An error occurred while updating in Firestore. Please try again."
+        description: "An error occurred while updating in Supabase. Please try again."
       });
     }
   };
@@ -179,20 +178,20 @@ const Platforms = () => {
     }
   };
 
-  // Handler for disconnecting platform (deleting from Firestore)
+  // Handler for disconnecting platform (deleting from Supabase)
   const handleDisconnect = async (platformId: string) => {
-    console.log("Disconnecting platform ID from Firestore:", platformId);
+    console.log("Disconnecting platform ID from Supabase:", platformId);
     
     try {
       await deletePlatform(platformId);
       
       toast.warning("Platform Disconnected", {
-        description: "The platform has been disconnected and removed from Firestore."
+        description: "The platform has been disconnected and removed from Supabase."
       });
     } catch (error) {
-      console.error("Error deleting platform from Firestore:", error);
+      console.error("Error deleting platform from Supabase:", error);
       toast.error("Failed to disconnect platform", {
-        description: "An error occurred while removing from Firestore. Please try again."
+        description: "An error occurred while removing from Supabase. Please try again."
       });
     }
   };
