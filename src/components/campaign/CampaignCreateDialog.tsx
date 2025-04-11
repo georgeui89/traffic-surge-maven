@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
@@ -24,9 +25,11 @@ import {
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Plus, Loader2, CheckCircle2 } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { addCampaign, fetchPlatforms, PlatformData } from "@/lib/firebase"
+import { toast } from "sonner"
 
 const campaignSchema = z.object({
   name: z.string().min(3, { message: "Campaign name must be at least 3 characters" }),
@@ -54,27 +57,58 @@ export function CampaignCreateDialog() {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const { toast } = useToast()
+  const [platforms, setPlatforms] = useState<PlatformData[]>([])
+  const [isLoadingPlatforms, setIsLoadingPlatforms] = useState(false)
+  const { toast: uiToast } = useToast()
   
   const form = useForm<CampaignFormValues>({
     resolver: zodResolver(campaignSchema),
     defaultValues,
   })
 
+  useEffect(() => {
+    if (open) {
+      loadPlatforms();
+    }
+  }, [open]);
+
+  const loadPlatforms = async () => {
+    try {
+      setIsLoadingPlatforms(true);
+      const platformsData = await fetchPlatforms();
+      setPlatforms(platformsData);
+    } catch (error) {
+      console.error("Failed to load platforms:", error);
+      toast.error("Failed to load platforms", {
+        description: "Could not retrieve the list of platforms"
+      });
+    } finally {
+      setIsLoadingPlatforms(false);
+    }
+  };
+
   async function onSubmit(data: CampaignFormValues) {
     if (loading) return
     
     setLoading(true)
     try {
-      console.log("Creating campaign:", data)
-      await new Promise(resolve => setTimeout(resolve, 1200))
-
+      console.log("Creating campaign in Firestore:", data)
+      
+      // Add some initial metrics
+      const campaignData = {
+        ...data,
+        visits: 0,
+        revenue: 0,
+        cost: Math.round(Math.random() * 15) + 5,
+      };
+      
+      await addCampaign(campaignData);
+      
       setSuccess(true)
       
-      toast({
-        title: "Campaign created",
-        description: `Your campaign "${data.name}" has been created successfully`,
-      })
+      toast.success("Campaign created", {
+        description: `Your campaign "${data.name}" has been saved to Firestore`
+      });
 
       setTimeout(() => {
         form.reset()
@@ -82,12 +116,10 @@ export function CampaignCreateDialog() {
         setOpen(false)
       }, 1500)
     } catch (error) {
-      console.error("Failed to create campaign:", error)
-      toast({
-        title: "Failed to create campaign",
-        description: "Please try again later",
-        variant: "destructive",
-      })
+      console.error("Failed to create campaign in Firestore:", error)
+      toast.error("Failed to create campaign", {
+        description: "An error occurred while saving to Firestore. Please try again."
+      });
     } finally {
       if (!success) {
         setLoading(false)
@@ -209,14 +241,27 @@ export function CampaignCreateDialog() {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select platform" />
+                        <SelectValue placeholder={
+                          isLoadingPlatforms 
+                            ? "Loading platforms..." 
+                            : platforms.length > 0 
+                              ? "Select platform" 
+                              : "No platforms available"
+                        } />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="9hits">9Hits</SelectItem>
-                      <SelectItem value="hitleap">HitLeap</SelectItem>
-                      <SelectItem value="otohits">Otohits</SelectItem>
-                      <SelectItem value="easyHits4U">EasyHits4U</SelectItem>
+                      {isLoadingPlatforms ? (
+                        <SelectItem value="loading" disabled>Loading platforms...</SelectItem>
+                      ) : platforms.length > 0 ? (
+                        platforms.map(platform => (
+                          <SelectItem key={platform.id} value={platform.id || ""}>
+                            {platform.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="none" disabled>No platforms available</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                   <FormDescription>

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ExternalLink, Search, Plus, MoreHorizontal, Edit, BarChart2, Link2Off } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,17 +21,18 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { getStatusColor } from '@/utils/formatters';
-import { platforms as initialPlatforms } from '@/utils/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { addPlatform, deletePlatform, updatePlatform, subscribeToPlatforms, PlatformData } from '@/lib/firebase';
 
 const Platforms = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast: uiToast } = useToast();
-  const [platforms, setPlatforms] = useState(initialPlatforms);
+  const [platforms, setPlatforms] = useState<PlatformData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Dialog states
   const [isAddPlatformOpen, setIsAddPlatformOpen] = useState(false);
@@ -39,17 +40,39 @@ const Platforms = () => {
   const [isAnalyticsDialogOpen, setIsAnalyticsDialogOpen] = useState(false);
   
   // Platform data states
-  const [newPlatform, setNewPlatform] = useState({ 
+  const [newPlatform, setNewPlatform] = useState<Omit<PlatformData, "id">>({ 
     name: '', 
     url: '', 
     status: 'inactive' 
   });
-  const [currentPlatform, setCurrentPlatform] = useState({
+  const [currentPlatform, setCurrentPlatform] = useState<PlatformData>({
     id: '',
     name: '',
     url: '',
     status: ''
   });
+
+  // Subscribe to platforms data from Firestore
+  useEffect(() => {
+    console.log("Setting up Firestore subscription for platforms");
+    const unsubscribe = subscribeToPlatforms(
+      (fetchedPlatforms) => {
+        console.log("Platforms loaded from Firestore:", fetchedPlatforms);
+        setPlatforms(fetchedPlatforms);
+        setIsLoading(false);
+      },
+      (error) => {
+        console.error("Error loading platforms:", error);
+        toast.error("Failed to load platforms");
+        setIsLoading(false);
+      }
+    );
+
+    return () => {
+      console.log("Cleaning up Firestore subscription for platforms");
+      unsubscribe();
+    };
+  }, []);
 
   const filteredPlatforms = platforms.filter(platform => 
     platform.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -62,9 +85,9 @@ const Platforms = () => {
     setIsAddPlatformOpen(true);
   };
 
-  // Handler for saving a new platform
-  const handleSavePlatform = () => {
-    console.log("Attempting to save platform:", newPlatform);
+  // Handler for saving a new platform to Firestore
+  const handleSavePlatform = async () => {
+    console.log("Attempting to save platform to Firestore:", newPlatform);
     
     if (!newPlatform.name || !newPlatform.url) {
       toast.error("Missing Information", {
@@ -73,20 +96,21 @@ const Platforms = () => {
       return;
     }
 
-    // Create platform with unique ID and add it to the platforms list
-    const platformToAdd = {
-      ...newPlatform,
-      id: Date.now().toString()
-    };
-    
-    setPlatforms(currentPlatforms => [...currentPlatforms, platformToAdd]);
-    
-    toast.success("Platform Added", {
-      description: `${newPlatform.name} was successfully added`
-    });
-    
-    setIsAddPlatformOpen(false);
-    setNewPlatform({ name: '', url: '', status: 'inactive' });
+    try {
+      await addPlatform(newPlatform);
+      
+      toast.success("Platform Added", {
+        description: `${newPlatform.name} was successfully added to Firestore`
+      });
+      
+      setIsAddPlatformOpen(false);
+      setNewPlatform({ name: '', url: '', status: 'inactive' });
+    } catch (error) {
+      console.error("Error saving platform to Firestore:", error);
+      toast.error("Failed to save platform", {
+        description: "An error occurred while saving to Firestore. Please try again."
+      });
+    }
   };
 
   // Handler for opening Edit Platform dialog
@@ -105,9 +129,9 @@ const Platforms = () => {
     }
   };
 
-  // Handler for saving edited platform
-  const handleSaveEditedPlatform = () => {
-    console.log("Saving edited platform:", currentPlatform);
+  // Handler for saving edited platform to Firestore
+  const handleSaveEditedPlatform = async () => {
+    console.log("Saving edited platform to Firestore:", currentPlatform);
     
     if (!currentPlatform.name || !currentPlatform.url) {
       toast.error("Missing Information", {
@@ -116,18 +140,27 @@ const Platforms = () => {
       return;
     }
 
-    // Update the platform in the list
-    setPlatforms(currentPlatforms => 
-      currentPlatforms.map(platform => 
-        platform.id === currentPlatform.id ? currentPlatform : platform
-      )
-    );
-    
-    toast.success("Platform Updated", {
-      description: `${currentPlatform.name} was successfully updated`
-    });
-    
-    setIsEditPlatformOpen(false);
+    try {
+      if (!currentPlatform.id) {
+        throw new Error("Platform ID is missing");
+      }
+      
+      // Extract updatable fields (excluding id)
+      const { id, ...updateData } = currentPlatform;
+      
+      await updatePlatform(id, updateData);
+      
+      toast.success("Platform Updated", {
+        description: `${currentPlatform.name} was successfully updated in Firestore`
+      });
+      
+      setIsEditPlatformOpen(false);
+    } catch (error) {
+      console.error("Error updating platform in Firestore:", error);
+      toast.error("Failed to update platform", {
+        description: "An error occurred while updating in Firestore. Please try again."
+      });
+    }
   };
 
   // Handler for viewing analytics
@@ -146,18 +179,22 @@ const Platforms = () => {
     }
   };
 
-  // Handler for disconnecting platform
-  const handleDisconnect = (platformId: string) => {
-    console.log("Disconnecting platform ID:", platformId);
+  // Handler for disconnecting platform (deleting from Firestore)
+  const handleDisconnect = async (platformId: string) => {
+    console.log("Disconnecting platform ID from Firestore:", platformId);
     
-    // Remove platform from list
-    setPlatforms(currentPlatforms => 
-      currentPlatforms.filter(platform => platform.id !== platformId)
-    );
-    
-    toast.warning("Platform Disconnected", {
-      description: "The platform has been disconnected from your account."
-    });
+    try {
+      await deletePlatform(platformId);
+      
+      toast.warning("Platform Disconnected", {
+        description: "The platform has been disconnected and removed from Firestore."
+      });
+    } catch (error) {
+      console.error("Error deleting platform from Firestore:", error);
+      toast.error("Failed to disconnect platform", {
+        description: "An error occurred while removing from Firestore. Please try again."
+      });
+    }
   };
 
   return (
@@ -195,7 +232,13 @@ const Platforms = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredPlatforms.length > 0 ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-6">
+                  Loading platform data...
+                </TableCell>
+              </TableRow>
+            ) : filteredPlatforms.length > 0 ? (
               filteredPlatforms.map(platform => (
                 <TableRow key={platform.id}>
                   <TableCell className="font-medium">{platform.name}</TableCell>
@@ -228,17 +271,17 @@ const Platforms = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => handleEditPlatform(platform.id)} className="cursor-pointer">
+                        <DropdownMenuItem onClick={() => handleEditPlatform(platform.id!)} className="cursor-pointer">
                           <Edit className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleViewAnalytics(platform.id)} className="cursor-pointer">
+                        <DropdownMenuItem onClick={() => handleViewAnalytics(platform.id!)} className="cursor-pointer">
                           <BarChart2 className="mr-2 h-4 w-4" />
                           View Analytics
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem 
-                          onClick={() => handleDisconnect(platform.id)}
+                          onClick={() => handleDisconnect(platform.id!)}
                           className="text-destructive cursor-pointer"
                         >
                           <Link2Off className="mr-2 h-4 w-4" />
