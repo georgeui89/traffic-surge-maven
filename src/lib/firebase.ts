@@ -117,17 +117,9 @@ export const fetchRdps = async () => {
       });
     } catch (firestoreError) {
       console.error("Firestore error fetching RDPs, using mock data as fallback:", firestoreError);
-      // Import from mockData as fallback
+      // Import from mockData as fallback - now the mock data structure matches RdpData
       const { rdps: mockRdps } = await import('../utils/mockData');
-      rdps = mockRdps.map(rdp => ({
-        ...rdp,
-        dedicatedIp: rdp.dedicatedIp || '192.168.1.' + Math.floor(Math.random() * 255),
-        provider: rdp.provider || 'Provider-' + Math.floor(Math.random() * 10),
-        cpuCores: rdp.cpuCores || 4,
-        memory: rdp.memory || 8,
-        costPeriod: rdp.costPeriod || 'monthly',
-        platforms: rdp.platforms || []
-      })) as RdpData[];
+      rdps = mockRdps as RdpData[];
     }
     
     return rdps;
@@ -197,17 +189,9 @@ export const subscribeToRdps = (
         // Fall back to mock data
         console.log("Falling back to mock data for RDPs");
         try {
+          // Import from mockData as fallback - now the mock data structure matches RdpData
           const { rdps: mockRdps } = await import('../utils/mockData');
-          const formattedMockData = mockRdps.map(rdp => ({
-            ...rdp,
-            dedicatedIp: rdp.dedicatedIp || '192.168.1.' + Math.floor(Math.random() * 255),
-            provider: rdp.provider || 'Provider-' + Math.floor(Math.random() * 10),
-            cpuCores: rdp.cpuCores || 4,
-            memory: rdp.memory || 8,
-            costPeriod: rdp.costPeriod || 'monthly',
-            platforms: rdp.platforms || []
-          })) as RdpData[];
-          callback(formattedMockData);
+          callback(mockRdps as RdpData[]);
         } catch (mockError) {
           console.error("Error loading mock data:", mockError);
           if (onError) onError(error);

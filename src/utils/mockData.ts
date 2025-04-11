@@ -1,4 +1,3 @@
-
 import { subDays, format, subHours, addDays, addHours } from 'date-fns';
 
 // Platforms
@@ -19,11 +18,88 @@ export const platforms = [
 
 // RDPs
 export const rdps = [
-  { id: 'rdp1', name: 'RDP-01', status: 'online', platform: '9hits', visits: 5420, revenue: 2.71, cost: 1.2 },
-  { id: 'rdp2', name: 'RDP-02', status: 'online', platform: 'bighits4u', visits: 4230, revenue: 2.12, cost: 1.2 },
-  { id: 'rdp3', name: 'RDP-03', status: 'offline', platform: 'hitleap', visits: 0, revenue: 0, cost: 1.2 },
-  { id: 'rdp4', name: 'RDP-04', status: 'online', platform: 'otohits', visits: 6180, revenue: 3.09, cost: 1.2 },
-  { id: 'rdp5', name: 'RDP-05', status: 'online', platform: 'webhit', visits: 3970, revenue: 1.99, cost: 1.2 },
+  { 
+    id: 'rdp1', 
+    name: 'RDP-01', 
+    status: 'online', 
+    dedicatedIp: '192.168.1.10', 
+    provider: 'Digital Ocean',
+    cpuCores: 4,
+    memory: 8,
+    cost: 1.2, 
+    costPeriod: 'monthly' as const,
+    visits: 5420, 
+    revenue: 2.71,
+    platforms: [
+      { id: '9hits', name: '9Hits', weight: 60 },
+      { id: 'otohits', name: 'Otohits.net', weight: 40 }
+    ]
+  },
+  { 
+    id: 'rdp2', 
+    name: 'RDP-02', 
+    status: 'online', 
+    dedicatedIp: '192.168.1.11', 
+    provider: 'Contabo',
+    cpuCores: 2,
+    memory: 4,
+    cost: 1.2, 
+    costPeriod: 'monthly' as const,
+    visits: 4230, 
+    revenue: 2.12,
+    platforms: [
+      { id: 'bighits4u', name: 'BigHits4U', weight: 100 }
+    ]
+  },
+  { 
+    id: 'rdp3', 
+    name: 'RDP-03', 
+    status: 'offline', 
+    dedicatedIp: '192.168.1.12', 
+    provider: 'Hetzner',
+    cpuCores: 8,
+    memory: 16,
+    cost: 1.2, 
+    costPeriod: 'monthly' as const,
+    visits: 0, 
+    revenue: 0,
+    platforms: [
+      { id: 'hitleap', name: 'Hitleap.com', weight: 100 }
+    ]
+  },
+  { 
+    id: 'rdp4', 
+    name: 'RDP-04', 
+    status: 'online', 
+    dedicatedIp: '192.168.1.13', 
+    provider: 'AWS',
+    cpuCores: 4,
+    memory: 8,
+    cost: 1.2, 
+    costPeriod: 'monthly' as const,
+    visits: 6180, 
+    revenue: 3.09,
+    platforms: [
+      { id: 'otohits', name: 'Otohits.net', weight: 70 },
+      { id: 'webhit', name: 'Webhit.net', weight: 30 }
+    ]
+  },
+  { 
+    id: 'rdp5', 
+    name: 'RDP-05', 
+    status: 'online', 
+    dedicatedIp: '192.168.1.14', 
+    provider: 'Vultr',
+    cpuCores: 2,
+    memory: 4,
+    cost: 1.2, 
+    costPeriod: 'monthly' as const,
+    visits: 3970, 
+    revenue: 1.99,
+    platforms: [
+      { id: 'webhit', name: 'Webhit.net', weight: 100 }
+    ]
+  },
 ];
 
 // Campaigns

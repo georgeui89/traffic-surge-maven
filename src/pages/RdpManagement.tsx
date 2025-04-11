@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Server, Search, Plus, Power, Wifi, DollarSign, BarChart2, MoreHorizontal, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -58,7 +59,7 @@ const RdpManagement = () => {
       } catch (error) {
         console.error("Error loading initial RDP data:", error);
         if (isMounted) {
-          // Use mock data as a fallback
+          // Use mock data as a fallback - now initialRdps matches RdpData
           setRdps(initialRdps as RdpData[]);
           setIsUsingMockData(true);
           setIsLoading(false);
