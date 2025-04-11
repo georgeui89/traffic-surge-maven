@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
@@ -94,9 +93,12 @@ export function CampaignCreateDialog() {
     try {
       console.log("Creating campaign in Firestore:", data)
       
-      // Add some initial metrics
       const campaignData = {
-        ...data,
+        name: data.name,
+        url: data.url,
+        platform: data.platform,
+        status: data.status,
+        campaignType: data.campaignType,
         visits: 0,
         revenue: 0,
         cost: Math.round(Math.random() * 15) + 5,
