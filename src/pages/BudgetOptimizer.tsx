@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DollarSign, BarChart2, Zap, TrendingUp, Download, Calculator, RefreshCw, Check, Loader2 } from 'lucide-react';
+import { DollarSign, BarChart2, Zap, TrendingUp, Download, Calculator, RefreshCw, Check, Loader2, AlertTriangle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
@@ -12,10 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from '@/hooks/use-toast';
 import { formatCurrency, formatNumber, formatPercent } from '@/utils/formatters';
 import { cn } from '@/lib/utils';
-import { platforms } from '@/utils/mockData';
 
 // Define the platform allocation type for TypeScript
 interface PlatformAllocation {
@@ -127,20 +127,35 @@ const RecommendationCard = ({ recommendation, onApply, isLoading }: {
   );
 };
 
+// Initial platform allocations
+const initialPlatformAllocations: PlatformAllocation[] = [
+  { id: '9hits', name: '9Hits', percentage: 35, amount: 17.5, color: 'primary' },
+  { id: 'hitleap', name: 'HitLeap', percentage: 25, amount: 12.5, color: 'traffic' },
+  { id: 'otohits', name: 'Otohits', percentage: 20, amount: 10, color: 'platforms' },
+  { id: 'easyhits4u', name: 'EasyHits4U', percentage: 10, amount: 5, color: 'earnings' },
+  { id: 'webhit', name: 'Webhit.net', percentage: 10, amount: 5, color: 'muted-foreground' }
+];
+
 const BudgetOptimizer = () => {
-  // Navigation for button links
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   // State management
   const [dailyBudget, setDailyBudget] = useState<number>(50);
   const [optimizationTarget, setOptimizationTarget] = useState<string>('roi');
   const [isAutoAdjustEnabled, setIsAutoAdjustEnabled] = useState<boolean>(false);
-  const [platformAllocations, setPlatformAllocations] = useState<PlatformAllocation[]>([]);
+  const [platformAllocations, setPlatformAllocations] = useState<PlatformAllocation[]>(
+    initialPlatformAllocations.map(p => ({ 
+      ...p, 
+      amount: (50 * p.percentage) / 100 
+    }))
+  );
+  const [totalAllocatedPercentage, setTotalAllocatedPercentage] = useState<number>(100);
   const [expectedResults, setExpectedResults] = useState<ExpectedResults>({
-    visits: 0,
-    impressions: 0,
-    revenue: 0,
-    roi: 0
+    visits: 10000,
+    impressions: 4000,
+    revenue: 25,
+    roi: -50
   });
   const [currentRecommendation, setCurrentRecommendation] = useState<Recommendation | null>({
     id: 'rec1',
@@ -169,34 +184,17 @@ const BudgetOptimizer = () => {
       'webhit': 10
     }
   });
-  const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
-  const [isApplyingRecommendation, setIsApplyingRecommendation] = useState<boolean>(false);
+  const [isLoadingOptimize, setIsLoadingOptimize] = useState<boolean>(false);
+  const [isLoadingApply, setIsLoadingApply] = useState<boolean>(false);
   
-  const { toast } = useToast();
-  
-  // Initialize platform allocations on component mount
+  // Calculate total allocated percentage whenever platform allocations change
   useEffect(() => {
-    const initialAllocations: PlatformAllocation[] = platforms.slice(0, 5).map((platform, index) => {
-      const defaultPercentages = [35, 25, 20, 10, 10];
-      const percentage = defaultPercentages[index];
-      const amount = (dailyBudget * percentage) / 100;
-      
-      return {
-        id: platform.id,
-        name: platform.name,
-        percentage,
-        amount,
-        color: ['primary', 'traffic', 'platforms', 'earnings', 'muted-foreground'][index % 5]
-      };
-    });
-    
-    setPlatformAllocations(initialAllocations);
-  }, []);
+    const total = platformAllocations.reduce((sum, platform) => sum + platform.percentage, 0);
+    setTotalAllocatedPercentage(total);
+  }, [platformAllocations]);
   
   // Calculate expected results whenever budget or allocations change
   useEffect(() => {
-    if (platformAllocations.length === 0) return;
-    
     calculateExpectedResults();
   }, [dailyBudget, platformAllocations]);
   
@@ -231,6 +229,18 @@ const BudgetOptimizer = () => {
       
       setPlatformAllocations(updatedAllocations);
     }
+  };
+  
+  // Handle direct percentage input for each platform
+  const handleDirectPercentageInput = (platformId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = parseFloat(e.target.value);
+    
+    // Validate input
+    if (isNaN(newValue) || newValue < 0 || newValue > 100) {
+      return;
+    }
+    
+    handleAllocationChange(platformId, [newValue]);
   };
   
   // Handle slider changes for platform allocations
@@ -308,7 +318,7 @@ const BudgetOptimizer = () => {
   
   // Handle budget optimization
   const handleOptimize = () => {
-    setIsOptimizing(true);
+    setIsLoadingOptimize(true);
     
     // Simulate API delay
     setTimeout(() => {
@@ -369,7 +379,7 @@ const BudgetOptimizer = () => {
         duration: 3000,
       });
       
-      setIsOptimizing(false);
+      setIsLoadingOptimize(false);
     }, 1500);
   };
   
@@ -377,7 +387,7 @@ const BudgetOptimizer = () => {
   const handleRecommendationApply = () => {
     if (!currentRecommendation) return;
     
-    setIsApplyingRecommendation(true);
+    setIsLoadingApply(true);
     
     // Simulate a delay for applying recommendations
     setTimeout(() => {
@@ -415,7 +425,7 @@ const BudgetOptimizer = () => {
         duration: 3000,
       });
       
-      setIsApplyingRecommendation(false);
+      setIsLoadingApply(false);
     }, 1000);
   };
   
@@ -445,7 +455,7 @@ const BudgetOptimizer = () => {
     
     toast({
       title: "Navigating",
-      description: "Redirecting to ROI Calculator page.",
+      description: "Redirecting to CPM Calculator page.",
       duration: 2000,
     });
   };
@@ -460,7 +470,7 @@ const BudgetOptimizer = () => {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={navigateToRoiCalculator}>
             <Calculator className="h-4 w-4 mr-2" />
-            ROI Calculator
+            CPM Calculator
           </Button>
           <Button variant="outline" size="sm" onClick={handleExportPlan}>
             <Download className="h-4 w-4 mr-2" />
@@ -485,6 +495,8 @@ const BudgetOptimizer = () => {
                       <Input 
                         id="total-budget"
                         type="number" 
+                        min="0"
+                        step="1"
                         value={dailyBudget} 
                         onChange={handleBudgetChange}
                         className="pl-9"
@@ -522,15 +534,34 @@ const BudgetOptimizer = () => {
               <Separator />
               
               <div className="space-y-6">
-                <h3 className="text-sm font-medium">Platform Allocations</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium">Platform Allocations</h3>
+                  <span className={cn(
+                    "text-sm font-medium",
+                    Math.abs(totalAllocatedPercentage - 100) > 0.5 && "text-destructive"
+                  )}>
+                    Total: {totalAllocatedPercentage.toFixed(0)}%
+                  </span>
+                </div>
                 
                 {platformAllocations.map((platform) => (
                   <div key={platform.id} className="space-y-2">
                     <div className="flex justify-between items-center">
                       <Label htmlFor={`platform-${platform.id}`} className="text-sm">{platform.name}</Label>
-                      <span className="text-sm font-medium">
-                        {formatCurrency(platform.amount)}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <Input 
+                          type="number" 
+                          min="0"
+                          max="100"
+                          step="5"
+                          className="w-16 h-8 text-sm"
+                          value={platform.percentage}
+                          onChange={(e) => handleDirectPercentageInput(platform.id, e)}
+                        />
+                        <span className="text-sm font-medium w-20 text-right">
+                          {formatCurrency(platform.amount)}
+                        </span>
+                      </div>
                     </div>
                     <Slider
                       id={`platform-${platform.id}`}
@@ -546,14 +577,24 @@ const BudgetOptimizer = () => {
                     </div>
                   </div>
                 ))}
+                
+                {Math.abs(totalAllocatedPercentage - 100) > 0.5 && (
+                  <Alert variant="destructive" className="bg-destructive/10 border-destructive/30 text-destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Invalid Allocation</AlertTitle>
+                    <AlertDescription>
+                      Total allocation must equal 100%. Current total: {totalAllocatedPercentage.toFixed(0)}%
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
               
               <Button 
                 onClick={handleOptimize} 
                 className="w-full"
-                disabled={isOptimizing}
+                disabled={isLoadingOptimize || Math.abs(totalAllocatedPercentage - 100) > 0.5}
               >
-                {isOptimizing ? (
+                {isLoadingOptimize ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Optimizing...
@@ -634,9 +675,25 @@ const BudgetOptimizer = () => {
             <RecommendationCard 
               recommendation={currentRecommendation} 
               onApply={handleRecommendationApply}
-              isLoading={isApplyingRecommendation}
+              isLoading={isLoadingApply}
             />
           )}
+          
+          <Card>
+            <CardContent className="pt-4">
+              <Alert className="bg-primary/5 border-primary/20">
+                <Info className="h-4 w-4 text-primary" />
+                <AlertTitle>Budget Optimization Tips</AlertTitle>
+                <AlertDescription className="text-sm">
+                  <ul className="list-disc pl-4 space-y-1 mt-2">
+                    <li>Start with platforms that have the highest acceptance rates</li>
+                    <li>Distribute more budget to platforms with better ROI</li>
+                    <li>Monitor performance and adjust allocations weekly</li>
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

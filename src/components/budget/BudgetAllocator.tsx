@@ -7,7 +7,10 @@ import { Slider } from "@/components/ui/slider"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency, formatNumber, formatPercent } from "@/utils/formatters"
-import { Zap, Loader2 } from "lucide-react"
+import { Zap, Loader2, AlertTriangle, Info } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { cn } from "@/lib/utils"
 
 interface Platform {
   id: string
@@ -48,7 +51,14 @@ export function BudgetAllocator({
   })
   const [loading, setLoading] = useState(false)
   const [lastUpdated, setLastUpdated] = useState(Date.now())
+  const [totalPercentage, setTotalPercentage] = useState(100)
   const { toast } = useToast()
+
+  // Update total percentage whenever platforms change
+  useEffect(() => {
+    const total = platforms.reduce((sum, platform) => sum + platform.percentage, 0)
+    setTotalPercentage(total)
+  }, [platforms])
 
   // Calculate expected results whenever platforms or total budget changes
   useEffect(() => {
@@ -70,6 +80,17 @@ export function BudgetAllocator({
     
     return () => clearTimeout(timer)
   }, [totalBudget, platforms, lastUpdated])
+
+  const handleDirectPercentageInput = (platformId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = parseFloat(e.target.value);
+    
+    // Validate input
+    if (isNaN(newValue) || newValue < 0 || newValue > 100) {
+      return;
+    }
+    
+    handleSliderChange(platformId, [newValue]);
+  };
 
   const handleSliderChange = (platformId: string, value: number[]) => {
     const newValue = value[0]
@@ -208,13 +229,34 @@ export function BudgetAllocator({
   return (
     <div className="space-y-6">
       <div className="space-y-6">
-        <h3 className="text-sm font-medium">Platform Allocations</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium">Platform Allocations</h3>
+          <span className={cn(
+            "text-sm font-medium",
+            Math.abs(totalPercentage - 100) > 0.5 && "text-destructive"
+          )}>
+            Total: {totalPercentage.toFixed(0)}%
+          </span>
+        </div>
         
         {platforms.map((platform) => (
           <div key={platform.id} className="space-y-2">
             <div className="flex justify-between items-center">
               <label htmlFor={`platform-${platform.id}`} className="text-sm">{platform.name}</label>
-              <span className="text-sm font-medium">{formatCurrency(platform.budget)}</span>
+              <div className="flex items-center gap-2">
+                <Input 
+                  type="number" 
+                  min="0"
+                  max="100"
+                  step="5"
+                  className="w-16 h-8 text-sm"
+                  value={platform.percentage}
+                  onChange={(e) => handleDirectPercentageInput(platform.id, e)}
+                />
+                <span className="text-sm font-medium w-20 text-right">
+                  {formatCurrency(platform.budget)}
+                </span>
+              </div>
             </div>
             <Slider
               id={`platform-${platform.id}`}
@@ -232,6 +274,16 @@ export function BudgetAllocator({
             </div>
           </div>
         ))}
+        
+        {Math.abs(totalPercentage - 100) > 0.5 && (
+          <Alert variant="destructive" className="bg-destructive/10 border-destructive/30 text-destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Invalid Allocation</AlertTitle>
+            <AlertDescription>
+              Total allocation must equal 100%. Current total: {totalPercentage.toFixed(0)}%
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
       
       <div className="pt-4">
@@ -295,7 +347,11 @@ export function BudgetAllocator({
         </div>
       </div>
       
-      <Button onClick={optimizeBudget} disabled={loading} className="w-full">
+      <Button 
+        onClick={optimizeBudget} 
+        disabled={loading || Math.abs(totalPercentage - 100) > 0.5} 
+        className="w-full"
+      >
         {loading ? (
           <>
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
