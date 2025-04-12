@@ -47,59 +47,68 @@ export const getRandomColor = (): string => {
   return PLATFORM_COLORS[Math.floor(Math.random() * PLATFORM_COLORS.length)];
 };
 
+// Updated with realistic values based on traffic exchange platforms
 export const initialPlatforms: Platform[] = [
   { 
     id: '9hits', 
     name: '9Hits', 
-    percentage: 35, 
-    amount: 17.5, 
+    percentage: 20, 
+    amount: 1, 
     color: 'primary',
-    costPerVisit: 0.0000034, 
-    acceptanceRate: 0.4, 
-    cpm: 1.5 
+    costPerVisit: 0.0001, 
+    acceptanceRate: 0.2, 
+    cpm: 0.5 
   },
   { 
     id: 'hitleap', 
     name: 'HitLeap', 
-    percentage: 25, 
-    amount: 12.5, 
+    percentage: 20, 
+    amount: 1, 
     color: 'traffic',
-    costPerVisit: 0.000028, 
-    acceptanceRate: 0.3, 
-    cpm: 2.5 
+    costPerVisit: 0.0002, 
+    acceptanceRate: 0.15, 
+    cpm: 0.4 
   },
   { 
     id: 'otohits', 
     name: 'Otohits', 
     percentage: 20, 
-    amount: 10, 
+    amount: 1, 
     color: 'platforms',
-    costPerVisit: 0.0000018, 
-    acceptanceRate: 0.35, 
-    cpm: 0.5 
+    costPerVisit: 0.00001, 
+    acceptanceRate: 0.1, 
+    cpm: 0.1 
   },
   { 
     id: 'easyhits4u', 
     name: 'EasyHits4U', 
-    percentage: 10, 
-    amount: 5, 
+    percentage: 20, 
+    amount: 1, 
     color: 'earnings',
-    costPerVisit: 0.000032, 
+    costPerVisit: 0.0005, 
     acceptanceRate: 0.25, 
-    cpm: 1.8 
+    cpm: 0.6 
   },
   { 
     id: 'webhit', 
     name: 'Webhit.net', 
-    percentage: 10, 
-    amount: 5, 
+    percentage: 20, 
+    amount: 1, 
     color: 'muted-foreground',
-    costPerVisit: 0.000025, 
-    acceptanceRate: 0.32, 
-    cpm: 1.2 
+    costPerVisit: 0.0003, 
+    acceptanceRate: 0.2, 
+    cpm: 0.5 
   }
 ];
 
+/**
+ * Calculates expected results based on platform allocations and daily budget
+ * 
+ * For each platform:
+ * - Expected Visits = Amount / Cost per Visit
+ * - Expected Impressions = Expected Visits × Acceptance Rate
+ * - Expected Revenue = (Expected Impressions / 1000) × CPM
+ */
 export const calculateExpectedResults = (
   platforms: Platform[],
   dailyBudget: number
@@ -133,6 +142,13 @@ export const calculateExpectedResults = (
   };
 };
 
+/**
+ * Optimizes budget allocation based on target (ROI, traffic, impressions)
+ * 
+ * - Maximum Traffic: Allocate budget to platforms with lowest cost per visit
+ * - Maximum Impressions: Allocate budget to platforms with highest acceptance rate / cost per visit
+ * - Maximum ROI: Allocate budget to platforms with highest (acceptance rate * cpm / 1000 - cost per visit)
+ */
 export const optimizeBudgetAllocation = (
   platforms: Platform[],
   target: 'roi' | 'traffic' | 'impressions',

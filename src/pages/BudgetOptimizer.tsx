@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -47,7 +48,8 @@ const BudgetOptimizer = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const [dailyBudget, setDailyBudget] = useState<number>(50);
+  // Changed default budget from 50 to 5 to reflect more realistic starting point
+  const [dailyBudget, setDailyBudget] = useState<number>(5);
   const [optimizationTarget, setOptimizationTarget] = useState<'roi' | 'traffic' | 'impressions'>('roi');
   const [isAutoAdjustEnabled, setIsAutoAdjustEnabled] = useState<boolean>(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState<boolean>(false);
@@ -55,7 +57,7 @@ const BudgetOptimizer = () => {
   const [platformAllocations, setPlatformAllocations] = useState<Platform[]>(
     initialPlatforms.map(p => ({ 
       ...p, 
-      amount: (50 * p.percentage) / 100 
+      amount: (5 * p.percentage) / 100 // Updated to match new default budget
     }))
   );
   const [totalAllocatedPercentage, setTotalAllocatedPercentage] = useState<number>(100);
@@ -81,9 +83,9 @@ const BudgetOptimizer = () => {
   const [newPlatformDialogOpen, setNewPlatformDialogOpen] = useState<boolean>(false);
   const [newPlatform, setNewPlatform] = useState({
     name: '',
-    costPerVisit: 0.00001,
-    acceptanceRate: 0.5,
-    cpm: 1.5
+    costPerVisit: 0.0001,
+    acceptanceRate: 0.2,
+    cpm: 0.5
   });
   
   useEffect(() => {
@@ -383,9 +385,9 @@ const BudgetOptimizer = () => {
     setNewPlatformDialogOpen(false);
     setNewPlatform({
       name: '',
-      costPerVisit: 0.00001,
-      acceptanceRate: 0.5,
-      cpm: 1.5
+      costPerVisit: 0.0001,
+      acceptanceRate: 0.2,
+      cpm: 0.5
     });
     
     toast({
@@ -412,7 +414,7 @@ const BudgetOptimizer = () => {
           throw new Error("Invalid configuration format");
         }
         
-        setDailyBudget(importedConfig.dailyBudget || 50);
+        setDailyBudget(importedConfig.dailyBudget || 5);
         setOptimizationTarget(importedConfig.target || 'roi');
         setPlatformAllocations(importedConfig.platforms.map((p: any) => ({
           ...p,
@@ -499,7 +501,7 @@ const BudgetOptimizer = () => {
                               id="total-budget"
                               type="number" 
                               min="0"
-                              step="1"
+                              step="0.1"
                               value={dailyBudget} 
                               onChange={handleBudgetChange}
                               className="pl-9"
@@ -821,7 +823,7 @@ const BudgetOptimizer = () => {
                       <span>{platform.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">{platform.percentage.toFixed(0)}%</span>
+                      <span className="text-muted-foreground">{platform.percentage.toFixed(1)}%</span>
                       <span className="font-medium">{formatCurrency(platform.amount)}</span>
                     </div>
                   </div>
@@ -962,7 +964,7 @@ const BudgetOptimizer = () => {
                 onChange={(e) => setNewPlatform({...newPlatform, costPerVisit: parseFloat(e.target.value)})}
                 className="mt-2"
               />
-              <p className="text-xs text-muted-foreground mt-1">Example: 0.00001 ($0.00001 per visit)</p>
+              <p className="text-xs text-muted-foreground mt-1">Example: 0.0001 ($0.0001 per visit)</p>
             </div>
             
             <div>
@@ -977,7 +979,7 @@ const BudgetOptimizer = () => {
                 onChange={(e) => setNewPlatform({...newPlatform, acceptanceRate: parseFloat(e.target.value)})}
                 className="mt-2"
               />
-              <p className="text-xs text-muted-foreground mt-1">Enter a value between 0 and 1 (e.g., 0.5 = 50%)</p>
+              <p className="text-xs text-muted-foreground mt-1">Enter a value between 0 and 1 (e.g., 0.2 = 20%)</p>
             </div>
             
             <div>
@@ -991,7 +993,7 @@ const BudgetOptimizer = () => {
                 onChange={(e) => setNewPlatform({...newPlatform, cpm: parseFloat(e.target.value)})}
                 className="mt-2"
               />
-              <p className="text-xs text-muted-foreground mt-1">Revenue per 1000 impressions</p>
+              <p className="text-xs text-muted-foreground mt-1">Revenue per 1000 impressions (e.g., 0.5 = $0.50)</p>
             </div>
           </div>
           <DialogFooter>

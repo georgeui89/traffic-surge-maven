@@ -1,7 +1,6 @@
 
 import React from "react";
-import { Pie } from "recharts";
-import { PieChart, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
 
 interface BudgetChartProps {
   data: Array<{
@@ -58,13 +57,13 @@ export function BudgetChart({ data }: BudgetChartProps) {
     );
   };
 
-  // Fix the CustomTooltip component by properly typing its props
+  // CustomTooltip component with proper typing
   const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-background p-2 border rounded-md shadow-md">
           <p className="font-medium">{`${payload[0].name}`}</p>
-          <p>{`Allocation: ${payload[0].value}%`}</p>
+          <p>{`Allocation: ${payload[0].value.toFixed(1)}%`}</p>
           <p>{`Amount: $${payload[0].payload.amount.toFixed(2)}`}</p>
         </div>
       );
