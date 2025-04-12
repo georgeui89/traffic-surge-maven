@@ -324,7 +324,7 @@ const BudgetOptimizer = () => {
     
     toast({
       title: "Configuration Saved",
-      description: `"${configName}" has been saved to your local configurations.",
+      description: `"${configName}" has been saved to your local configurations.`,
       duration: 3000,
     });
   };
@@ -339,7 +339,7 @@ const BudgetOptimizer = () => {
     
     toast({
       title: "Configuration Loaded",
-      description: `"${config.name}" has been loaded successfully.",
+      description: `"${config.name}" has been loaded successfully.`,
       duration: 3000,
     });
   };
@@ -390,7 +390,7 @@ const BudgetOptimizer = () => {
     
     toast({
       title: "Platform Added",
-      description: `"${newPlatform.name}" has been added to your budget allocation.",
+      description: `"${newPlatform.name}" has been added to your budget allocation.`,
       duration: 3000,
     });
   };
