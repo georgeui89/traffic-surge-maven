@@ -13,6 +13,18 @@ interface BudgetChartProps {
   }>;
 }
 
+// Define the shape of props for the CustomTooltip component
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    name: string;
+    value: number;
+    payload: {
+      amount: number;
+    };
+  }>;
+}
+
 export function BudgetChart({ data }: BudgetChartProps) {
   // Filter out platforms with 0% allocation
   const chartData = data
@@ -46,7 +58,8 @@ export function BudgetChart({ data }: BudgetChartProps) {
     );
   };
 
-  const CustomTooltip = ({ active, payload }) => {
+  // Fix the CustomTooltip component by properly typing its props
+  const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-background p-2 border rounded-md shadow-md">
