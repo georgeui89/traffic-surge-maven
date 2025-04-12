@@ -324,7 +324,7 @@ const BudgetOptimizer = () => {
     
     toast({
       title: "Configuration Saved",
-      description: `"${configName}" has been saved to your local configurations.`,
+      description: `"${configName}" has been saved to your local configurations.",
       duration: 3000,
     });
   };
@@ -339,7 +339,7 @@ const BudgetOptimizer = () => {
     
     toast({
       title: "Configuration Loaded",
-      description: `"${config.name}" has been loaded successfully.`,
+      description: `"${config.name}" has been loaded successfully.",
       duration: 3000,
     });
   };
@@ -390,7 +390,7 @@ const BudgetOptimizer = () => {
     
     toast({
       title: "Platform Added",
-      description: `"${newPlatform.name}" has been added to your budget allocation.`,
+      description: `"${newPlatform.name}" has been added to your budget allocation.",
       duration: 3000,
     });
   };
@@ -465,288 +465,285 @@ const BudgetOptimizer = () => {
           <Card>
             <CardHeader>
               <CardTitle className="text-base font-medium">Budget Allocation Optimizer</CardTitle>
-              <TabsList className="mt-1">
-                <TabsTrigger
-                  value="budget"
-                  onClick={() => setActiveTab('budget')}
-                  className={activeTab === 'budget' ? 'bg-primary text-white' : ''}
-                >
-                  Budget Allocations
-                </TabsTrigger>
-                <TabsTrigger
-                  value="scenarios"
-                  onClick={() => setActiveTab('scenarios')}
-                  className={activeTab === 'scenarios' ? 'bg-primary text-white' : ''}
-                >
-                  What-If Analysis
-                </TabsTrigger>
-                <TabsTrigger
-                  value="saved"
-                  onClick={() => setActiveTab('saved')}
-                  className={activeTab === 'saved' ? 'bg-primary text-white' : ''}
-                >
-                  Saved Configurations
-                </TabsTrigger>
-              </TabsList>
-            </CardHeader>
-            
-            <CardContent className="space-y-6">
-              {activeTab === 'budget' && (
-                <>
-                  <div className="space-y-4">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                      <div className="w-full sm:w-1/2">
-                        <Label htmlFor="total-budget" className="mb-2 block">Daily Budget</Label>
-                        <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input 
-                            id="total-budget"
-                            type="number" 
-                            min="0"
-                            step="1"
-                            value={dailyBudget} 
-                            onChange={handleBudgetChange}
-                            className="pl-9"
-                          />
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="mt-1">
+                  <TabsTrigger
+                    value="budget"
+                    className={activeTab === 'budget' ? 'bg-primary text-white' : ''}
+                  >
+                    Budget Allocations
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="scenarios"
+                    className={activeTab === 'scenarios' ? 'bg-primary text-white' : ''}
+                  >
+                    What-If Analysis
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="saved"
+                    className={activeTab === 'saved' ? 'bg-primary text-white' : ''}
+                  >
+                    Saved Configurations
+                  </TabsTrigger>
+                </TabsList>
+              
+                <CardContent className="space-y-6">
+                  <TabsContent value="budget">
+                    <div className="space-y-4">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div className="w-full sm:w-1/2">
+                          <Label htmlFor="total-budget" className="mb-2 block">Daily Budget</Label>
+                          <div className="relative">
+                            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              id="total-budget"
+                              type="number" 
+                              min="0"
+                              step="1"
+                              value={dailyBudget} 
+                              onChange={handleBudgetChange}
+                              className="pl-9"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="w-full sm:w-1/2">
+                          <Label htmlFor="optimization-target" className="mb-2 block">Optimization Target</Label>
+                          <Select 
+                            value={optimizationTarget} 
+                            onValueChange={(value) => setOptimizationTarget(value as 'roi' | 'traffic' | 'impressions')}
+                          >
+                            <SelectTrigger id="optimization-target">
+                              <SelectValue placeholder="Select target" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="roi">Maximum ROI</SelectItem>
+                              <SelectItem value="traffic">Maximum Traffic</SelectItem>
+                              <SelectItem value="impressions">Maximum Impressions</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                       
-                      <div className="w-full sm:w-1/2">
-                        <Label htmlFor="optimization-target" className="mb-2 block">Optimization Target</Label>
-                        <Select 
-                          value={optimizationTarget} 
-                          onValueChange={(value) => setOptimizationTarget(value as 'roi' | 'traffic' | 'impressions')}
-                        >
-                          <SelectTrigger id="optimization-target">
-                            <SelectValue placeholder="Select target" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="roi">Maximum ROI</SelectItem>
-                            <SelectItem value="traffic">Maximum Traffic</SelectItem>
-                            <SelectItem value="impressions">Maximum Impressions</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="auto-adjust"
-                        checked={isAutoAdjustEnabled}
-                        onCheckedChange={setIsAutoAdjustEnabled}
-                      />
-                      <Label htmlFor="auto-adjust" className="cursor-pointer">
-                        Auto-adjust allocations to maintain 100% total
-                      </Label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="advanced-options"
-                        checked={showAdvancedOptions}
-                        onCheckedChange={setShowAdvancedOptions}
-                      />
-                      <Label htmlFor="advanced-options" className="cursor-pointer">
-                        Show advanced platform options
-                      </Label>
-                    </div>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium">Platform Allocations</h3>
-                      <div className="flex items-center gap-2">
-                        <span className={cn(
-                          "text-sm font-medium",
-                          Math.abs(totalAllocatedPercentage - 100) > 0.5 
-                            ? "text-destructive" 
-                            : "text-muted-foreground"
-                        )}>
-                          Total: {totalAllocatedPercentage.toFixed(0)}%
-                        </span>
-                        
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setNewPlatformDialogOpen(true)}
-                          className="h-8"
-                        >
-                          <Plus className="h-3.5 w-3.5 mr-1" />
-                          Add Platform
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {platformAllocations.map((platform) => (
-                        <PlatformCard
-                          key={platform.id}
-                          {...platform}
-                          onUpdate={handlePlatformUpdate}
-                          onRemove={handlePlatformRemove}
-                          showAdvancedFields={showAdvancedOptions}
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="auto-adjust"
+                          checked={isAutoAdjustEnabled}
+                          onCheckedChange={setIsAutoAdjustEnabled}
                         />
-                      ))}
+                        <Label htmlFor="auto-adjust" className="cursor-pointer">
+                          Auto-adjust allocations to maintain 100% total
+                        </Label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="advanced-options"
+                          checked={showAdvancedOptions}
+                          onCheckedChange={setShowAdvancedOptions}
+                        />
+                        <Label htmlFor="advanced-options" className="cursor-pointer">
+                          Show advanced platform options
+                        </Label>
+                      </div>
                     </div>
                     
-                    {Math.abs(totalAllocatedPercentage - 100) > 0.5 && (
-                      <Alert variant="destructive" className="bg-destructive/10 border-destructive/30 text-destructive">
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertTitle>Invalid Allocation</AlertTitle>
-                        <AlertDescription>
-                          Total allocation must equal 100%. Current total: {totalAllocatedPercentage.toFixed(0)}%
-                          {!isAutoAdjustEnabled && (
-                            <Button
-                              variant="link"
-                              className="p-0 h-auto text-destructive underline"
-                              onClick={adjustPlatformPercentages}
-                            >
-                              Adjust Now
-                            </Button>
-                          )}
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    <Button 
-                      onClick={handleOptimize} 
-                      disabled={isLoadingOptimize || Math.abs(totalAllocatedPercentage - 100) > 0.5}
-                      className="flex-1"
-                    >
-                      {isLoadingOptimize ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Optimizing...
-                        </>
-                      ) : (
-                        <>
-                          <Zap className="h-4 w-4 mr-2" />
-                          Optimize Budget Allocation
-                        </>
-                      )}
-                    </Button>
+                    <Separator className="my-6" />
                     
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setSaveConfigDialogOpen(true)}
-                      className="flex-1"
-                    >
-                      <Save className="h-4 w-4 mr-2" />
-                      Save Configuration
-                    </Button>
-                  </div>
-                </>
-              )}
-              
-              {activeTab === 'scenarios' && (
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    Experiment with different platform parameters to see how they affect your results
-                    without changing your actual budget allocation.
-                  </p>
-                  
-                  <WhatIfAnalysis 
-                    platforms={platformAllocations}
-                    dailyBudget={dailyBudget}
-                    onApplyChanges={(updatedPlatforms) => {
-                      setPlatformAllocations(updatedPlatforms);
-                      toast({
-                        title: "Changes Applied",
-                        description: "What-if scenario has been applied to your budget allocation.",
-                        duration: 3000,
-                      });
-                    }}
-                  />
-                </div>
-              )}
-              
-              {activeTab === 'saved' && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium">Saved Configurations</h3>
-                    <div>
-                      <input
-                        type="file"
-                        id="import-config"
-                        className="hidden"
-                        accept="application/json"
-                        onChange={handleImportFile}
-                      />
-                      <label htmlFor="import-config">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="h-8 cursor-pointer"
-                          asChild
-                        >
-                          <span>
-                            <FileUp className="h-3.5 w-3.5 mr-1" />
-                            Import
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-medium">Platform Allocations</h3>
+                        <div className="flex items-center gap-2">
+                          <span className={cn(
+                            "text-sm font-medium",
+                            Math.abs(totalAllocatedPercentage - 100) > 0.5 
+                              ? "text-destructive" 
+                              : "text-muted-foreground"
+                          )}>
+                            Total: {totalAllocatedPercentage.toFixed(0)}%
                           </span>
-                        </Button>
-                      </label>
+                          
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setNewPlatformDialogOpen(true)}
+                            className="h-8"
+                          >
+                            <Plus className="h-3.5 w-3.5 mr-1" />
+                            Add Platform
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {platformAllocations.map((platform) => (
+                          <PlatformCard
+                            key={platform.id}
+                            {...platform}
+                            onUpdate={handlePlatformUpdate}
+                            onRemove={handlePlatformRemove}
+                            showAdvancedFields={showAdvancedOptions}
+                          />
+                        ))}
+                      </div>
+                      
+                      {Math.abs(totalAllocatedPercentage - 100) > 0.5 && (
+                        <Alert variant="destructive" className="bg-destructive/10 border-destructive/30 text-destructive">
+                          <AlertTriangle className="h-4 w-4" />
+                          <AlertTitle>Invalid Allocation</AlertTitle>
+                          <AlertDescription>
+                            Total allocation must equal 100%. Current total: {totalAllocatedPercentage.toFixed(0)}%
+                            {!isAutoAdjustEnabled && (
+                              <Button
+                                variant="link"
+                                className="p-0 h-auto text-destructive underline"
+                                onClick={adjustPlatformPercentages}
+                              >
+                                Adjust Now
+                              </Button>
+                            )}
+                          </AlertDescription>
+                        </Alert>
+                      )}
                     </div>
-                  </div>
+                    
+                    <div className="flex flex-wrap gap-2 mt-6">
+                      <Button 
+                        onClick={handleOptimize} 
+                        disabled={isLoadingOptimize || Math.abs(totalAllocatedPercentage - 100) > 0.5}
+                        className="flex-1"
+                      >
+                        {isLoadingOptimize ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Optimizing...
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="h-4 w-4 mr-2" />
+                            Optimize Budget Allocation
+                          </>
+                        )}
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setSaveConfigDialogOpen(true)}
+                        className="flex-1"
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Configuration
+                      </Button>
+                    </div>
+                  </TabsContent>
                   
-                  {savedConfigurations.length === 0 ? (
-                    <div className="text-center p-6 border rounded-md bg-muted/20">
-                      <p className="text-muted-foreground">No saved configurations yet</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Save your current configuration or import one to get started
+                  <TabsContent value="scenarios">
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">
+                        Experiment with different platform parameters to see how they affect your results
+                        without changing your actual budget allocation.
                       </p>
+                      
+                      <WhatIfAnalysis 
+                        platforms={platformAllocations}
+                        dailyBudget={dailyBudget}
+                        onApplyChanges={(updatedPlatforms) => {
+                          setPlatformAllocations(updatedPlatforms);
+                          toast({
+                            title: "Changes Applied",
+                            description: "What-if scenario has been applied to your budget allocation.",
+                            duration: 3000,
+                          });
+                        }}
+                      />
                     </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {savedConfigurations.map((config) => (
-                        <div 
-                          key={config.id} 
-                          className="flex items-center justify-between border rounded-md p-3"
-                        >
-                          <div>
-                            <p className="font-medium">{config.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              ${config.dailyBudget} budget, {config.platforms.length} platforms,
-                              {new Date(config.date).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
+                  </TabsContent>
+                  
+                  <TabsContent value="saved">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-medium">Saved Configurations</h3>
+                        <div>
+                          <input
+                            type="file"
+                            id="import-config"
+                            className="hidden"
+                            accept="application/json"
+                            onChange={handleImportFile}
+                          />
+                          <label htmlFor="import-config">
                             <Button 
                               variant="outline" 
-                              size="sm" 
-                              onClick={() => handleLoadConfiguration(config)}
+                              size="sm"
+                              className="h-8 cursor-pointer"
+                              asChild
                             >
-                              Load
+                              <span>
+                                <FileUp className="h-3.5 w-3.5 mr-1" />
+                                Import
+                              </span>
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => {
-                                const updatedConfigs = savedConfigurations.filter(c => c.id !== config.id);
-                                setSavedConfigurations(updatedConfigs);
-                                localStorage.setItem('budgetConfigurations', JSON.stringify(updatedConfigs));
-                                
-                                toast({
-                                  title: "Configuration Deleted",
-                                  description: `"${config.name}" has been removed.`,
-                                  duration: 3000,
-                                });
-                              }}
-                              className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                            >
-                              Delete
-                            </Button>
-                          </div>
+                          </label>
                         </div>
-                      ))}
+                      </div>
+                      
+                      {savedConfigurations.length === 0 ? (
+                        <div className="text-center p-6 border rounded-md bg-muted/20">
+                          <p className="text-muted-foreground">No saved configurations yet</p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Save your current configuration or import one to get started
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {savedConfigurations.map((config) => (
+                            <div 
+                              key={config.id} 
+                              className="flex items-center justify-between border rounded-md p-3"
+                            >
+                              <div>
+                                <p className="font-medium">{config.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  ${config.dailyBudget} budget, {config.platforms.length} platforms,
+                                  {new Date(config.date).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => handleLoadConfiguration(config)}
+                                >
+                                  Load
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => {
+                                    const updatedConfigs = savedConfigurations.filter(c => c.id !== config.id);
+                                    setSavedConfigurations(updatedConfigs);
+                                    localStorage.setItem('budgetConfigurations', JSON.stringify(updatedConfigs));
+                                    
+                                    toast({
+                                      title: "Configuration Deleted",
+                                      description: `"${config.name}" has been removed.`,
+                                      duration: 3000,
+                                    });
+                                  }}
+                                  className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
+                  </TabsContent>
+                </CardContent>
+              </Tabs>
+            </CardHeader>
           </Card>
         </div>
         
