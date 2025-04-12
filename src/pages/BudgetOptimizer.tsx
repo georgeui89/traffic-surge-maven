@@ -941,4 +941,71 @@ const BudgetOptimizer = () => {
           </DialogHeader>
           <div className="py-4 space-y-4">
             <div>
-              <Label htmlFor="platform-name">Platform Name</Label
+              <Label htmlFor="platform-name">Platform Name</Label>
+              <Input
+                id="platform-name"
+                value={newPlatform.name}
+                onChange={(e) => setNewPlatform({...newPlatform, name: e.target.value})}
+                placeholder="Platform Name"
+                className="mt-2"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="platform-cost">Cost per Visit ($)</Label>
+              <Input
+                id="platform-cost"
+                type="number"
+                step="0.000001"
+                min="0.000001"
+                value={newPlatform.costPerVisit}
+                onChange={(e) => setNewPlatform({...newPlatform, costPerVisit: parseFloat(e.target.value)})}
+                className="mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Example: 0.00001 ($0.00001 per visit)</p>
+            </div>
+            
+            <div>
+              <Label htmlFor="platform-acceptance">Acceptance Rate</Label>
+              <Input
+                id="platform-acceptance"
+                type="number"
+                step="0.01"
+                min="0"
+                max="1"
+                value={newPlatform.acceptanceRate}
+                onChange={(e) => setNewPlatform({...newPlatform, acceptanceRate: parseFloat(e.target.value)})}
+                className="mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Enter a value between 0 and 1 (e.g., 0.5 = 50%)</p>
+            </div>
+            
+            <div>
+              <Label htmlFor="platform-cpm">CPM Rate ($)</Label>
+              <Input
+                id="platform-cpm"
+                type="number"
+                step="0.1"
+                min="0"
+                value={newPlatform.cpm}
+                onChange={(e) => setNewPlatform({...newPlatform, cpm: parseFloat(e.target.value)})}
+                className="mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Revenue per 1000 impressions</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNewPlatformDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddPlatform}>
+              Add Platform
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default BudgetOptimizer;
