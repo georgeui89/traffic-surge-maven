@@ -47,7 +47,6 @@ const BudgetOptimizer = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // State management
   const [dailyBudget, setDailyBudget] = useState<number>(50);
   const [optimizationTarget, setOptimizationTarget] = useState<'roi' | 'traffic' | 'impressions'>('roi');
   const [isAutoAdjustEnabled, setIsAutoAdjustEnabled] = useState<boolean>(false);
@@ -87,24 +86,20 @@ const BudgetOptimizer = () => {
     cpm: 1.5
   });
   
-  // Calculate total allocated percentage whenever platform allocations change
   useEffect(() => {
     const total = platformAllocations.reduce((sum, platform) => sum + platform.percentage, 0);
     setTotalAllocatedPercentage(total);
     
-    // If auto-adjust is enabled, adjust percentages to maintain 100%
     if (isAutoAdjustEnabled && Math.abs(total - 100) > 0.1) {
       adjustPlatformPercentages();
     }
   }, [platformAllocations]);
   
-  // Calculate expected results whenever budget or allocations change
   useEffect(() => {
     const results = calculateExpectedResults(platformAllocations, dailyBudget);
     setExpectedResults(results);
   }, [dailyBudget, platformAllocations]);
   
-  // Load saved configurations on component mount
   useEffect(() => {
     const savedConfigs = localStorage.getItem('budgetConfigurations');
     if (savedConfigs) {
@@ -116,10 +111,9 @@ const BudgetOptimizer = () => {
     }
   }, []);
   
-  // Adjust platform percentages to maintain 100% total
   const adjustPlatformPercentages = () => {
     const total = platformAllocations.reduce((sum, platform) => sum + platform.percentage, 0);
-    if (Math.abs(total - 100) <= 0.1) return; // Already close to 100%
+    if (Math.abs(total - 100) <= 0.1) return;
     
     const adjustmentFactor = 100 / total;
     const adjustedPlatforms = platformAllocations.map(platform => ({
@@ -137,13 +131,11 @@ const BudgetOptimizer = () => {
     });
   };
   
-  // Handle daily budget input change
   const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
     if (!isNaN(value) && value >= 0) {
       setDailyBudget(value);
       
-      // Update platform allocation amounts based on new budget
       const updatedAllocations = platformAllocations.map(platform => ({
         ...platform,
         amount: (value * platform.percentage) / 100
@@ -153,11 +145,9 @@ const BudgetOptimizer = () => {
     }
   };
   
-  // Handle platform allocation updates
   const handlePlatformUpdate = (platformId: string, updates: any) => {
     const updatedPlatforms = platformAllocations.map(platform => {
       if (platform.id === platformId) {
-        // If percentage is being updated
         if (updates.percentage !== undefined) {
           return {
             ...platform,
@@ -166,7 +156,6 @@ const BudgetOptimizer = () => {
           };
         }
         
-        // Otherwise, just update other fields
         return { ...platform, ...updates };
       }
       return platform;
@@ -175,7 +164,6 @@ const BudgetOptimizer = () => {
     setPlatformAllocations(updatedPlatforms);
   };
   
-  // Handle platform removal
   const handlePlatformRemove = (platformId: string) => {
     if (platformAllocations.length <= 2) {
       toast({
@@ -197,27 +185,21 @@ const BudgetOptimizer = () => {
     });
   };
   
-  // Handle budget optimization
   const handleOptimize = () => {
     setIsLoadingOptimize(true);
     
-    // Simulate optimization delay
     setTimeout(() => {
       try {
-        // Optimize platform allocations
         const optimizedPlatforms = optimizeBudgetAllocation(
           platformAllocations, 
           optimizationTarget,
           dailyBudget
         );
         
-        // Generate recommendation based on optimized vs. current allocations
         const recommendation = generateRecommendation(platformAllocations, optimizedPlatforms);
         
-        // Update platforms with optimized allocations
         setPlatformAllocations(optimizedPlatforms);
         
-        // Update current recommendation
         setCurrentRecommendation(recommendation);
         
         toast({
@@ -244,7 +226,6 @@ const BudgetOptimizer = () => {
     }, 1000);
   };
   
-  // Handle applying AI recommendations
   const handleRecommendationApply = () => {
     if (!currentRecommendation) return;
     
@@ -252,7 +233,6 @@ const BudgetOptimizer = () => {
     
     setTimeout(() => {
       try {
-        // Apply the recommendations
         const recommendedAllocations = platformAllocations.map(platform => {
           const newPercentage = currentRecommendation.allocations[platform.id] || platform.percentage;
           return {
@@ -264,7 +244,6 @@ const BudgetOptimizer = () => {
         
         setPlatformAllocations(recommendedAllocations);
         
-        // Clear the recommendation after applying
         setCurrentRecommendation(null);
         
         toast({
@@ -287,7 +266,6 @@ const BudgetOptimizer = () => {
     }, 800);
   };
   
-  // Handle exporting the budget plan
   const handleExportPlan = () => {
     const exportData = platformAllocations.map(platform => ({
       Platform: platform.name,
@@ -307,7 +285,6 @@ const BudgetOptimizer = () => {
     });
   };
   
-  // Navigate to ROI calculator
   const navigateToRoiCalculator = () => {
     navigate('/cpm-calculator');
     
@@ -318,7 +295,6 @@ const BudgetOptimizer = () => {
     });
   };
   
-  // Handle saving configuration
   const handleSaveConfiguration = () => {
     if (!configName.trim()) {
       toast({
@@ -348,12 +324,11 @@ const BudgetOptimizer = () => {
     
     toast({
       title: "Configuration Saved",
-      description: `"${configName}" has been saved to your local configurations.`,
+      description: `"${configName}" has been saved to your local configurations.",
       duration: 3000,
     });
   };
   
-  // Handle loading a saved configuration
   const handleLoadConfiguration = (config: any) => {
     setDailyBudget(config.dailyBudget);
     setOptimizationTarget(config.target);
@@ -364,12 +339,11 @@ const BudgetOptimizer = () => {
     
     toast({
       title: "Configuration Loaded",
-      description: `"${config.name}" has been loaded successfully.`,
+      description: `"${config.name}" has been loaded successfully.",
       duration: 3000,
     });
   };
   
-  // Handle adding a new platform
   const handleAddPlatform = () => {
     if (!newPlatform.name) {
       toast({
@@ -381,19 +355,16 @@ const BudgetOptimizer = () => {
       return;
     }
     
-    // Create new platform with equal allocation
     const newId = `platform-${Date.now()}`;
     const color = getRandomColor();
     const equalPercentage = 100 / (platformAllocations.length + 1);
     
-    // Adjust all platforms for equal allocation
     const adjustedPlatforms = platformAllocations.map(p => ({
       ...p,
       percentage: equalPercentage,
       amount: (dailyBudget * equalPercentage) / 100
     }));
     
-    // Add new platform
     const updatedPlatforms = [
       ...adjustedPlatforms,
       {
@@ -419,12 +390,11 @@ const BudgetOptimizer = () => {
     
     toast({
       title: "Platform Added",
-      description: `"${newPlatform.name}" has been added to your budget allocation.`,
+      description: `"${newPlatform.name}" has been added to your budget allocation.",
       duration: 3000,
     });
   };
   
-  // Handle importing a configuration file
   const handleImportFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -434,7 +404,6 @@ const BudgetOptimizer = () => {
       try {
         const importedConfig = JSON.parse(e.target?.result as string);
         
-        // Validate imported configuration
         if (
           !importedConfig.platforms ||
           !Array.isArray(importedConfig.platforms) ||
@@ -443,7 +412,6 @@ const BudgetOptimizer = () => {
           throw new Error("Invalid configuration format");
         }
         
-        // Load configuration
         setDailyBudget(importedConfig.dailyBudget || 50);
         setOptimizationTarget(importedConfig.target || 'roi');
         setPlatformAllocations(importedConfig.platforms.map((p: any) => ({
@@ -470,7 +438,6 @@ const BudgetOptimizer = () => {
     
     reader.readAsText(file);
     
-    // Reset the input so the same file can be selected again
     event.target.value = '';
   };
   
@@ -938,9 +905,110 @@ const BudgetOptimizer = () => {
         </div>
       </div>
       
-      {/* Dialog for saving configuration */}
       <Dialog open={saveConfigDialogOpen} onOpenChange={setSaveConfigDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Save Configuration</DialogTitle>
             <DialogDescription>
+              Enter a name for this configuration to save it for future use.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="config-name">Configuration Name</Label>
+            <Input
+              id="config-name"
+              value={configName}
+              onChange={(e) => setConfigName(e.target.value)}
+              placeholder="My Budget Plan"
+              className="mt-2"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSaveConfigDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveConfiguration}>
+              Save Configuration
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      <Dialog open={newPlatformDialogOpen} onOpenChange={setNewPlatformDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Platform</DialogTitle>
+            <DialogDescription>
+              Enter the details for the new traffic platform.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div>
+              <Label htmlFor="platform-name">Platform Name</Label>
+              <Input
+                id="platform-name"
+                value={newPlatform.name}
+                onChange={(e) => setNewPlatform({...newPlatform, name: e.target.value})}
+                placeholder="Platform Name"
+                className="mt-2"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="platform-cost">Cost per Visit ($)</Label>
+              <Input
+                id="platform-cost"
+                type="number"
+                step="0.000001"
+                min="0.000001"
+                value={newPlatform.costPerVisit}
+                onChange={(e) => setNewPlatform({...newPlatform, costPerVisit: parseFloat(e.target.value)})}
+                className="mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Example: 0.00001 ($0.00001 per visit)</p>
+            </div>
+            
+            <div>
+              <Label htmlFor="platform-acceptance">Acceptance Rate</Label>
+              <Input
+                id="platform-acceptance"
+                type="number"
+                step="0.01"
+                min="0"
+                max="1"
+                value={newPlatform.acceptanceRate}
+                onChange={(e) => setNewPlatform({...newPlatform, acceptanceRate: parseFloat(e.target.value)})}
+                className="mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Enter a value between 0 and 1 (e.g., 0.5 = 50%)</p>
+            </div>
+            
+            <div>
+              <Label htmlFor="platform-cpm">CPM Rate ($)</Label>
+              <Input
+                id="platform-cpm"
+                type="number"
+                step="0.1"
+                min="0"
+                value={newPlatform.cpm}
+                onChange={(e) => setNewPlatform({...newPlatform, cpm: parseFloat(e.target.value)})}
+                className="mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Revenue per 1000 impressions</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNewPlatformDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddPlatform}>
+              Add Platform
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default BudgetOptimizer;
