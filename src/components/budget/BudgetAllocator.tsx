@@ -7,10 +7,20 @@ import { Slider } from "@/components/ui/slider"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency, formatNumber, formatPercent } from "@/utils/formatters"
-import { Zap, Loader2, AlertTriangle, Info } from "lucide-react"
+import { Zap, Loader2, AlertTriangle, Info, CheckCircle2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { cn } from "@/lib/utils"
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent } from "@/components/ui/card"
+import { Switch } from "@/components/ui/switch"
 
 interface Platform {
   id: string
@@ -36,22 +46,31 @@ interface BudgetAllocatorProps {
 }
 
 export function BudgetAllocator({
-  totalBudget,
+  totalBudget: initialTotalBudget = 50,
   onTotalBudgetChange,
   initialPlatforms,
-  optimizationTarget = 'roi',
+  optimizationTarget: initialOptimizationTarget = 'roi',
   onOptimizationTargetChange
 }: BudgetAllocatorProps) {
-  const [platforms, setPlatforms] = useState<Platform[]>(initialPlatforms)
+  const [platforms, setPlatforms] = useState<Platform[]>(() => 
+    initialPlatforms.map(p => ({
+      ...p,
+      budget: (initialTotalBudget * p.percentage) / 100
+    }))
+  )
   const [results, setResults] = useState<ExpectedResults>({
     dailyVisits: 0,
     dailyImpressions: 0,
     dailyRevenue: 0,
     roi: 0
   })
+  const [optimizationTarget, setOptimizationTarget] = useState<'roi' | 'traffic' | 'impressions'>(initialOptimizationTarget)
   const [loading, setLoading] = useState(false)
   const [lastUpdated, setLastUpdated] = useState(Date.now())
   const [totalPercentage, setTotalPercentage] = useState(100)
+  const [totalBudget, setTotalBudget] = useState(initialTotalBudget)
+  const [autoAdjust, setAutoAdjust] = useState(false)
+  const [optimizationSuccess, setOptimizationSuccess] = useState(false)
   const { toast } = useToast()
 
   // Update total percentage whenever platforms change
@@ -62,24 +81,90 @@ export function BudgetAllocator({
 
   // Calculate expected results whenever platforms or total budget changes
   useEffect(() => {
-    // Ensure a small delay to make it feel like real calculations
-    const timer = setTimeout(() => {
-      // Simple calculation formula, in a real app this would be more complex
-      const dailyVisits = totalBudget * 200 // 200 visits per $1
-      const dailyImpressions = dailyVisits * 0.4 // 40% acceptance rate
-      const dailyRevenue = dailyImpressions * 0.005 // $0.005 per impression
-      const roi = ((dailyRevenue - totalBudget) / totalBudget) * 100
-  
-      setResults({
-        dailyVisits,
-        dailyImpressions,
-        dailyRevenue,
-        roi
-      })
-    }, 300)
-    
-    return () => clearTimeout(timer)
+    calculateExpectedResults()
   }, [totalBudget, platforms, lastUpdated])
+
+  // Recalculate budget amounts when total budget changes
+  useEffect(() => {
+    if (onTotalBudgetChange) {
+      onTotalBudgetChange(totalBudget)
+    }
+    
+    // Update platform budgets based on new total budget
+    setPlatforms(prev => prev.map(platform => ({
+      ...platform,
+      budget: (totalBudget * platform.percentage) / 100
+    })))
+  }, [totalBudget, onTotalBudgetChange])
+
+  // Notify parent component when optimization target changes
+  useEffect(() => {
+    if (onOptimizationTargetChange) {
+      onOptimizationTargetChange(optimizationTarget)
+    }
+  }, [optimizationTarget, onOptimizationTargetChange])
+
+  const calculateExpectedResults = () => {
+    // Enhanced calculation formula based on optimization target
+    let multiplier = 1;
+    
+    if (optimizationTarget === 'roi') {
+      multiplier = 1.1; // 10% better for ROI optimization
+    } else if (optimizationTarget === 'traffic') {
+      multiplier = 1.2; // 20% better for traffic optimization
+    } else if (optimizationTarget === 'impressions') {
+      multiplier = 1.15; // 15% better for impressions optimization
+    }
+    
+    // Calculate visits based on platform weights
+    const baseVisits = totalBudget * 200 * multiplier; // Base: 200 visits per $1
+    const weightedVisits = platforms.reduce((sum, platform) => {
+      // Different platforms have different efficiency
+      let platformMultiplier = 1;
+      if (platform.id === '9hits') platformMultiplier = 1.2;
+      if (platform.id === 'hitleap') platformMultiplier = 0.9;
+      if (platform.id === 'otohits') platformMultiplier = 1.1;
+      
+      return sum + ((platform.budget / totalBudget) * baseVisits * platformMultiplier);
+    }, 0);
+    
+    // Calculate other metrics
+    const impressionsRate = optimizationTarget === 'impressions' ? 0.45 : 0.4;
+    const dailyImpressions = weightedVisits * impressionsRate;
+    
+    const revenueRate = optimizationTarget === 'roi' ? 0.006 : 0.005;
+    const dailyRevenue = dailyImpressions * revenueRate;
+    
+    const roi = ((dailyRevenue - totalBudget) / totalBudget) * 100;
+    
+    setResults({
+      dailyVisits: weightedVisits,
+      dailyImpressions: dailyImpressions,
+      dailyRevenue: dailyRevenue,
+      roi: roi
+    });
+    
+    // Show optimization success indicator temporarily if results improved
+    if (optimizationSuccess) {
+      setTimeout(() => setOptimizationSuccess(false), 3000);
+    }
+  };
+
+  const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    if (!isNaN(value) && value >= 0) {
+      setTotalBudget(value);
+    }
+  };
+
+  const handleTargetChange = (value: 'roi' | 'traffic' | 'impressions') => {
+    setOptimizationTarget(value);
+    // Recalculate expected results after a short delay
+    setTimeout(() => {
+      calculateExpectedResults();
+      setLastUpdated(Date.now());
+    }, 100);
+  };
 
   const handleDirectPercentageInput = (platformId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value);
@@ -206,6 +291,7 @@ export function BudgetAllocator({
       setPlatforms(optimizedPlatforms)
       // Trigger a rerender of results
       setLastUpdated(Date.now())
+      setOptimizationSuccess(true)
       
       toast({
         title: "Budget Optimized",
@@ -228,6 +314,65 @@ export function BudgetAllocator({
 
   return (
     <div className="space-y-6">
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="w-full sm:w-1/2">
+            <Label htmlFor="total-budget" className="mb-2 block">Daily Budget</Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+              <Input 
+                id="total-budget"
+                type="number" 
+                min="0"
+                step="5"
+                value={totalBudget} 
+                onChange={handleBudgetChange}
+                className="pl-8"
+              />
+            </div>
+          </div>
+          
+          <div className="w-full sm:w-1/2">
+            <Label htmlFor="optimization-target" className="mb-2 block">Optimization Target</Label>
+            <Select 
+              value={optimizationTarget} 
+              onValueChange={handleTargetChange as (value: string) => void}
+            >
+              <SelectTrigger id="optimization-target">
+                <SelectValue placeholder="Select target" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="roi">Maximum ROI</SelectItem>
+                <SelectItem value="traffic">Maximum Traffic</SelectItem>
+                <SelectItem value="impressions">Maximum Impressions</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="auto-adjust"
+            checked={autoAdjust}
+            onCheckedChange={setAutoAdjust}
+          />
+          <Label htmlFor="auto-adjust" className="cursor-pointer">
+            Auto-adjust budget based on performance
+          </Label>
+        </div>
+
+        {optimizationSuccess && (
+          <Alert className="bg-success/10 border-success/30 text-success">
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertTitle>Budget Successfully Optimized</AlertTitle>
+            <AlertDescription>
+              Your budget has been optimized for {optimizationTarget === 'roi' ? 'maximum ROI' : 
+                optimizationTarget === 'traffic' ? 'maximum traffic' : 'maximum impressions'}
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
+      
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium">Platform Allocations</h3>
@@ -250,7 +395,7 @@ export function BudgetAllocator({
                   max="100"
                   step="5"
                   className="w-16 h-8 text-sm"
-                  value={platform.percentage}
+                  value={platform.percentage.toFixed(0)}
                   onChange={(e) => handleDirectPercentageInput(platform.id, e)}
                 />
                 <span className="text-sm font-medium w-20 text-right">
@@ -346,6 +491,22 @@ export function BudgetAllocator({
           </div>
         </div>
       </div>
+      
+      <Card className="bg-muted/5 mt-4">
+        <CardContent className="pt-4">
+          <Alert className="bg-primary/5 border-primary/20">
+            <Info className="h-4 w-4 text-primary" />
+            <AlertTitle>Optimization Tips</AlertTitle>
+            <AlertDescription className="text-sm">
+              <ul className="list-disc pl-4 space-y-1 mt-2">
+                <li>For best ROI, allocate more budget to platforms with higher conversion rates</li>
+                <li>Switch optimization targets to see different allocation strategies</li>
+                <li>Total allocation must equal exactly 100%</li>
+              </ul>
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
       
       <Button 
         onClick={optimizeBudget} 
