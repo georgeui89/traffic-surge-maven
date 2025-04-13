@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { jsPDF } from 'jspdf';
 import { 
@@ -20,6 +19,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { platformData, calculateCPMStrategy } from '@/utils/cpmCalculatorUtils';
 
 interface CpmCalculatorProps {
   className?: string;
@@ -77,10 +77,10 @@ export default function CpmCalculator({ className }: CpmCalculatorProps) {
       id: "otohits", 
       name: "Otohits", 
       enabled: true, 
-      cpm: 0.50, 
-      conversionFactor: 1,
-      visitDuration: 30,
-      acceptanceRate: 40,
+      cpm: platformData["Otohits"].cpm, 
+      conversionFactor: platformData["Otohits"].conversionFactor,
+      visitDuration: platformData["Otohits"].visitLength,
+      acceptanceRate: platformData["Otohits"].acceptanceRate,
       creditsNeeded: 0,
       visitsGenerated: 0,
       validImpressions: 0,
@@ -90,10 +90,10 @@ export default function CpmCalculator({ className }: CpmCalculatorProps) {
       id: "9hits", 
       name: "9Hits", 
       enabled: true, 
-      cpm: 0.43, 
-      conversionFactor: 1,
-      visitDuration: 30,
-      acceptanceRate: 40,
+      cpm: platformData["9Hits"].cpm, 
+      conversionFactor: platformData["9Hits"].conversionFactor,
+      visitDuration: platformData["9Hits"].visitLength,
+      acceptanceRate: platformData["9Hits"].acceptanceRate,
       creditsNeeded: 0,
       visitsGenerated: 0,
       validImpressions: 0,
@@ -103,10 +103,10 @@ export default function CpmCalculator({ className }: CpmCalculatorProps) {
       id: "bighits4u", 
       name: "BigHits4U", 
       enabled: true, 
-      cpm: 0.45, 
-      conversionFactor: 60,
-      visitDuration: 30,
-      acceptanceRate: 30,
+      cpm: platformData["BigHits4U"].cpm, 
+      conversionFactor: platformData["BigHits4U"].conversionFactor,
+      visitDuration: platformData["BigHits4U"].visitLength,
+      acceptanceRate: platformData["BigHits4U"].acceptanceRate,
       creditsNeeded: 0,
       visitsGenerated: 0,
       validImpressions: 0,
@@ -114,12 +114,12 @@ export default function CpmCalculator({ className }: CpmCalculatorProps) {
     },
     { 
       id: "hitleap", 
-      name: "HitLeap", 
+      name: "Hitleap", 
       enabled: true, 
-      cpm: 0.49, 
-      conversionFactor: 1,
-      visitDuration: 30,
-      acceptanceRate: 35,
+      cpm: platformData["Hitleap"].cpm, 
+      conversionFactor: platformData["Hitleap"].conversionFactor,
+      visitDuration: platformData["Hitleap"].visitLength,
+      acceptanceRate: platformData["Hitleap"].acceptanceRate,
       creditsNeeded: 0,
       visitsGenerated: 0,
       validImpressions: 0,
@@ -129,10 +129,10 @@ export default function CpmCalculator({ className }: CpmCalculatorProps) {
       id: "webhit", 
       name: "Webhit.net", 
       enabled: true, 
-      cpm: 0.47, 
-      conversionFactor: 1,
-      visitDuration: 30,
-      acceptanceRate: 30,
+      cpm: platformData["Webhit.net"].cpm, 
+      conversionFactor: platformData["Webhit.net"].conversionFactor,
+      visitDuration: platformData["Webhit.net"].visitLength,
+      acceptanceRate: platformData["Webhit.net"].acceptanceRate,
       creditsNeeded: 0,
       visitsGenerated: 0,
       validImpressions: 0,
@@ -175,75 +175,53 @@ export default function CpmCalculator({ className }: CpmCalculatorProps) {
       return;
     }
 
-    // Calculate how much revenue each platform should contribute
-    let revenuePerPlatform = revenueGoal / enabledPlatforms.length;
-    
-    // If using uneven distribution, adjust revenue per platform based on weights
-    if (useUnevenDistribution) {
-      const totalWeight = enabledPlatforms.reduce((sum, p) => sum + platformWeights[p.id], 0);
-      
-      if (totalWeight > 0) {
-        enabledPlatforms.forEach(p => {
-          const weight = platformWeights[p.id];
-          const platformRevenue = (weight / totalWeight) * revenueGoal;
-          
-          // Calculate metrics for this platform
-          const creditsNeeded = calculateNeededCredits(p, platformRevenue);
-          const visitsGenerated = creditsNeeded * p.conversionFactor / p.visitDuration;
-          const validImpressions = visitsGenerated * (p.acceptanceRate / 100);
-          
-          // Update platform with calculated values
-          setPlatforms(prev => prev.map(platform => 
-            platform.id === p.id ? {
-              ...platform,
-              creditsNeeded,
-              visitsGenerated,
-              validImpressions,
-              revenue: platformRevenue
-            } : platform
-          ));
-        });
-      }
-    } 
-    // Even distribution
-    else {
-      enabledPlatforms.forEach(p => {
-        // Calculate metrics for this platform
-        const creditsNeeded = calculateNeededCredits(p, revenuePerPlatform);
-        const visitsGenerated = creditsNeeded * p.conversionFactor / p.visitDuration;
-        const validImpressions = visitsGenerated * (p.acceptanceRate / 100);
-        
-        // Update platform with calculated values
-        setPlatforms(prev => prev.map(platform => 
-          platform.id === p.id ? {
-            ...platform,
-            creditsNeeded,
-            visitsGenerated,
-            validImpressions,
-            revenue: revenuePerPlatform
-          } : platform
-        ));
-      });
-    }
-    
-    // Calculate total metrics across all platforms
-    const updatedPlatforms = platforms.filter(p => p.enabled);
-    
-    const totalVisits = updatedPlatforms.reduce((sum, p) => sum + p.visitsGenerated, 0);
-    const totalValidImpressions = updatedPlatforms.reduce((sum, p) => sum + p.validImpressions, 0);
-    const totalRevenue = updatedPlatforms.reduce((sum, p) => sum + p.revenue, 0);
-    
-    // Calculate weighted average acceptance rate
-    const totalAcceptanceRateSum = updatedPlatforms.reduce((sum, p) => sum + p.acceptanceRate, 0);
-    const avgAcceptanceRate = totalAcceptanceRateSum / (updatedPlatforms.length || 1);
-    
-    setDashboardMetrics({
-      totalVisits,
-      validImpressions: totalValidImpressions,
-      revenue: totalRevenue,
-      acceptanceRate: avgAcceptanceRate
+    // Use the CPM strategy calculation
+    const platformNames = enabledPlatforms.map(p => {
+      // Map internal platform IDs to platformData keys
+      if (p.id === "otohits") return "Otohits";
+      if (p.id === "9hits") return "9Hits";
+      if (p.id === "bighits4u") return "BigHits4U";
+      if (p.id === "hitleap") return "Hitleap";
+      if (p.id === "webhit") return "Webhit.net";
+      return p.name;
     });
-  }, [platforms, revenueGoal, timeOnSite, useUnevenDistribution, platformWeights]);
+
+    // Calculate strategy based on enabled platforms
+    const strategy = calculateCPMStrategy(platformNames, revenueGoal);
+    
+    // Update platforms with calculated values
+    const updatedPlatforms = platforms.map(platform => {
+      const result = strategy.results.find(r => {
+        if (platform.id === "otohits" && r.platform === "Otohits") return true;
+        if (platform.id === "9hits" && r.platform === "9Hits") return true;
+        if (platform.id === "bighits4u" && r.platform === "BigHits4U") return true;
+        if (platform.id === "hitleap" && r.platform === "Hitleap") return true;
+        if (platform.id === "webhit" && r.platform === "Webhit.net") return true;
+        return false;
+      });
+
+      if (result && platform.enabled) {
+        return {
+          ...platform,
+          creditsNeeded: parseFloat(result.creditsNeeded),
+          visitsGenerated: result.visits,
+          validImpressions: result.validImpressions,
+          revenue: parseFloat(result.revenue)
+        };
+      }
+      return platform;
+    });
+
+    setPlatforms(updatedPlatforms);
+    
+    // Update dashboard metrics
+    setDashboardMetrics({
+      totalVisits: parseInt(strategy.totals.visits.toString()),
+      validImpressions: parseInt(strategy.totals.validImpressions.toString()),
+      revenue: parseFloat(strategy.totals.revenue),
+      acceptanceRate: parseFloat(strategy.totals.acceptanceRate)
+    });
+  }, [platforms.map(p => p.enabled).join(','), revenueGoal, timeOnSite]);
 
   // Calculate percentage change between current and previous metrics
   const calculatePercentageChange = (current: number, previous: number) => {
