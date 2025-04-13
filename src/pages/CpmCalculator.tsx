@@ -1,17 +1,15 @@
 
 import { useState } from 'react';
-import PageTransition from '@/components/layout/PageTransition';
+import { PageTransition } from '@/components/layout/PageTransition';
 import CpmCalculator from '@/components/calculator/CpmCalculator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { ParticleBackground } from '@/components/ui/particle-background';
 
 const CpmCalculatorPage = () => {
   const [activeTab, setActiveTab] = useState('calculator');
 
   return (
     <PageTransition>
-      <ParticleBackground />
       <div className="page-container">
         <div className="page-header">
           <div>
