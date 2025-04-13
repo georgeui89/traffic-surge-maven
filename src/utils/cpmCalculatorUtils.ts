@@ -43,6 +43,24 @@ export const platformData = {
   }
 };
 
+// Type for platform data
+export interface PlatformData {
+  id: string;
+  name: string;
+  enabled: boolean;
+  cpm: number;
+  conversionFactor: number;
+  visitDuration: number;
+  acceptanceRate: number;
+  creditsNeeded: number;
+  visitsGenerated: number;
+  validImpressions: number;
+  revenue: number;
+  efficiency: number;
+  color: string;
+  timeEstimate: string;
+}
+
 // Format seconds into human-readable time
 export function formatTime(seconds: number): string {
   const hours = Math.floor(seconds / 3600);
