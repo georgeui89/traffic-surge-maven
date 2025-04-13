@@ -30,7 +30,7 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
   calculatePercentageChange 
 }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
       <Card className="bg-muted/5 border">
         <CardContent className="p-4">
           <div className="flex justify-between items-start">
@@ -80,7 +80,7 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm text-muted-foreground">Revenue</p>
-              <h3 className="text-2xl font-bold">
+              <h3 className="text-2xl font-bold text-green-500">
                 ${metrics.revenue.toFixed(2)}
               </h3>
             </div>

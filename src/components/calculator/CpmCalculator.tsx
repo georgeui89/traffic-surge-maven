@@ -1,40 +1,16 @@
 
 import { useState, useEffect } from 'react';
 import { jsPDF } from 'jspdf';
-import { 
-  Calculator, Percent, DollarSign, HelpCircle, 
-  ExternalLink, Clock, Activity, BarChart2, 
-  TrendingUp, Download, Target, AlertTriangle, 
-  Check, ChevronDown, ChevronUp, Info, Zap,
-  PieChart, Settings, Globe
-} from 'lucide-react';
+import { Calculator, Download } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { 
   platformData, 
   calculateCPMStrategy,
-  distributeRevenue, 
-  calculateCreditsForRevenue,
-  calculateRevenueFromCredits,
-  formatTime,
   PlatformData
 } from '@/utils/cpmCalculatorUtils';
 import { PlatformSelector } from './PlatformSelector';
@@ -43,6 +19,8 @@ import { PlatformResultsTable } from './PlatformResultsTable';
 import { OptimizationTips } from './OptimizationTips';
 import { DistributionMethodSelector } from './DistributionMethodSelector';
 import { RevenueCalculator } from './RevenueCalculator';
+import { SimpleCalculator } from './SimpleCalculator';
+import { CpmRatesPanel } from './CpmRatesPanel';
 
 interface CpmCalculatorProps {
   className?: string;
@@ -60,14 +38,16 @@ interface DashboardMetrics {
 
 // Distribution method type
 type DistributionMethod = 'equal' | 'weighted' | 'optimal' | 'manual';
+type CalculatorMode = 'simple' | 'advanced';
 
 export default function CpmCalculator({ className }: CpmCalculatorProps) {
   const { toast } = useToast();
+  const [calculatorMode, setCalculatorMode] = useState<CalculatorMode>('simple');
   const [activeTab, setActiveTab] = useState<string>('calculate-credits');
   const [revenueGoal, setRevenueGoal] = useState<number>(50);
-  const [timeOnSite, setTimeOnSite] = useState<number>(30);
   const [distributionMethod, setDistributionMethod] = useState<DistributionMethod>('equal');
   const [useUnevenDistribution, setUseUnevenDistribution] = useState<boolean>(false);
+  const [selectedPlatform, setSelectedPlatform] = useState<string>("");
 
   // Dashboard metrics
   const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics>({
@@ -127,13 +107,6 @@ export default function CpmCalculator({ className }: CpmCalculatorProps) {
   const togglePlatform = (platformId: string) => {
     setPlatforms(prev => prev.map(p => 
       p.id === platformId ? { ...p, enabled: !p.enabled } : p
-    ));
-  };
-
-  // Update platform parameters
-  const updatePlatform = (platformId: string, field: string, value: number) => {
-    setPlatforms(prev => prev.map(p => 
-      p.id === platformId ? { ...p, [field]: value } : p
     ));
   };
 
@@ -238,56 +211,6 @@ export default function CpmCalculator({ className }: CpmCalculatorProps) {
     doc.text(`Total Credits Required: ${Math.round(dashboardMetrics.totalCredits).toLocaleString()}`, 25, 95);
     doc.text(`Estimated Time: ${dashboardMetrics.timeEstimate}`, 25, 105);
     
-    // Add platform details
-    doc.setFontSize(14);
-    doc.text('Platform Details', 20, 125);
-    
-    let y = 135;
-    platforms.filter(p => p.enabled).forEach((platform) => {
-      // If we're about to go off the page, add a new page
-      if (y > 250) {
-        doc.addPage();
-        y = 20;
-      }
-      
-      doc.setFontSize(12);
-      doc.text(`Platform: ${platform.name}`, 25, y);
-      doc.text(`CPM Rate: $${platform.cpm.toFixed(2)}`, 25, y + 10);
-      doc.text(`Visit Duration: ${platform.visitDuration}s`, 25, y + 20);
-      doc.text(`Acceptance Rate: ${platform.acceptanceRate}%`, 25, y + 30);
-      doc.text(`Required Credits: ${Math.round(platform.creditsNeeded).toLocaleString()}`, 25, y + 40);
-      doc.text(`Revenue Contribution: $${platform.revenue.toFixed(2)}`, 25, y + 50);
-      doc.text(`Estimated Time: ${platform.timeEstimate}`, 25, y + 60);
-      
-      y += 80;
-    });
-    
-    // Add distribution method information
-    doc.addPage();
-    doc.setFontSize(14);
-    doc.text('Distribution Strategy', 20, 20);
-    doc.setFontSize(12);
-    doc.text(`Method: ${useUnevenDistribution ? 'Custom Distribution' : distributionMethod}`, 25, 30);
-    
-    let distributionY = 40;
-    if (useUnevenDistribution) {
-      doc.text('Custom Percentages:', 25, distributionY);
-      distributionY += 10;
-      platforms.filter(p => p.enabled).forEach(platform => {
-        doc.text(`${platform.name}: ${customDistribution[platform.name] || 0}%`, 30, distributionY);
-        distributionY += 10;
-      });
-    }
-    
-    // Add optimization tips
-    doc.setFontSize(14);
-    doc.text('Optimization Tips', 20, distributionY + 20);
-    doc.setFontSize(10);
-    doc.text('1. Increase time on site to improve acceptance rates', 25, distributionY + 30);
-    doc.text('2. Focus on high-value regions for better CPM rates', 25, distributionY + 40);
-    doc.text('3. Distribute credits across platforms based on efficiency', 25, distributionY + 50);
-    doc.text('4. Optimize for mobile traffic which typically has higher CPM', 25, distributionY + 60);
-    
     // Save the PDF
     doc.save('CPM_Strategy_Report.pdf');
     
@@ -301,7 +224,6 @@ export default function CpmCalculator({ className }: CpmCalculatorProps) {
   // Reset all settings
   const resetSettings = () => {
     setRevenueGoal(50);
-    setTimeOnSite(30);
     setDistributionMethod('equal');
     setUseUnevenDistribution(false);
     
@@ -345,16 +267,16 @@ export default function CpmCalculator({ className }: CpmCalculatorProps) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Calculator className="h-5 w-5" /> 
-              Ultimate CPM Strategy Calculator
+              CPM Strategy Calculator
             </CardTitle>
             <CardDescription>
-              Plan and optimize your autosurf traffic strategy across multiple platforms
+              Optimize your traffic strategy by estimating revenue and required credits
             </CardDescription>
           </div>
-          <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-[400px]">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="calculate-credits">Plan for Revenue Goal</TabsTrigger>
-              <TabsTrigger value="calculate-revenue">Calculate Revenue</TabsTrigger>
+          <Tabs defaultValue={calculatorMode} onValueChange={(value) => setCalculatorMode(value as CalculatorMode)} className="w-auto">
+            <TabsList className="grid w-[250px] grid-cols-2">
+              <TabsTrigger value="simple">Simple Mode</TabsTrigger>
+              <TabsTrigger value="advanced">Advanced Mode</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -362,76 +284,99 @@ export default function CpmCalculator({ className }: CpmCalculatorProps) {
       
       <CardContent>
         <div className="grid gap-6">
-          {/* Dashboard Metrics */}
-          <MetricsDashboard 
-            metrics={dashboardMetrics} 
-            prevMetrics={prevMetrics} 
-            calculatePercentageChange={calculatePercentageChange} 
-          />
+          <TabsContent value="simple" className="mt-0">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <SimpleCalculator platforms={platforms} togglePlatform={togglePlatform} />
+              </div>
+              <div>
+                <CpmRatesPanel platforms={platforms} />
+              </div>
+            </div>
+            <Separator className="my-6" />
+            <OptimizationTips />
+          </TabsContent>
+          
+          <TabsContent value="advanced" className="space-y-6 mt-0">
+            {/* Dashboard Metrics */}
+            <MetricsDashboard 
+              metrics={dashboardMetrics} 
+              prevMetrics={prevMetrics} 
+              calculatePercentageChange={calculatePercentageChange} 
+            />
 
-          <TabsContent value="calculate-credits" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="revenue-goal">Revenue Goal ($)</Label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      id="revenue-goal" 
-                      type="number" 
-                      min="0" 
-                      step="0.01" 
-                      value={revenueGoal}
-                      onChange={(e) => setRevenueGoal(parseFloat(e.target.value) || 0)}
-                      className="pl-9"
-                    />
+            <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-[400px]">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="calculate-credits">Plan for Revenue Goal</TabsTrigger>
+                <TabsTrigger value="calculate-revenue">Calculate Revenue</TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <TabsContent value="calculate-credits" className="space-y-6 pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium">Revenue Goal ($)</label>
+                    <div className="relative">
+                      <Input 
+                        id="revenue-goal" 
+                        type="number" 
+                        min="0" 
+                        step="0.01" 
+                        value={revenueGoal}
+                        onChange={(e) => setRevenueGoal(parseFloat(e.target.value) || 0)}
+                        className="pl-9"
+                      />
+                    </div>
                   </div>
+                  
+                  <DistributionMethodSelector
+                    distributionMethod={distributionMethod}
+                    useUnevenDistribution={useUnevenDistribution}
+                    setDistributionMethod={setDistributionMethod}
+                    setUseUnevenDistribution={setUseUnevenDistribution}
+                    platforms={platforms.filter(p => p.enabled)}
+                    customDistribution={customDistribution}
+                    updatePlatformDistribution={updatePlatformDistribution}
+                  />
                 </div>
                 
-                <DistributionMethodSelector
-                  distributionMethod={distributionMethod}
-                  useUnevenDistribution={useUnevenDistribution}
-                  setDistributionMethod={setDistributionMethod}
-                  setUseUnevenDistribution={setUseUnevenDistribution}
-                  platforms={platforms.filter(p => p.enabled)}
-                  customDistribution={customDistribution}
-                  updatePlatformDistribution={updatePlatformDistribution}
+                <PlatformSelector
+                  platforms={platforms}
+                  togglePlatform={togglePlatform}
+                  selectedPlatform={selectedPlatform}
+                  setSelectedPlatform={setSelectedPlatform}
                 />
               </div>
               
-              <PlatformSelector
-                platforms={platforms}
-                togglePlatform={togglePlatform}
-              />
-            </div>
+              <Separator />
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-base font-medium">Platform Results</h3>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={resetSettings}>
+                      Reset
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={generateReport}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Export Report
+                    </Button>
+                  </div>
+                </div>
+                
+                <PlatformResultsTable platforms={platforms.filter(p => p.enabled)} dashboardMetrics={dashboardMetrics} />
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="calculate-revenue" className="space-y-6 pt-4">
+              <RevenueCalculator />
+            </TabsContent>
             
             <Separator />
             
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-base font-medium">Platform Results</h3>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={resetSettings}>
-                    Reset
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={generateReport}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Report
-                  </Button>
-                </div>
-              </div>
-              
-              <PlatformResultsTable platforms={platforms.filter(p => p.enabled)} dashboardMetrics={dashboardMetrics} />
-            </div>
+            <OptimizationTips />
           </TabsContent>
-          
-          <TabsContent value="calculate-revenue" className="space-y-6">
-            <RevenueCalculator />
-          </TabsContent>
-          
-          <Separator />
-          
-          <OptimizationTips />
         </div>
       </CardContent>
       
