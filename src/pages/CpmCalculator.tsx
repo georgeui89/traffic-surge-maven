@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { PageTransition } from '@/components/layout/PageTransition';
+import PageTransition from '@/components/layout/PageTransition';
 import CpmCalculator from '@/components/calculator/CpmCalculator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
