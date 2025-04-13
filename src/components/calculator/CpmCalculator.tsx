@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { jsPDF } from 'jspdf';
 import { 
@@ -20,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { platformData, calculateCPMStrategy } from '@/utils/cpmCalculatorUtils';
+import { InfoCircle } from '@/components/ui/info-circle';
 
 interface CpmCalculatorProps {
   className?: string;
@@ -203,10 +205,10 @@ export default function CpmCalculator({ className }: CpmCalculatorProps) {
       if (result && platform.enabled) {
         return {
           ...platform,
-          creditsNeeded: parseFloat(result.creditsNeeded),
+          creditsNeeded: parseFloat(result.creditsNeeded as string),
           visitsGenerated: result.visits,
           validImpressions: result.validImpressions,
-          revenue: parseFloat(result.revenue)
+          revenue: parseFloat(result.revenue as string)
         };
       }
       return platform;
@@ -218,8 +220,8 @@ export default function CpmCalculator({ className }: CpmCalculatorProps) {
     setDashboardMetrics({
       totalVisits: parseInt(strategy.totals.visits.toString()),
       validImpressions: parseInt(strategy.totals.validImpressions.toString()),
-      revenue: parseFloat(strategy.totals.revenue),
-      acceptanceRate: parseFloat(strategy.totals.acceptanceRate)
+      revenue: parseFloat(strategy.totals.revenue.toString()),
+      acceptanceRate: parseFloat(strategy.totals.acceptanceRate.toString())
     });
   }, [platforms.map(p => p.enabled).join(','), revenueGoal, timeOnSite]);
 

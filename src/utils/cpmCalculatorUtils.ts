@@ -10,7 +10,7 @@ export const platformData = {
 
 // Function to calculate credits and metrics for a platform
 export function calculatePlatformMetrics(platform: string, revenueGoal: number) {
-  const data = platformData[platform];
+  const data = platformData[platform as keyof typeof platformData];
   if (!data || revenueGoal <= 0) {
     return { credits: 0, revenue: 0, visits: 0, validImpressions: 0 };
   }
