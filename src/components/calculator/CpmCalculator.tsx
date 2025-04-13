@@ -784,7 +784,7 @@ export default function CpmCalculator({ className }: CpmCalculatorProps) {
                 </Card>
                 
                 <Alert className="bg-primary/5 border-primary/20">
-                  <InfoCircle className="h-4 w-4 text-primary" />
+                  <Info className="h-4 w-4 text-primary" />
                   <AlertDescription>
                     Efficiency rating compares how many credits each platform requires to generate $1 in revenue. Higher efficiency means fewer credits needed.
                   </AlertDescription>
