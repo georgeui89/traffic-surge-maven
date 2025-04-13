@@ -274,23 +274,24 @@ export default function CpmCalculator({ className }: CpmCalculatorProps) {
     doc.setFontSize(12);
     doc.text(`Method: ${useUnevenDistribution ? 'Custom Distribution' : distributionMethod}`, 25, 30);
     
+    let distributionY = 40;
     if (useUnevenDistribution) {
-      doc.text('Custom Percentages:', 25, 40);
-      let customY = 50;
+      doc.text('Custom Percentages:', 25, distributionY);
+      distributionY += 10;
       platforms.filter(p => p.enabled).forEach(platform => {
-        doc.text(`${platform.name}: ${customDistribution[platform.name] || 0}%`, 30, customY);
-        customY += 10;
+        doc.text(`${platform.name}: ${customDistribution[platform.name] || 0}%`, 30, distributionY);
+        distributionY += 10;
       });
     }
     
     // Add optimization tips
     doc.setFontSize(14);
-    doc.text('Optimization Tips', 20, customY ? customY + 20 : 60);
+    doc.text('Optimization Tips', 20, distributionY + 20);
     doc.setFontSize(10);
-    doc.text('1. Increase time on site to improve acceptance rates', 25, customY ? customY + 30 : 70);
-    doc.text('2. Focus on high-value regions for better CPM rates', 25, customY ? customY + 40 : 80);
-    doc.text('3. Distribute credits across platforms based on efficiency', 25, customY ? customY + 50 : 90);
-    doc.text('4. Optimize for mobile traffic which typically has higher CPM', 25, customY ? customY + 60 : 100);
+    doc.text('1. Increase time on site to improve acceptance rates', 25, distributionY + 30);
+    doc.text('2. Focus on high-value regions for better CPM rates', 25, distributionY + 40);
+    doc.text('3. Distribute credits across platforms based on efficiency', 25, distributionY + 50);
+    doc.text('4. Optimize for mobile traffic which typically has higher CPM', 25, distributionY + 60);
     
     // Save the PDF
     doc.save('CPM_Strategy_Report.pdf');
