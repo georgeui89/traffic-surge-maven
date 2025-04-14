@@ -1,9 +1,9 @@
 
 import { Helmet } from "react-helmet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import BudgetAllocator from "@/components/budget/BudgetAllocator";
-import ScenarioPlanner from "@/components/budget/ScenarioPlanner";
-import WhatIfAnalysis from "@/components/budget/WhatIfAnalysis";
+import { BudgetAllocator } from "@/components/budget/BudgetAllocator";
+import { ScenarioPlanner } from "@/components/budget/ScenarioPlanner";
+import { WhatIfAnalysis } from "@/components/budget/WhatIfAnalysis";
 import RevenueBudgetOptimizer from "@/components/budget/RevenueBudgetOptimizer";
 
 export default function BudgetOptimizer() {
