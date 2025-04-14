@@ -6,6 +6,7 @@ import { ScenarioPlanner } from "@/components/budget/ScenarioPlanner";
 import { WhatIfAnalysis } from "@/components/budget/WhatIfAnalysis";
 import RevenueBudgetOptimizer from "@/components/budget/RevenueBudgetOptimizer";
 import { useState } from "react";
+import { MultiplePlatformOptimizer } from "@/components/budget/MultiplePlatformOptimizer";
 
 // Sample platform data for WhatIfAnalysis component
 const samplePlatforms = [
@@ -16,7 +17,7 @@ const samplePlatforms = [
     amount: 20,
     color: "blue-500",
     costPerVisit: 0.0002,
-    acceptanceRate: 0.85,
+    acceptanceRate: 85,
     cpm: 1.2
   },
   {
@@ -26,7 +27,7 @@ const samplePlatforms = [
     amount: 12.5,
     color: "green-500",
     costPerVisit: 0.00015,
-    acceptanceRate: 0.7,
+    acceptanceRate: 70,
     cpm: 0.9
   },
   {
@@ -36,7 +37,7 @@ const samplePlatforms = [
     amount: 10,
     color: "yellow-500",
     costPerVisit: 0.00025,
-    acceptanceRate: 0.9,
+    acceptanceRate: 90,
     cpm: 1.5
   },
   {
@@ -46,7 +47,7 @@ const samplePlatforms = [
     amount: 7.5,
     color: "purple-500",
     costPerVisit: 0.0003,
-    acceptanceRate: 0.8,
+    acceptanceRate: 80,
     cpm: 1.8
   }
 ];
@@ -83,13 +84,18 @@ export default function BudgetOptimizer() {
         </div>
       </div>
 
-      <Tabs defaultValue="optimizer" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="multi-platform" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="multi-platform">Multi-Platform Optimizer</TabsTrigger>
           <TabsTrigger value="allocator">Budget Allocator</TabsTrigger>
           <TabsTrigger value="optimizer">Revenue Optimizer</TabsTrigger>
           <TabsTrigger value="scenarios">Scenario Planner</TabsTrigger>
           <TabsTrigger value="whatif">What-If Analysis</TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="multi-platform" className="space-y-4">
+          <MultiplePlatformOptimizer initialPlatforms={platforms} />
+        </TabsContent>
         
         <TabsContent value="allocator" className="space-y-4">
           <BudgetAllocator 
