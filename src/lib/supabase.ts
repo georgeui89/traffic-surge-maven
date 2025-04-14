@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize the Supabase client
@@ -13,6 +12,10 @@ export interface PlatformData {
   name: string;
   url: string;
   status: string;
+  cpm?: number;           // Cost per thousand impressions (revenue potential)
+  costPerCredit?: number; // Cost per credit used
+  acceptanceRate?: number; // Rate at which visits are accepted as valid impressions
+  conversionFactor?: number; // Conversion factor for platform-specific metrics
 }
 
 export interface RdpData {
