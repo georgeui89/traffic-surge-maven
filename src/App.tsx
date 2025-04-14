@@ -26,88 +26,30 @@ function App() {
   return (
     <HelmetProvider>
       <Routes>
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={
+        <Route path="/" element={
+          <MainLayout>
             <Suspense fallback={<div>Loading...</div>}>
-              <Index />
+              <Routes>
+                <Route index element={<Index />} />
+                <Route path="features" element={<Features />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="campaigns" element={<Campaigns />} />
+                <Route path="platforms" element={<Platforms />} />
+                <Route path="analytics" element={<TrafficAnalytics />} />
+                <Route path="budget-optimizer" element={<BudgetOptimizer />} />
+                <Route path="cpm-calculator" element={<CpmCalculator />} />
+                <Route path="automation" element={<Automation />} />
+                <Route path="rdp-management" element={<RdpManagement />} />
+                <Route path="rdp-scaler" element={<RdpScaler />} />
+                <Route path="script-lab" element={<ScriptLab />} />
+                <Route path="reporting" element={<Reporting />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="help-center" element={<HelpCenter />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
             </Suspense>
-          } />
-          <Route path="features" element={
-            <Suspense fallback={<div>Loading...</div>}>
-              <Features />
-            </Suspense>
-          } />
-          <Route path="dashboard" element={
-            <Suspense fallback={<div>Loading...</div>}>
-              <Dashboard />
-            </Suspense>
-          } />
-          <Route path="campaigns" element={
-            <Suspense fallback={<div>Loading...</div>}>
-              <Campaigns />
-            </Suspense>
-          } />
-          <Route path="platforms" element={
-            <Suspense fallback={<div>Loading...</div>}>
-              <Platforms />
-            </Suspense>
-          } />
-          <Route path="analytics" element={
-            <Suspense fallback={<div>Loading...</div>}>
-              <TrafficAnalytics />
-            </Suspense>
-          } />
-          <Route path="budget-optimizer" element={
-            <Suspense fallback={<div>Loading...</div>}>
-              <BudgetOptimizer />
-            </Suspense>
-          } />
-          <Route path="cpm-calculator" element={
-            <Suspense fallback={<div>Loading...</div>}>
-              <CpmCalculator />
-            </Suspense>
-          } />
-          <Route path="automation" element={
-            <Suspense fallback={<div>Loading...</div>}>
-              <Automation />
-            </Suspense>
-          } />
-          <Route path="rdp-management" element={
-            <Suspense fallback={<div>Loading...</div>}>
-              <RdpManagement />
-            </Suspense>
-          } />
-          <Route path="rdp-scaler" element={
-            <Suspense fallback={<div>Loading...</div>}>
-              <RdpScaler />
-            </Suspense>
-          } />
-          <Route path="script-lab" element={
-            <Suspense fallback={<div>Loading...</div>}>
-              <ScriptLab />
-            </Suspense>
-          } />
-          <Route path="reporting" element={
-            <Suspense fallback={<div>Loading...</div>}>
-              <Reporting />
-            </Suspense>
-          } />
-          <Route path="settings" element={
-            <Suspense fallback={<div>Loading...</div>}>
-              <Settings />
-            </Suspense>
-          } />
-          <Route path="help-center" element={
-            <Suspense fallback={<div>Loading...</div>}>
-              <HelpCenter />
-            </Suspense>
-          } />
-          <Route path="*" element={
-            <Suspense fallback={<div>Loading...</div>}>
-              <NotFound />
-            </Suspense>
-          } />
-        </Route>
+          </MainLayout>
+        } />
       </Routes>
     </HelmetProvider>
   );
