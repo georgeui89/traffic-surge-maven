@@ -82,7 +82,7 @@ export function TrafficOptimizationSuggestions({ initialSuggestions }: TrafficOp
       case 'negative':
         return 'destructive'
       case 'neutral':
-        return 'secondary'
+        return 'secondary' // Changed from 'warning' to 'secondary'
     }
   }
   
@@ -91,7 +91,7 @@ export function TrafficOptimizationSuggestions({ initialSuggestions }: TrafficOp
       case 'easy':
         return 'success'
       case 'medium':
-        return 'warning'
+        return 'secondary' // Changed from 'warning' to 'secondary'
       case 'hard':
         return 'destructive'
     }
