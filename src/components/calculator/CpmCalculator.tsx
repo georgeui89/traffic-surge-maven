@@ -1,11 +1,10 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { jsPDF } from 'jspdf';
 import { 
   Calculator, Percent, DollarSign, HelpCircle, 
   ExternalLink, Clock, Activity, BarChart2, 
   TrendingUp, Download, Target, AlertTriangle, 
-  Check, ChevronDown, ChevronUp
+  Check, ChevronDown, ChevronUp, Info
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -785,7 +784,7 @@ export default function CpmCalculator({ className }: CpmCalculatorProps) {
                 </Card>
                 
                 <Alert className="bg-primary/5 border-primary/20">
-                  <InfoCircle className="h-4 w-4 text-primary" />
+                  <Info className="h-4 w-4 text-primary" />
                   <AlertDescription>
                     Efficiency rating compares how many credits each platform requires to generate $1 in revenue. Higher efficiency means fewer credits needed.
                   </AlertDescription>
