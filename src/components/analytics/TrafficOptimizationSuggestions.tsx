@@ -82,7 +82,7 @@ export function TrafficOptimizationSuggestions({ initialSuggestions }: TrafficOp
       case 'negative':
         return 'destructive'
       case 'neutral':
-        return 'secondary' // Changed from 'warning' to 'secondary'
+        return 'secondary'
     }
   }
   
@@ -91,7 +91,7 @@ export function TrafficOptimizationSuggestions({ initialSuggestions }: TrafficOp
       case 'easy':
         return 'success'
       case 'medium':
-        return 'secondary' // Changed from 'warning' to 'secondary'
+        return 'secondary'
       case 'hard':
         return 'destructive'
     }
@@ -136,10 +136,14 @@ export function TrafficOptimizationSuggestions({ initialSuggestions }: TrafficOp
                   <h3 className="text-sm font-medium mb-1">{suggestion.title}</h3>
                   <p className="text-sm text-muted-foreground mb-2">{suggestion.description}</p>
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant={getImpactBadgeVariant(suggestion.impactType) as "success" | "destructive" | "secondary"}>
+                    <Badge 
+                      variant={getImpactBadgeVariant(suggestion.impactType) as "success" | "destructive" | "secondary"}
+                    >
                       Impact: {suggestion.impact}
                     </Badge>
-                    <Badge variant={getComplexityBadgeVariant(suggestion.complexity) as "success" | "warning" | "destructive"}>
+                    <Badge 
+                      variant={getComplexityBadgeVariant(suggestion.complexity) as "success" | "destructive" | "secondary"}
+                    >
                       Complexity: {suggestion.complexity}
                     </Badge>
                   </div>
