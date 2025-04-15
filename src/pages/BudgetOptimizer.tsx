@@ -1,143 +1,227 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  DollarSign, BarChart2, Zap, TrendingUp, Download, 
-  Calculator, RefreshCw, Check, Loader2, AlertTriangle, 
-  Info, Plus, PieChart, Save, Upload, FileUp
-} from 'lucide-react';
+import { DollarSign, BarChart2, Zap, TrendingUp, Download, Calculator, RefreshCw, Check, Loader2, AlertTriangle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter,
-  DialogHeader,
-  DialogTitle 
-} from "@/components/ui/dialog";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from '@/hooks/use-toast';
 import { formatCurrency, formatNumber, formatPercent } from '@/utils/formatters';
 import { cn } from '@/lib/utils';
-import { 
-  initialPlatforms, 
-  calculateExpectedResults, 
-  optimizeBudgetAllocation,
-  generateRecommendation,
-  exportToCsv,
-  getRandomColor, 
-  Platform, 
-  ExpectedResults, 
-  Recommendation
-} from '@/utils/budgetUtils';
-import { PlatformCard } from '@/components/budget/PlatformCard';
-import { BudgetChart } from '@/components/budget/BudgetChart';
-import { WhatIfAnalysis } from '@/components/budget/WhatIfAnalysis';
+
+// Define the platform allocation type for TypeScript
+interface PlatformAllocation {
+  id: string;
+  name: string;
+  percentage: number;
+  amount: number;
+  color: string;
+}
+
+// Define the expected results type
+interface ExpectedResults {
+  visits: number;
+  impressions: number;
+  revenue: number;
+  roi: number;
+}
+
+// Define the recommendation type
+interface Recommendation {
+  id: string;
+  changes: {
+    description: string;
+    impact: string;
+    impactType: 'success' | 'warning';
+  }[];
+  allocations: {
+    [key: string]: number;
+  }
+}
+
+const BudgetDistributionCard = ({ data }: { data: PlatformAllocation[] }) => {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base font-medium">Current Budget Distribution</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {data.map((platform) => (
+            <div key={platform.id} className="space-y-2">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <div className={`w-3 h-3 rounded-full bg-${platform.color} mr-2`}></div>
+                  <span className="text-sm font-medium">{platform.name}</span>
+                </div>
+                <span className="text-sm font-medium">{formatCurrency(platform.amount)}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Progress value={platform.percentage} className="h-2" />
+                <span className="text-xs text-muted-foreground w-8">{platform.percentage.toFixed(0)}%</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const RecommendationCard = ({ recommendation, onApply, isLoading }: { 
+  recommendation: Recommendation | null, 
+  onApply: () => void,
+  isLoading: boolean
+}) => {
+  if (!recommendation) return null;
+  
+  return (
+    <Card className="border-primary/20">
+      <CardHeader className="bg-primary/5">
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle className="text-base font-medium">AI Budget Recommendation</CardTitle>
+            <CardDescription>Based on performance analysis</CardDescription>
+          </div>
+          <div className="bg-primary/10 p-1.5 rounded-full">
+            <Zap className="h-5 w-5 text-primary" />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-4">
+        <div className="space-y-3">
+          {recommendation.changes.map((change, index) => (
+            <div key={index} className="flex justify-between items-center">
+              <span className="text-sm">{change.description}</span>
+              <span className={`text-xs bg-${change.impactType}/10 text-${change.impactType} px-2 py-0.5 rounded`}>
+                {change.impact}
+              </span>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+      <CardFooter className="border-t bg-muted/10 pt-3">
+        <Button onClick={onApply} className="w-full" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Applying...
+            </>
+          ) : (
+            <>
+              <Check className="h-4 w-4 mr-2" />
+              Apply Recommendations
+            </>
+          )}
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};
+
+// Initial platform allocations
+const initialPlatformAllocations: PlatformAllocation[] = [
+  { id: '9hits', name: '9Hits', percentage: 35, amount: 17.5, color: 'primary' },
+  { id: 'hitleap', name: 'HitLeap', percentage: 25, amount: 12.5, color: 'traffic' },
+  { id: 'otohits', name: 'Otohits', percentage: 20, amount: 10, color: 'platforms' },
+  { id: 'easyhits4u', name: 'EasyHits4U', percentage: 10, amount: 5, color: 'earnings' },
+  { id: 'webhit', name: 'Webhit.net', percentage: 10, amount: 5, color: 'muted-foreground' }
+];
 
 const BudgetOptimizer = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Changed default budget from 50 to 5 to reflect more realistic starting point
-  const [dailyBudget, setDailyBudget] = useState<number>(5);
-  const [optimizationTarget, setOptimizationTarget] = useState<'roi' | 'traffic' | 'impressions'>('roi');
+  // State management
+  const [dailyBudget, setDailyBudget] = useState<number>(50);
+  const [optimizationTarget, setOptimizationTarget] = useState<string>('roi');
   const [isAutoAdjustEnabled, setIsAutoAdjustEnabled] = useState<boolean>(false);
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>('budget');
-  const [platformAllocations, setPlatformAllocations] = useState<Platform[]>(
-    initialPlatforms.map(p => ({ 
+  const [platformAllocations, setPlatformAllocations] = useState<PlatformAllocation[]>(
+    initialPlatformAllocations.map(p => ({ 
       ...p, 
-      amount: (5 * p.percentage) / 100 // Updated to match new default budget
+      amount: (50 * p.percentage) / 100 
     }))
   );
   const [totalAllocatedPercentage, setTotalAllocatedPercentage] = useState<number>(100);
   const [expectedResults, setExpectedResults] = useState<ExpectedResults>({
-    dailyVisits: 0,
-    dailyImpressions: 0,
-    dailyRevenue: 0,
-    roi: 0
+    visits: 10000,
+    impressions: 4000,
+    revenue: 25,
+    roi: -50
   });
-  const [currentRecommendation, setCurrentRecommendation] = useState<Recommendation | null>(null);
+  const [currentRecommendation, setCurrentRecommendation] = useState<Recommendation | null>({
+    id: 'rec1',
+    changes: [
+      { 
+        description: 'Reallocate from HitLeap to 9Hits',
+        impact: '+15% ROI',
+        impactType: 'success'
+      },
+      { 
+        description: 'Increase budget for Otohits',
+        impact: '+8% Traffic',
+        impactType: 'success'
+      },
+      { 
+        description: 'Reduce EasyHits4U spend',
+        impact: 'Low Quality',
+        impactType: 'warning'
+      }
+    ],
+    allocations: {
+      '9hits': 45,
+      'hitleap': 15,
+      'otohits': 25,
+      'easyhits4u': 5,
+      'webhit': 10
+    }
+  });
   const [isLoadingOptimize, setIsLoadingOptimize] = useState<boolean>(false);
   const [isLoadingApply, setIsLoadingApply] = useState<boolean>(false);
-  const [saveConfigDialogOpen, setSaveConfigDialogOpen] = useState<boolean>(false);
-  const [configName, setConfigName] = useState<string>('');
-  const [savedConfigurations, setSavedConfigurations] = useState<Array<{
-    id: string;
-    name: string;
-    platforms: Platform[];
-    dailyBudget: number;
-    target: 'roi' | 'traffic' | 'impressions';
-    date: string;
-  }>>([]);
-  const [newPlatformDialogOpen, setNewPlatformDialogOpen] = useState<boolean>(false);
-  const [newPlatform, setNewPlatform] = useState({
-    name: '',
-    costPerVisit: 0.0001,
-    acceptanceRate: 0.2,
-    cpm: 0.5
-  });
   
+  // Calculate total allocated percentage whenever platform allocations change
   useEffect(() => {
     const total = platformAllocations.reduce((sum, platform) => sum + platform.percentage, 0);
     setTotalAllocatedPercentage(total);
-    
-    if (isAutoAdjustEnabled && Math.abs(total - 100) > 0.1) {
-      adjustPlatformPercentages();
-    }
   }, [platformAllocations]);
   
+  // Calculate expected results whenever budget or allocations change
   useEffect(() => {
-    const results = calculateExpectedResults(platformAllocations, dailyBudget);
-    setExpectedResults(results);
+    calculateExpectedResults();
   }, [dailyBudget, platformAllocations]);
   
-  useEffect(() => {
-    const savedConfigs = localStorage.getItem('budgetConfigurations');
-    if (savedConfigs) {
-      try {
-        setSavedConfigurations(JSON.parse(savedConfigs));
-      } catch (error) {
-        console.error("Error loading saved configurations:", error);
-      }
-    }
-  }, []);
-  
-  const adjustPlatformPercentages = () => {
-    const total = platformAllocations.reduce((sum, platform) => sum + platform.percentage, 0);
-    if (Math.abs(total - 100) <= 0.1) return;
+  // Calculate expected results based on current allocations and budget
+  const calculateExpectedResults = () => {
+    // Mock calculation logic - in a real app, this would be more sophisticated
+    const totalBudget = dailyBudget;
+    const expectedVisits = totalBudget * 200; // 200 visits per $1
+    const expectedImpressions = expectedVisits * 0.4; // 40% acceptance rate
+    const expectedRevenue = expectedImpressions * 0.0005; // $0.0005 per impression
+    const expectedRoi = ((expectedRevenue - totalBudget) / totalBudget) * 100;
     
-    const adjustmentFactor = 100 / total;
-    const adjustedPlatforms = platformAllocations.map(platform => ({
-      ...platform,
-      percentage: platform.percentage * adjustmentFactor,
-      amount: (dailyBudget * platform.percentage * adjustmentFactor) / 100
-    }));
-    
-    setPlatformAllocations(adjustedPlatforms);
-    
-    toast({
-      title: "Allocations Adjusted",
-      description: "Platform allocations have been adjusted to total 100%.",
-      duration: 3000,
+    setExpectedResults({
+      visits: expectedVisits,
+      impressions: expectedImpressions,
+      revenue: expectedRevenue,
+      roi: expectedRoi
     });
   };
   
+  // Handle daily budget input change
   const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
     if (!isNaN(value) && value >= 0) {
       setDailyBudget(value);
       
+      // Update platform allocation amounts based on new budget
       const updatedAllocations = platformAllocations.map(platform => ({
         ...platform,
         amount: (value * platform.percentage) / 100
@@ -147,146 +231,225 @@ const BudgetOptimizer = () => {
     }
   };
   
-  const handlePlatformUpdate = (platformId: string, updates: any) => {
-    const updatedPlatforms = platformAllocations.map(platform => {
-      if (platform.id === platformId) {
-        if (updates.percentage !== undefined) {
-          return {
-            ...platform,
-            ...updates,
-            amount: (dailyBudget * updates.percentage) / 100
-          };
-        }
-        
-        return { ...platform, ...updates };
-      }
-      return platform;
-    });
+  // Handle direct percentage input for each platform
+  const handleDirectPercentageInput = (platformId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = parseFloat(e.target.value);
     
-    setPlatformAllocations(updatedPlatforms);
-  };
-  
-  const handlePlatformRemove = (platformId: string) => {
-    if (platformAllocations.length <= 2) {
-      toast({
-        title: "Cannot Remove Platform",
-        description: "You need at least two platforms for comparison.",
-        variant: "destructive",
-        duration: 3000,
-      });
+    // Validate input
+    if (isNaN(newValue) || newValue < 0 || newValue > 100) {
       return;
     }
     
-    const updatedPlatforms = platformAllocations.filter(p => p.id !== platformId);
-    setPlatformAllocations(updatedPlatforms);
-    
-    toast({
-      title: "Platform Removed",
-      description: "Platform has been removed from your budget allocation.",
-      duration: 3000,
-    });
+    handleAllocationChange(platformId, [newValue]);
   };
   
+  // Handle slider changes for platform allocations
+  const handleAllocationChange = (platformId: string, value: number[]) => {
+    const newValue = value[0];
+    
+    // Find the platform we're updating
+    const platform = platformAllocations.find(p => p.id === platformId);
+    if (!platform) return;
+    
+    // Calculate the difference between old and new percentage
+    const difference = newValue - platform.percentage;
+    
+    // If there's no change, return early
+    if (difference === 0) return;
+    
+    // Adjust other platforms proportionally to maintain 100% total
+    const otherPlatforms = platformAllocations.filter(p => p.id !== platformId);
+    const totalOtherPercentage = otherPlatforms.reduce((sum, p) => sum + p.percentage, 0);
+    
+    let updatedAllocations = platformAllocations.map(p => {
+      if (p.id === platformId) {
+        return {
+          ...p,
+          percentage: newValue,
+          amount: (dailyBudget * newValue) / 100
+        };
+      } else {
+        // Adjust other platforms proportionally
+        const adjustmentFactor = totalOtherPercentage > 0 
+          ? (100 - newValue) / totalOtherPercentage 
+          : 0;
+        
+        const newPercentage = p.percentage * adjustmentFactor;
+        
+        return {
+          ...p,
+          percentage: newPercentage,
+          amount: (dailyBudget * newPercentage) / 100
+        };
+      }
+    });
+    
+    // Ensure we have 100% allocation (fix rounding errors)
+    const totalPercentage = updatedAllocations.reduce((sum, p) => sum + p.percentage, 0);
+    if (Math.abs(totalPercentage - 100) > 0.01) {
+      // If we're off by more than 0.01%, adjust the last platform to make it exactly 100%
+      const lastPlatform = updatedAllocations.find(p => p.id !== platformId);
+      if (lastPlatform) {
+        const adjustment = 100 - (totalPercentage - lastPlatform.percentage);
+        updatedAllocations = updatedAllocations.map(p => {
+          if (p.id === lastPlatform.id) {
+            return {
+              ...p,
+              percentage: adjustment,
+              amount: (dailyBudget * adjustment) / 100
+            };
+          }
+          return p;
+        });
+      }
+    }
+    
+    setPlatformAllocations(updatedAllocations);
+    
+    // Show a toast notification for significant changes
+    if (Math.abs(difference) >= 10) {
+      toast({
+        title: "Budget Allocation Updated",
+        description: `${platform.name} allocation ${difference > 0 ? 'increased' : 'decreased'} by ${Math.abs(difference).toFixed(0)}%`,
+        duration: 3000,
+      });
+    }
+  };
+  
+  // Handle budget optimization
   const handleOptimize = () => {
     setIsLoadingOptimize(true);
     
+    // Simulate API delay
     setTimeout(() => {
-      try {
-        const optimizedPlatforms = optimizeBudgetAllocation(
-          platformAllocations, 
-          optimizationTarget,
-          dailyBudget
-        );
-        
-        const recommendation = generateRecommendation(platformAllocations, optimizedPlatforms);
-        
-        setPlatformAllocations(optimizedPlatforms);
-        
-        setCurrentRecommendation(recommendation);
-        
-        toast({
-          title: "Budget Optimized",
-          description: `Budget has been optimized for maximum ${
-            optimizationTarget === 'roi' ? 'ROI' : 
-            optimizationTarget === 'traffic' ? 'traffic' : 
-            'impressions'
-          }.`,
-          duration: 3000,
+      // Simulate optimized allocations based on selected target
+      let optimizedAllocations;
+      
+      if (optimizationTarget === 'roi') {
+        // Optimize for ROI - these would come from a real optimization algorithm
+        optimizedAllocations = platformAllocations.map(p => {
+          if (p.id === '9hits') return { ...p, percentage: 40, amount: dailyBudget * 0.4 };
+          if (p.id === 'hitleap') return { ...p, percentage: 20, amount: dailyBudget * 0.2 };
+          if (p.id === 'otohits') return { ...p, percentage: 25, amount: dailyBudget * 0.25 };
+          if (p.id === 'easyhits4u') return { ...p, percentage: 5, amount: dailyBudget * 0.05 };
+          return { ...p, percentage: 10, amount: dailyBudget * 0.1 };
         });
-      } catch (error) {
-        console.error("Optimization error:", error);
-        
-        toast({
-          title: "Optimization Error",
-          description: "An error occurred while optimizing your budget.",
-          variant: "destructive",
-          duration: 3000,
+      } else if (optimizationTarget === 'traffic') {
+        // Optimize for traffic
+        optimizedAllocations = platformAllocations.map(p => {
+          if (p.id === '9hits') return { ...p, percentage: 35, amount: dailyBudget * 0.35 };
+          if (p.id === 'hitleap') return { ...p, percentage: 30, amount: dailyBudget * 0.3 };
+          if (p.id === 'otohits') return { ...p, percentage: 15, amount: dailyBudget * 0.15 };
+          if (p.id === 'easyhits4u') return { ...p, percentage: 10, amount: dailyBudget * 0.1 };
+          return { ...p, percentage: 10, amount: dailyBudget * 0.1 };
         });
-      } finally {
-        setIsLoadingOptimize(false);
+      } else {
+        // Optimize for impressions
+        optimizedAllocations = platformAllocations.map(p => {
+          if (p.id === '9hits') return { ...p, percentage: 30, amount: dailyBudget * 0.3 };
+          if (p.id === 'hitleap') return { ...p, percentage: 15, amount: dailyBudget * 0.15 };
+          if (p.id === 'otohits') return { ...p, percentage: 35, amount: dailyBudget * 0.35 };
+          if (p.id === 'easyhits4u') return { ...p, percentage: 10, amount: dailyBudget * 0.1 };
+          return { ...p, percentage: 10, amount: dailyBudget * 0.1 };
+        });
       }
-    }, 1000);
+      
+      setPlatformAllocations(optimizedAllocations);
+      
+      // Also update expected results (more dramatic impact for demonstration)
+      const baseVisits = dailyBudget * 220; // Slightly better than before
+      const baseImpressions = baseVisits * 0.42; // Better acceptance rate
+      const baseRevenue = baseImpressions * 0.0006; // Better CPM
+      const baseRoi = ((baseRevenue - dailyBudget) / dailyBudget) * 100;
+      
+      setExpectedResults({
+        visits: baseVisits,
+        impressions: baseImpressions,
+        revenue: baseRevenue,
+        roi: baseRoi
+      });
+      
+      toast({
+        title: "Budget Optimized",
+        description: `Budget has been optimized for maximum ${
+          optimizationTarget === 'roi' ? 'ROI' : 
+          optimizationTarget === 'traffic' ? 'traffic' : 
+          'impressions'
+        }.`,
+        duration: 3000,
+      });
+      
+      setIsLoadingOptimize(false);
+    }, 1500);
   };
   
+  // Handle applying AI recommendations
   const handleRecommendationApply = () => {
     if (!currentRecommendation) return;
     
     setIsLoadingApply(true);
     
+    // Simulate a delay for applying recommendations
     setTimeout(() => {
-      try {
-        const recommendedAllocations = platformAllocations.map(platform => {
-          const newPercentage = currentRecommendation.allocations[platform.id] || platform.percentage;
-          return {
-            ...platform,
-            percentage: newPercentage,
-            amount: (dailyBudget * newPercentage) / 100
-          };
-        });
-        
-        setPlatformAllocations(recommendedAllocations);
-        
-        setCurrentRecommendation(null);
-        
-        toast({
-          title: "Recommendations Applied",
-          description: "Budget allocations have been updated based on AI recommendations.",
-          duration: 3000,
-        });
-      } catch (error) {
-        console.error("Error applying recommendations:", error);
-        
-        toast({
-          title: "Error",
-          description: "Failed to apply recommendations. Please try again.",
-          variant: "destructive",
-          duration: 3000,
-        });
-      } finally {
-        setIsLoadingApply(false);
-      }
-    }, 800);
+      // Apply the recommendations
+      const recommendedAllocations = platformAllocations.map(platform => {
+        const newPercentage = currentRecommendation.allocations[platform.id] || platform.percentage;
+        return {
+          ...platform,
+          percentage: newPercentage,
+          amount: (dailyBudget * newPercentage) / 100
+        };
+      });
+      
+      setPlatformAllocations(recommendedAllocations);
+      
+      // Update expected results (more dramatic impact for demonstration)
+      const baseVisits = dailyBudget * 230; // Even better than optimization
+      const baseImpressions = baseVisits * 0.45; // Better acceptance rate
+      const baseRevenue = baseImpressions * 0.00065; // Better CPM
+      const baseRoi = ((baseRevenue - dailyBudget) / dailyBudget) * 100;
+      
+      setExpectedResults({
+        visits: baseVisits,
+        impressions: baseImpressions,
+        revenue: baseRevenue,
+        roi: baseRoi
+      });
+      
+      // Clear the recommendation after applying
+      setCurrentRecommendation(null);
+      
+      toast({
+        title: "Recommendations Applied",
+        description: "Budget allocations have been updated based on AI recommendations.",
+        duration: 3000,
+      });
+      
+      setIsLoadingApply(false);
+    }, 1000);
   };
   
+  // Handle exporting the budget plan
   const handleExportPlan = () => {
-    const exportData = platformAllocations.map(platform => ({
-      Platform: platform.name,
-      'Allocation (%)': platform.percentage.toFixed(1),
-      'Allocation ($)': platform.amount.toFixed(2),
-      'Cost per Visit ($)': platform.costPerVisit.toFixed(8),
-      'Acceptance Rate (%)': (platform.acceptanceRate * 100).toFixed(1),
-      'CPM Rate ($)': platform.cpm.toFixed(2)
-    }));
+    const exportData = {
+      dailyBudget,
+      optimizationTarget,
+      isAutoAdjustEnabled,
+      platformAllocations,
+      expectedResults,
+      exportDate: new Date().toISOString()
+    };
     
-    exportToCsv(exportData, `budget-plan-${new Date().toISOString().slice(0, 10)}.csv`);
+    console.log('Exporting Budget Plan:', exportData);
     
     toast({
       title: "Budget Plan Exported",
-      description: "Your budget plan has been exported as CSV.",
+      description: "Budget plan data has been exported to console.",
       duration: 3000,
     });
   };
   
+  // Navigate to ROI calculator
   const navigateToRoiCalculator = () => {
     navigate('/cpm-calculator');
     
@@ -295,152 +458,6 @@ const BudgetOptimizer = () => {
       description: "Redirecting to CPM Calculator page.",
       duration: 2000,
     });
-  };
-  
-  const handleSaveConfiguration = () => {
-    if (!configName.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a name for this configuration.",
-        variant: "destructive",
-        duration: 3000,
-      });
-      return;
-    }
-    
-    const newConfig = {
-      id: Date.now().toString(),
-      name: configName,
-      platforms: [...platformAllocations],
-      dailyBudget,
-      target: optimizationTarget,
-      date: new Date().toISOString()
-    };
-    
-    const updatedConfigs = [...savedConfigurations, newConfig];
-    setSavedConfigurations(updatedConfigs);
-    localStorage.setItem('budgetConfigurations', JSON.stringify(updatedConfigs));
-    
-    setSaveConfigDialogOpen(false);
-    setConfigName('');
-    
-    toast({
-      title: "Configuration Saved",
-      description: `"${configName}" has been saved to your local configurations.`,
-      duration: 3000,
-    });
-  };
-  
-  const handleLoadConfiguration = (config: any) => {
-    setDailyBudget(config.dailyBudget);
-    setOptimizationTarget(config.target);
-    setPlatformAllocations(config.platforms.map((p: Platform) => ({
-      ...p,
-      amount: (config.dailyBudget * p.percentage) / 100
-    })));
-    
-    toast({
-      title: "Configuration Loaded",
-      description: `"${config.name}" has been loaded successfully.`,
-      duration: 3000,
-    });
-  };
-  
-  const handleAddPlatform = () => {
-    if (!newPlatform.name) {
-      toast({
-        title: "Error",
-        description: "Please enter a name for the new platform.",
-        variant: "destructive",
-        duration: 3000,
-      });
-      return;
-    }
-    
-    const newId = `platform-${Date.now()}`;
-    const color = getRandomColor();
-    const equalPercentage = 100 / (platformAllocations.length + 1);
-    
-    const adjustedPlatforms = platformAllocations.map(p => ({
-      ...p,
-      percentage: equalPercentage,
-      amount: (dailyBudget * equalPercentage) / 100
-    }));
-    
-    const updatedPlatforms = [
-      ...adjustedPlatforms,
-      {
-        id: newId,
-        name: newPlatform.name,
-        percentage: equalPercentage,
-        amount: (dailyBudget * equalPercentage) / 100,
-        color,
-        costPerVisit: newPlatform.costPerVisit,
-        acceptanceRate: newPlatform.acceptanceRate,
-        cpm: newPlatform.cpm
-      }
-    ];
-    
-    setPlatformAllocations(updatedPlatforms);
-    setNewPlatformDialogOpen(false);
-    setNewPlatform({
-      name: '',
-      costPerVisit: 0.0001,
-      acceptanceRate: 0.2,
-      cpm: 0.5
-    });
-    
-    toast({
-      title: "Platform Added",
-      description: `"${newPlatform.name}" has been added to your budget allocation.`,
-      duration: 3000,
-    });
-  };
-  
-  const handleImportFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const importedConfig = JSON.parse(e.target?.result as string);
-        
-        if (
-          !importedConfig.platforms ||
-          !Array.isArray(importedConfig.platforms) ||
-          typeof importedConfig.dailyBudget !== 'number'
-        ) {
-          throw new Error("Invalid configuration format");
-        }
-        
-        setDailyBudget(importedConfig.dailyBudget || 5);
-        setOptimizationTarget(importedConfig.target || 'roi');
-        setPlatformAllocations(importedConfig.platforms.map((p: any) => ({
-          ...p,
-          amount: (importedConfig.dailyBudget * p.percentage) / 100
-        })));
-        
-        toast({
-          title: "Configuration Imported",
-          description: "Your budget configuration has been imported successfully.",
-          duration: 3000,
-        });
-      } catch (error) {
-        console.error("Import error:", error);
-        
-        toast({
-          title: "Import Error",
-          description: "Failed to import configuration. Invalid file format.",
-          variant: "destructive",
-          duration: 3000,
-        });
-      }
-    };
-    
-    reader.readAsText(file);
-    
-    event.target.value = '';
   };
   
   return (
@@ -467,291 +484,135 @@ const BudgetOptimizer = () => {
           <Card>
             <CardHeader>
               <CardTitle className="text-base font-medium">Budget Allocation Optimizer</CardTitle>
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="mt-1">
-                  <TabsTrigger
-                    value="budget"
-                    className={activeTab === 'budget' ? 'bg-primary text-white' : ''}
-                  >
-                    Budget Allocations
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="scenarios"
-                    className={activeTab === 'scenarios' ? 'bg-primary text-white' : ''}
-                  >
-                    What-If Analysis
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="saved"
-                    className={activeTab === 'saved' ? 'bg-primary text-white' : ''}
-                  >
-                    Saved Configurations
-                  </TabsTrigger>
-                </TabsList>
-              
-                <CardContent className="space-y-6">
-                  <TabsContent value="budget">
-                    <div className="space-y-4">
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div className="w-full sm:w-1/2">
-                          <Label htmlFor="total-budget" className="mb-2 block">Daily Budget</Label>
-                          <div className="relative">
-                            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input 
-                              id="total-budget"
-                              type="number" 
-                              min="0"
-                              step="0.1"
-                              value={dailyBudget} 
-                              onChange={handleBudgetChange}
-                              className="pl-9"
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="w-full sm:w-1/2">
-                          <Label htmlFor="optimization-target" className="mb-2 block">Optimization Target</Label>
-                          <Select 
-                            value={optimizationTarget} 
-                            onValueChange={(value) => setOptimizationTarget(value as 'roi' | 'traffic' | 'impressions')}
-                          >
-                            <SelectTrigger id="optimization-target">
-                              <SelectValue placeholder="Select target" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="roi">Maximum ROI</SelectItem>
-                              <SelectItem value="traffic">Maximum Traffic</SelectItem>
-                              <SelectItem value="impressions">Maximum Impressions</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id="auto-adjust"
-                          checked={isAutoAdjustEnabled}
-                          onCheckedChange={setIsAutoAdjustEnabled}
-                        />
-                        <Label htmlFor="auto-adjust" className="cursor-pointer">
-                          Auto-adjust allocations to maintain 100% total
-                        </Label>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id="advanced-options"
-                          checked={showAdvancedOptions}
-                          onCheckedChange={setShowAdvancedOptions}
-                        />
-                        <Label htmlFor="advanced-options" className="cursor-pointer">
-                          Show advanced platform options
-                        </Label>
-                      </div>
-                    </div>
-                    
-                    <Separator className="my-6" />
-                    
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-medium">Platform Allocations</h3>
-                        <div className="flex items-center gap-2">
-                          <span className={cn(
-                            "text-sm font-medium",
-                            Math.abs(totalAllocatedPercentage - 100) > 0.5 
-                              ? "text-destructive" 
-                              : "text-muted-foreground"
-                          )}>
-                            Total: {totalAllocatedPercentage.toFixed(0)}%
-                          </span>
-                          
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => setNewPlatformDialogOpen(true)}
-                            className="h-8"
-                          >
-                            <Plus className="h-3.5 w-3.5 mr-1" />
-                            Add Platform
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {platformAllocations.map((platform) => (
-                          <PlatformCard
-                            key={platform.id}
-                            {...platform}
-                            onUpdate={handlePlatformUpdate}
-                            onRemove={handlePlatformRemove}
-                            showAdvancedFields={showAdvancedOptions}
-                          />
-                        ))}
-                      </div>
-                      
-                      {Math.abs(totalAllocatedPercentage - 100) > 0.5 && (
-                        <Alert variant="destructive" className="bg-destructive/10 border-destructive/30 text-destructive">
-                          <AlertTriangle className="h-4 w-4" />
-                          <AlertTitle>Invalid Allocation</AlertTitle>
-                          <AlertDescription>
-                            Total allocation must equal 100%. Current total: {totalAllocatedPercentage.toFixed(0)}%
-                            {!isAutoAdjustEnabled && (
-                              <Button
-                                variant="link"
-                                className="p-0 h-auto text-destructive underline"
-                                onClick={adjustPlatformPercentages}
-                              >
-                                Adjust Now
-                              </Button>
-                            )}
-                          </AlertDescription>
-                        </Alert>
-                      )}
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-2 mt-6">
-                      <Button 
-                        onClick={handleOptimize} 
-                        disabled={isLoadingOptimize || Math.abs(totalAllocatedPercentage - 100) > 0.5}
-                        className="flex-1"
-                      >
-                        {isLoadingOptimize ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Optimizing...
-                          </>
-                        ) : (
-                          <>
-                            <Zap className="h-4 w-4 mr-2" />
-                            Optimize Budget Allocation
-                          </>
-                        )}
-                      </Button>
-                      
-                      <Button 
-                        variant="outline" 
-                        onClick={() => setSaveConfigDialogOpen(true)}
-                        className="flex-1"
-                      >
-                        <Save className="h-4 w-4 mr-2" />
-                        Save Configuration
-                      </Button>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="scenarios">
-                    <div className="space-y-4">
-                      <p className="text-sm text-muted-foreground">
-                        Experiment with different platform parameters to see how they affect your results
-                        without changing your actual budget allocation.
-                      </p>
-                      
-                      <WhatIfAnalysis 
-                        platforms={platformAllocations}
-                        dailyBudget={dailyBudget}
-                        onApplyChanges={(updatedPlatforms) => {
-                          setPlatformAllocations(updatedPlatforms);
-                          toast({
-                            title: "Changes Applied",
-                            description: "What-if scenario has been applied to your budget allocation.",
-                            duration: 3000,
-                          });
-                        }}
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div className="w-full sm:w-1/2">
+                    <Label htmlFor="total-budget" className="mb-2 block">Daily Budget</Label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        id="total-budget"
+                        type="number" 
+                        min="0"
+                        step="1"
+                        value={dailyBudget} 
+                        onChange={handleBudgetChange}
+                        className="pl-9"
                       />
                     </div>
-                  </TabsContent>
+                  </div>
                   
-                  <TabsContent value="saved">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-medium">Saved Configurations</h3>
-                        <div>
-                          <input
-                            type="file"
-                            id="import-config"
-                            className="hidden"
-                            accept="application/json"
-                            onChange={handleImportFile}
-                          />
-                          <label htmlFor="import-config">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              className="h-8 cursor-pointer"
-                              asChild
-                            >
-                              <span>
-                                <FileUp className="h-3.5 w-3.5 mr-1" />
-                                Import
-                              </span>
-                            </Button>
-                          </label>
-                        </div>
+                  <div className="w-full sm:w-1/2">
+                    <Label htmlFor="optimization-target" className="mb-2 block">Optimization Target</Label>
+                    <Select value={optimizationTarget} onValueChange={setOptimizationTarget}>
+                      <SelectTrigger id="optimization-target">
+                        <SelectValue placeholder="Select target" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="roi">Maximum ROI</SelectItem>
+                        <SelectItem value="traffic">Maximum Traffic</SelectItem>
+                        <SelectItem value="impressions">Maximum Impressions</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="auto-adjust"
+                    checked={isAutoAdjustEnabled}
+                    onCheckedChange={setIsAutoAdjustEnabled}
+                  />
+                  <Label htmlFor="auto-adjust">
+                    Auto-adjust budget based on real-time performance
+                  </Label>
+                </div>
+              </div>
+              
+              <Separator />
+              
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium">Platform Allocations</h3>
+                  <span className={cn(
+                    "text-sm font-medium",
+                    Math.abs(totalAllocatedPercentage - 100) > 0.5 && "text-destructive"
+                  )}>
+                    Total: {totalAllocatedPercentage.toFixed(0)}%
+                  </span>
+                </div>
+                
+                {platformAllocations.map((platform) => (
+                  <div key={platform.id} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <Label htmlFor={`platform-${platform.id}`} className="text-sm">{platform.name}</Label>
+                      <div className="flex items-center gap-2">
+                        <Input 
+                          type="number" 
+                          min="0"
+                          max="100"
+                          step="5"
+                          className="w-16 h-8 text-sm"
+                          value={platform.percentage}
+                          onChange={(e) => handleDirectPercentageInput(platform.id, e)}
+                        />
+                        <span className="text-sm font-medium w-20 text-right">
+                          {formatCurrency(platform.amount)}
+                        </span>
                       </div>
-                      
-                      {savedConfigurations.length === 0 ? (
-                        <div className="text-center p-6 border rounded-md bg-muted/20">
-                          <p className="text-muted-foreground">No saved configurations yet</p>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Save your current configuration or import one to get started
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          {savedConfigurations.map((config) => (
-                            <div 
-                              key={config.id} 
-                              className="flex items-center justify-between border rounded-md p-3"
-                            >
-                              <div>
-                                <p className="font-medium">{config.name}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  ${config.dailyBudget} budget, {config.platforms.length} platforms,
-                                  {new Date(config.date).toLocaleDateString()}
-                                </p>
-                              </div>
-                              <div className="flex gap-2">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  onClick={() => handleLoadConfiguration(config)}
-                                >
-                                  Load
-                                </Button>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  onClick={() => {
-                                    const updatedConfigs = savedConfigurations.filter(c => c.id !== config.id);
-                                    setSavedConfigurations(updatedConfigs);
-                                    localStorage.setItem('budgetConfigurations', JSON.stringify(updatedConfigs));
-                                    
-                                    toast({
-                                      title: "Configuration Deleted",
-                                      description: `"${config.name}" has been removed.`,
-                                      duration: 3000,
-                                    });
-                                  }}
-                                  className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                                >
-                                  Delete
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
-                  </TabsContent>
-                </CardContent>
-              </Tabs>
-            </CardHeader>
+                    <Slider
+                      id={`platform-${platform.id}`}
+                      value={[platform.percentage]}
+                      max={100}
+                      step={5}
+                      onValueChange={(value) => handleAllocationChange(platform.id, value)}
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>0%</span>
+                      <span>50%</span>
+                      <span>100%</span>
+                    </div>
+                  </div>
+                ))}
+                
+                {Math.abs(totalAllocatedPercentage - 100) > 0.5 && (
+                  <Alert variant="destructive" className="bg-destructive/10 border-destructive/30 text-destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Invalid Allocation</AlertTitle>
+                    <AlertDescription>
+                      Total allocation must equal 100%. Current total: {totalAllocatedPercentage.toFixed(0)}%
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+              
+              <Button 
+                onClick={handleOptimize} 
+                className="w-full"
+                disabled={isLoadingOptimize || Math.abs(totalAllocatedPercentage - 100) > 0.5}
+              >
+                {isLoadingOptimize ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Optimizing...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="h-4 w-4 mr-2" />
+                    Optimize Budget Allocation
+                  </>
+                )}
+              </Button>
+            </CardContent>
           </Card>
         </div>
         
         <div className="space-y-6">
-          <Card className="bg-muted/5">
-            <CardHeader className="pb-2">
+          <Card className="bg-muted/10">
+            <CardHeader>
               <CardTitle className="text-base font-medium">Expected Results</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -761,7 +622,7 @@ const BudgetOptimizer = () => {
                     <TrendingUp className="h-4 w-4 text-traffic mr-2" />
                     <span className="text-sm">Daily Visits</span>
                   </div>
-                  <span className="font-medium">{formatNumber(expectedResults.dailyVisits)}</span>
+                  <span className="font-medium">{formatNumber(expectedResults.visits)}</span>
                 </div>
               </div>
               
@@ -771,7 +632,7 @@ const BudgetOptimizer = () => {
                     <BarChart2 className="h-4 w-4 text-platforms mr-2" />
                     <span className="text-sm">Daily Impressions</span>
                   </div>
-                  <span className="font-medium">{formatNumber(expectedResults.dailyImpressions)}</span>
+                  <span className="font-medium">{formatNumber(expectedResults.impressions)}</span>
                 </div>
               </div>
               
@@ -781,7 +642,7 @@ const BudgetOptimizer = () => {
                     <DollarSign className="h-4 w-4 text-earnings mr-2" />
                     <span className="text-sm">Daily Revenue</span>
                   </div>
-                  <span className="font-medium">{formatCurrency(expectedResults.dailyRevenue)}</span>
+                  <span className="font-medium">{formatCurrency(expectedResults.revenue)}</span>
                 </div>
               </div>
               
@@ -808,94 +669,26 @@ const BudgetOptimizer = () => {
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base font-medium">Budget Distribution</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <BudgetChart data={platformAllocations} />
-              
-              <div className="mt-4 space-y-2">
-                {platformAllocations.map((platform) => (
-                  <div key={platform.id} className="flex justify-between items-center text-sm">
-                    <div className="flex items-center">
-                      <div className={`w-3 h-3 rounded-full bg-${platform.color} mr-2`}></div>
-                      <span>{platform.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">{platform.percentage.toFixed(1)}%</span>
-                      <span className="font-medium">{formatCurrency(platform.amount)}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <BudgetDistributionCard data={platformAllocations} />
           
           {currentRecommendation && (
-            <Card className="border-primary/20">
-              <CardHeader className="bg-primary/5 pb-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-base font-medium">Budget Recommendation</CardTitle>
-                    <CardDescription>Based on your optimization target</CardDescription>
-                  </div>
-                  <div className="bg-primary/10 p-1.5 rounded-full">
-                    <Zap className="h-5 w-5 text-primary" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <div className="space-y-3">
-                  {currentRecommendation.changes.map((change, index) => (
-                    <div key={index} className="flex justify-between items-center">
-                      <span className="text-sm">{change.description}</span>
-                      <span className={`text-xs bg-${change.impactType}/10 text-${change.impactType} px-2 py-0.5 rounded`}>
-                        {change.impact}
-                      </span>
-                    </div>
-                  ))}
-                  
-                  {currentRecommendation.changes.length === 0 && (
-                    <p className="text-sm text-muted-foreground">
-                      Your current allocation is already optimized.
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-              <CardFooter className="border-t bg-muted/10 pt-3">
-                <Button 
-                  onClick={handleRecommendationApply} 
-                  className="w-full" 
-                  disabled={isLoadingApply || currentRecommendation.changes.length === 0}
-                >
-                  {isLoadingApply ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Applying...
-                    </>
-                  ) : (
-                    <>
-                      <Check className="h-4 w-4 mr-2" />
-                      Apply Recommendations
-                    </>
-                  )}
-                </Button>
-              </CardFooter>
-            </Card>
+            <RecommendationCard 
+              recommendation={currentRecommendation} 
+              onApply={handleRecommendationApply}
+              isLoading={isLoadingApply}
+            />
           )}
           
           <Card>
             <CardContent className="pt-4">
               <Alert className="bg-primary/5 border-primary/20">
                 <Info className="h-4 w-4 text-primary" />
-                <AlertTitle>Optimization Tips</AlertTitle>
+                <AlertTitle>Budget Optimization Tips</AlertTitle>
                 <AlertDescription className="text-sm">
                   <ul className="list-disc pl-4 space-y-1 mt-2">
-                    <li>Platforms with higher acceptance rates convert more traffic into revenue</li>
-                    <li>Higher CPM rates mean more revenue per 1000 impressions</li>
-                    <li>Lower cost per visit means more traffic for your budget</li>
-                    <li>Find the optimal balance between cost, traffic, and conversion rates</li>
+                    <li>Start with platforms that have the highest acceptance rates</li>
+                    <li>Distribute more budget to platforms with better ROI</li>
+                    <li>Monitor performance and adjust allocations weekly</li>
                   </ul>
                 </AlertDescription>
               </Alert>
@@ -903,109 +696,6 @@ const BudgetOptimizer = () => {
           </Card>
         </div>
       </div>
-      
-      <Dialog open={saveConfigDialogOpen} onOpenChange={setSaveConfigDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Save Configuration</DialogTitle>
-            <DialogDescription>
-              Enter a name for this configuration to save it for future use.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <Label htmlFor="config-name">Configuration Name</Label>
-            <Input
-              id="config-name"
-              value={configName}
-              onChange={(e) => setConfigName(e.target.value)}
-              placeholder="My Budget Plan"
-              className="mt-2"
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSaveConfigDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveConfiguration}>
-              Save Configuration
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      <Dialog open={newPlatformDialogOpen} onOpenChange={setNewPlatformDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add New Platform</DialogTitle>
-            <DialogDescription>
-              Enter the details for the new traffic platform.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4 space-y-4">
-            <div>
-              <Label htmlFor="platform-name">Platform Name</Label>
-              <Input
-                id="platform-name"
-                value={newPlatform.name}
-                onChange={(e) => setNewPlatform({...newPlatform, name: e.target.value})}
-                placeholder="Platform Name"
-                className="mt-2"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="platform-cost">Cost per Visit ($)</Label>
-              <Input
-                id="platform-cost"
-                type="number"
-                step="0.000001"
-                min="0.000001"
-                value={newPlatform.costPerVisit}
-                onChange={(e) => setNewPlatform({...newPlatform, costPerVisit: parseFloat(e.target.value)})}
-                className="mt-2"
-              />
-              <p className="text-xs text-muted-foreground mt-1">Example: 0.0001 ($0.0001 per visit)</p>
-            </div>
-            
-            <div>
-              <Label htmlFor="platform-acceptance">Acceptance Rate</Label>
-              <Input
-                id="platform-acceptance"
-                type="number"
-                step="0.01"
-                min="0"
-                max="1"
-                value={newPlatform.acceptanceRate}
-                onChange={(e) => setNewPlatform({...newPlatform, acceptanceRate: parseFloat(e.target.value)})}
-                className="mt-2"
-              />
-              <p className="text-xs text-muted-foreground mt-1">Enter a value between 0 and 1 (e.g., 0.2 = 20%)</p>
-            </div>
-            
-            <div>
-              <Label htmlFor="platform-cpm">CPM Rate ($)</Label>
-              <Input
-                id="platform-cpm"
-                type="number"
-                step="0.1"
-                min="0"
-                value={newPlatform.cpm}
-                onChange={(e) => setNewPlatform({...newPlatform, cpm: parseFloat(e.target.value)})}
-                className="mt-2"
-              />
-              <p className="text-xs text-muted-foreground mt-1">Revenue per 1000 impressions (e.g., 0.5 = $0.50)</p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setNewPlatformDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleAddPlatform}>
-              Add Platform
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
